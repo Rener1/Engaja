@@ -75,7 +75,7 @@ class RolesPermissionsSeeder extends Seeder
 
         // GERENTE DE PROJETO
         $gerente->givePermissionTo([
-            'user.ver', 'user.criar', 'user.editar',
+            'user.ver', 'user.criar', 'user.editar', 'user.excluir',
             'participante.ver', 'participante.criar', 'participante.editar', 'participante.excluir',
             'evento.ver', 'evento.criar', 'evento.editar',
             'atividade.ver', 'atividade.criar', 'atividade.editar', 'atividade.excluir',

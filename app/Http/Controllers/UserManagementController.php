@@ -13,6 +13,7 @@ use App\Models\Municipio;
 use App\Models\Participante;
 use App\Models\Regiao;
 use App\Models\User;
+use App\Services\UserDeletionService;
 use App\Word\WordDocument;
 use App\Word\WordTableExport;
 use Illuminate\Http\RedirectResponse;
@@ -35,6 +36,8 @@ class UserManagementController extends Controller
     private const LEGACY_ROLES = ['gestor', 'formador'];
 
     private const CREATOR_ROLES = ['administrador', 'gerente', 'eq_pedagogica', 'articulador'];
+
+    private const DELETER_ROLES = ['administrador', 'gerente'];
 
     private const EMAIL_SIMILARITY_THRESHOLD = 0.85;
 
@@ -304,6 +307,31 @@ class UserManagementController extends Controller
         return redirect()
             ->route('usuarios.index')
             ->with('success', "Senha de {$managedUser->name} redefinida com sucesso. O usuario devera troca-la no proximo acesso.");
+    }
+
+    public function destroy(Request $request, User $managedUser, UserDeletionService $userDeletionService): RedirectResponse
+    {
+        abort_unless($request->user()?->hasAnyRole(self::DELETER_ROLES), 403);
+
+        if ($managedUser->is($request->user())) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'Você não pode excluir o próprio usuário.');
+        }
+
+        if ($this->isProtected($managedUser) && ! $request->user()->hasRole('administrador')) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'Este usuário não pode ser excluído.');
+        }
+
+        $userName = $managedUser->name;
+
+        $userDeletionService->delete($managedUser);
+
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', "Usuário {$userName} excluído com sucesso.");
     }
 
     private function assignableRoles()

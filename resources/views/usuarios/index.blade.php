@@ -143,6 +143,11 @@
                 $acoesHtml .= '<li><button type="button" class="dropdown-item js-reset-password" data-bs-toggle="modal" data-bs-target="#modalRedefinirSenha" data-action="' . route('usuarios.password.reset', $u) . '" data-user-name="' . e($u->name) . '">Redefinir senha</button></li>';
             }
 
+            if (auth()->user()->hasAnyRole(['administrador', 'gerente']) && ! $u->is(auth()->user())) {
+                $acoesHtml .= '<li><hr class="dropdown-divider"></li>'
+                    . '<li><button type="button" class="dropdown-item text-danger js-delete-user" data-bs-toggle="modal" data-bs-target="#modalExcluirUsuario" data-action="' . e(route('usuarios.destroy', $u)) . '" data-user-name="' . e($u->name) . '">Deletar usuário</button></li>';
+            }
+
             $acoesHtml .= '</ul></div>';
 
             return [
@@ -500,6 +505,36 @@
       </div>
   </div>
   @endrole
+
+  @hasanyrole('administrador|gerente')
+  <div class="modal fade" id="modalExcluirUsuario" tabindex="-1" aria-labelledby="modalExcluirUsuarioLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="modalExcluirUsuarioLabel">Deletar usuário</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+              </div>
+              <form method="POST" id="form-excluir-usuario" action="">
+                  @csrf
+                  @method('DELETE')
+                  <div class="modal-body">
+                      <p class="mb-2">
+                          Você tem ciência de que está deletando este usuário e todos os dados vinculados a ele?
+                      </p>
+                      <p class="fw-semibold mb-3" id="delete-user-name"></p>
+                      <div class="alert alert-warning mb-0" role="alert">
+                          O usuário, suas inscrições, presenças e certificados serão desativados.
+                      </div>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <button type="submit" class="btn btn-engaja">Confirmar exclusão</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+  @endhasanyrole
 @endif
 @endsection
 
@@ -515,6 +550,8 @@
     const form = document.getElementById('form-emitir-certificados');
     const resetPasswordForm = document.getElementById('form-redefinir-senha');
     const resetPasswordUserName = document.getElementById('reset-password-user-name');
+    const deleteUserForm = document.getElementById('form-excluir-usuario');
+    const deleteUserName = document.getElementById('delete-user-name');
 
     gridEl?.addEventListener('datatable:selection-changed', (event) => {
       hiddenInputs.innerHTML = '';
@@ -552,18 +589,28 @@
       });
     }
 
-    // Delegação de evento: os botões .js-reset-password são renderizados pelo
-    // AG Grid de forma assíncrona (depois do DOMContentLoaded).
+    // Delegação de eventos: as ações são renderizadas pelo AG Grid de forma
+    // assíncrona, depois do DOMContentLoaded.
     document.addEventListener('click', (event) => {
-      const button = event.target.closest('.js-reset-password');
-      if (!button) return;
-
-      if (resetPasswordForm) {
-        resetPasswordForm.action = button.dataset.action || '';
-        resetPasswordForm.reset();
+      const resetPasswordButton = event.target.closest('.js-reset-password');
+      if (resetPasswordButton) {
+        if (resetPasswordForm) {
+          resetPasswordForm.action = resetPasswordButton.dataset.action || '';
+          resetPasswordForm.reset();
+        }
+        if (resetPasswordUserName) {
+          resetPasswordUserName.textContent = resetPasswordButton.dataset.userName || '';
+        }
       }
-      if (resetPasswordUserName) {
-        resetPasswordUserName.textContent = button.dataset.userName || '';
+
+      const deleteUserButton = event.target.closest('.js-delete-user');
+      if (deleteUserButton) {
+        if (deleteUserForm) {
+          deleteUserForm.action = deleteUserButton.dataset.action || '';
+        }
+        if (deleteUserName) {
+          deleteUserName.textContent = deleteUserButton.dataset.userName || '';
+        }
       }
     });
 
