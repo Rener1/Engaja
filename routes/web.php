@@ -294,6 +294,9 @@ Route::middleware(['auth', 'role:administrador|gerente|eq_pedagogica|articulador
         });
         Route::get('{managedUser}/editar', [UserManagementController::class, 'edit'])->name('edit');
         Route::put('{managedUser}', [UserManagementController::class, 'update'])->name('update');
+        Route::delete('{managedUser}', [UserManagementController::class, 'destroy'])
+            ->middleware('role:administrador|gerente')
+            ->name('destroy');
         Route::post('{managedUser}/redefinir-senha', [UserManagementController::class, 'resetPassword'])
             ->middleware('role:administrador')
             ->name('password.reset');
