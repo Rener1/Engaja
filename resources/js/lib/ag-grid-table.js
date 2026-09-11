@@ -67,7 +67,12 @@ const buildColumnDefs = (columns, rowClassField) =>
             resizable: col.resizable ?? true,
             hide: col.hide ?? false,
             flex: col.flex ?? 1,
-            minWidth: col.minWidth,
+            // Sem um piso, `sizeColumnsToFit()` espreme colunas até ficarem
+            // ilegíveis em telas estreitas (ex.: cabeçalhos cortados para 2-3
+            // letras no mobile) em vez de habilitar o scroll horizontal do
+            // grid. Colunas que precisam de mais espaço já passam `minWidth`
+            // explícito (ex.: nomes longos, botões de ação).
+            minWidth: col.minWidth ?? 100,
             width: col.width,
             pinned: col.pinned,
             cellClass: col.cellClass,
