@@ -16,6 +16,7 @@ use App\Models\SubmissaoAvaliacao;
 use App\Models\TemplateAvaliacao;
 use App\Models\User;
 use App\Services\AvaliacaoRespostasDashboardService;
+use App\Support\CartasUrl;
 use App\ViewModels\Avaliacao\QuestoesFormViewModel;
 use App\Word\AvaliacaoFichaWordBuilder;
 use App\Word\AvaliacaoResultadosWordBuilder;
@@ -190,8 +191,11 @@ class AvaliacaoController extends Controller
 
         $avaliacoes = $query->paginate(15)->appends($request->query());
         $templatesDisponiveis = TemplateAvaliacao::orderBy('nome')->pluck('nome', 'id');
+        $linksFormulario = $avaliacoes->getCollection()->mapWithKeys(fn (Avaliacao $avaliacao) => [
+            $avaliacao->id => $this->formularioPublicoUrl($avaliacao),
+        ]);
 
-        return view('avaliacoes.universais.index', compact('avaliacoes', 'templatesDisponiveis'));
+        return view('avaliacoes.universais.index', compact('avaliacoes', 'templatesDisponiveis', 'linksFormulario'));
     }
 
     public function create(Request $request)
@@ -350,7 +354,7 @@ class AvaliacaoController extends Controller
 
     public function universaisStore(Request $request)
     {
-        $dados = $this->validateAvaliacaoUniversal($request);
+        $dados = $this->validateAvaliacaoUniversal($request, creating: true);
 
         $template = TemplateAvaliacao::with([
             'questoes.indicador',
@@ -786,7 +790,7 @@ class AvaliacaoController extends Controller
     {
         abort_unless($avaliacao->atividade_id === null, 404);
 
-        $link = route('avaliacao.formulario', $avaliacao);
+        $link = $this->formularioPublicoUrl($avaliacao);
 
         return view('avaliacoes.universais.link-qrcode', compact('avaliacao', 'link'));
     }
@@ -1033,15 +1037,16 @@ class AvaliacaoController extends Controller
         return $errors instanceof MessageBag ? $errors : null;
     }
 
-    private function validateAvaliacaoUniversal(Request $request): array
+    private function validateAvaliacaoUniversal(Request $request, bool $creating = false): array
     {
         $dados = $request->validate([
             'template_avaliacao_id' => ['required', Rule::exists('template_avaliacaos', 'id')],
             'descricao_universal' => ['nullable', 'string', 'max:255'],
             'respostas' => ['nullable', 'array'],
+            'is_cartas' => $creating ? ['sometimes', 'boolean'] : ['prohibited'],
         ]);
 
-        return [
+        $atributos = [
             'inscricao_id' => null,
             'atividade_id' => null,
             'template_avaliacao_id' => $dados['template_avaliacao_id'],
@@ -1049,6 +1054,12 @@ class AvaliacaoController extends Controller
             'anonima' => true,
             'transcricao' => false,
         ];
+
+        if ($creating) {
+            $atributos['is_cartas'] = $request->boolean('is_cartas');
+        }
+
+        return $atributos;
     }
 
     /**
@@ -1514,6 +1525,7 @@ class AvaliacaoController extends Controller
 
     public function formularioAvaliacao(Request $request, Avaliacao $avaliacao)
     {
+        $isCartas = $this->validarOrigemFormulario($request, $avaliacao);
         $atividade = Atividade::find($avaliacao->atividade_id);
 
         $avaliacao->load([
@@ -1537,7 +1549,7 @@ class AvaliacaoController extends Controller
         $formBloqueado = $formularioFechado || ($exigePresenca ? ($presencaRespondente?->avaliacao_respondida ?? false) : false);
         $respostasExistentes = collect();
 
-        return view('avaliacoes._form', [
+        $viewData = [
             'avaliacao' => $avaliacao,
             'atividade' => $atividade,
             'tiposQuestao' => $this->tiposQuestao(),
@@ -1548,11 +1560,24 @@ class AvaliacaoController extends Controller
             'isUniversal' => $isUniversal,
             'isTranscricao' => $isTranscricao,
             'formularioFechado' => $formularioFechado,
-        ]);
+            'isCartas' => $isCartas,
+        ];
+
+        if ($isCartas) {
+            $viewData['formAction'] = CartasUrl::route('cartas.avaliacao.formulario.responder', $avaliacao);
+
+            return view()->first([
+                'cartas.avaliacoes.formulario',
+                'avaliacoes._form',
+            ], $viewData);
+        }
+
+        return view('avaliacoes._form', $viewData);
     }
 
     public function responderFormulario(Request $request, Avaliacao $avaliacao)
     {
+        $isCartas = $this->validarOrigemFormulario($request, $avaliacao);
         $avaliacao->load(['avaliacaoQuestoes.escala', 'atividade']);
         $isUniversal = $avaliacao->atividade_id === null;
         $isTranscricao = $avaliacao->transcricao;
@@ -1562,6 +1587,12 @@ class AvaliacaoController extends Controller
         $presenca = $exigePresenca ? $this->resolverPresencaPorToken($token, $avaliacao) : null;
 
         if ($isUniversal && ! $avaliacao->formulario_aberto) {
+            if ($isCartas) {
+                return redirect()
+                    ->to(CartasUrl::route('cartas.avaliacao.formulario', $avaliacao))
+                    ->withErrors(['avaliacao' => 'Este formulário não está recebendo respostas no momento.']);
+            }
+
             return redirect()
                 ->route('avaliacao.formulario', $avaliacao)
                 ->withErrors(['avaliacao' => 'Este formulário não está recebendo respostas no momento.']);
@@ -1639,6 +1670,10 @@ class AvaliacaoController extends Controller
         });
 
         if ($isUniversal) {
+            if ($isCartas) {
+                return redirect()->to(CartasUrl::route('cartas.avaliacao.formulario.obrigado', $avaliacao));
+            }
+
             return redirect()
                 ->route('avaliacao.formulario.obrigado', $avaliacao);
         }
@@ -1658,13 +1693,49 @@ class AvaliacaoController extends Controller
             ]);
     }
 
-    public function formularioAvaliacaoObrigado(Avaliacao $avaliacao)
+    public function formularioAvaliacaoObrigado(Request $request, Avaliacao $avaliacao)
     {
+        $isCartas = $this->validarOrigemFormulario($request, $avaliacao);
         abort_unless($avaliacao->atividade_id === null, 404);
 
         $avaliacao->load('templateAvaliacao');
 
-        return view('avaliacoes.obrigado', compact('avaliacao'));
+        $viewData = [
+            'avaliacao' => $avaliacao,
+            'isCartas' => $isCartas,
+            'homeUrl' => $isCartas ? CartasUrl::route('cartas.apresentacao') : null,
+        ];
+
+        if ($isCartas) {
+            return view()->first([
+                'cartas.avaliacoes.obrigado',
+                'avaliacoes.obrigado',
+            ], $viewData);
+        }
+
+        return view('avaliacoes.obrigado', $viewData);
+    }
+
+    private function formularioPublicoUrl(Avaliacao $avaliacao): string
+    {
+        if ($avaliacao->is_cartas) {
+            return CartasUrl::route('cartas.avaliacao.formulario', $avaliacao);
+        }
+
+        return route('avaliacao.formulario', $avaliacao);
+    }
+
+    private function validarOrigemFormulario(Request $request, Avaliacao $avaliacao): bool
+    {
+        $isCartas = $request->routeIs('cartas.avaliacao.formulario*');
+
+        if ($isCartas) {
+            abort_unless($avaliacao->atividade_id === null && $avaliacao->is_cartas, 404);
+        } else {
+            abort_if($avaliacao->is_cartas, 404);
+        }
+
+        return $isCartas;
     }
 
     private function regraRespostaParaQuestao(AvaliacaoQuestao $questao): array

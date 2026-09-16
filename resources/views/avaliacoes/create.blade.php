@@ -82,7 +82,20 @@
             </div>
             @else
             <div class="col-md-6 d-flex align-items-center">
-              <div class="form-text mt-4">
+              <div class="form-check mt-4">
+                <input class="form-check-input @error('is_cartas') is-invalid @enderror" type="checkbox"
+                  value="1" id="is_cartas" name="is_cartas" @checked(old('is_cartas'))>
+                <label class="form-check-label" for="is_cartas">
+                  Avaliação para o Cartas para Esperançar
+                </label>
+                <div class="form-text">O link público será gerado no domínio do Cartas.</div>
+                @error('is_cartas')
+                <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-text">
                 Avaliações universais são sempre anônimas e não ficam vinculadas a um momento.
               </div>
             </div>
