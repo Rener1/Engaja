@@ -3,6 +3,7 @@
 namespace App\Notifications\Cartas;
 
 use App\Models\Cartas\CartaMensagem;
+use App\Support\CartasUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -24,14 +25,14 @@ class AjusteSolicitadoNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $url = route('cartas.cartas.show', $this->mensagem->carta_id);
+        $url = CartasUrl::route('cartas.cartas.show', $this->mensagem->carta_id);
 
         return (new MailMessage)
             ->subject('Cartas para Esperançar - Precisamos de um ajuste no seu envio.')
             ->view('emails.cartas.ajuste-solicitado', [
-                'voluntarioNome'      => $notifiable->name,
-                'parecerVerificacao'  => $this->mensagem->parecer_verificacao,
-                'url'                 => $url,
+                'voluntarioNome' => $notifiable->name,
+                'parecerVerificacao' => $this->mensagem->parecer_verificacao,
+                'url' => $url,
             ]);
     }
 }

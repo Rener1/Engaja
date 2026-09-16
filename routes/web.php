@@ -51,6 +51,10 @@ Route::prefix('cartas')->name('cartas.')->group(function () {
 
     Route::get('/', [CartasAuthController::class, 'apresentacao'])->name('apresentacao');
 
+    Route::get('/formulario-avaliacao/{avaliacao}', [AvaliacaoController::class, 'formularioAvaliacao'])->name('avaliacao.formulario');
+    Route::post('/formulario-avaliacao/{avaliacao}', [AvaliacaoController::class, 'responderFormulario'])->name('avaliacao.formulario.responder');
+    Route::get('/formulario-avaliacao/{avaliacao}/obrigado', [AvaliacaoController::class, 'formularioAvaliacaoObrigado'])->name('avaliacao.formulario.obrigado');
+
     Route::middleware('guest')->group(function () {
         Route::get('/login', [CartasAuthController::class, 'login'])->name('login');
         Route::post('/login', [CartasAuthController::class, 'authenticate'])->name('login.store');

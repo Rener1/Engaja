@@ -46,7 +46,7 @@
 </form>
 
 @php
-    function avaliacao_universal_sort_link($label, $key) {
+    $sortLink = function ($label, $key) {
         $currentSort = request('sort', 'created_at');
         $dirParam = request('dir', request('direction', 'desc'));
         $currentDir = strtolower((string) $dirParam) === 'asc' ? 'asc' : 'desc';
@@ -57,13 +57,13 @@
         $arrow = $isActive ? ($currentDir === 'asc' ? '↑' : '↓') : '';
 
         return '<a href="' . $url . '" class="text-decoration-none text-nowrap">' . e($label) . ' <span class="text-muted">' . $arrow . '</span></a>';
-    }
+    };
 
     $columns = [
         ['field' => 'descricao', 'headerName' => 'Descrição', 'flex' => 2],
-        ['field' => 'modelo', 'headerHtml' => avaliacao_universal_sort_link('Modelo', 'template'), 'flex' => 2],
+        ['field' => 'modelo', 'headerHtml' => $sortLink('Modelo', 'template'), 'flex' => 2],
         ['field' => 'submissoes', 'headerName' => 'Submissões', 'flex' => 1],
-        ['field' => 'registrada_em', 'headerHtml' => avaliacao_universal_sort_link('Registrada em', 'created_at'), 'flex' => 1],
+        ['field' => 'registrada_em', 'headerHtml' => $sortLink('Registrada em', 'created_at'), 'flex' => 1],
         ['field' => 'acoes', 'headerName' => 'Ações', 'flex' => 1, 'html' => true, 'align' => 'center'],
     ];
 
@@ -105,7 +105,7 @@
 
 @foreach ($avaliacoes as $avaliacao)
 @php
-  $linkAvaliacao = route('avaliacao.formulario', $avaliacao);
+  $linkAvaliacao = $linksFormulario[$avaliacao->id];
   $qrBase64 = null;
 
   if (class_exists(\SimpleSoftwareIO\QrCode\Facades\QrCode::class)) {

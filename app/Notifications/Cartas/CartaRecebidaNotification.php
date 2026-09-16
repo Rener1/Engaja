@@ -3,6 +3,7 @@
 namespace App\Notifications\Cartas;
 
 use App\Models\Cartas\Carta;
+use App\Support\CartasUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -24,7 +25,7 @@ class CartaRecebidaNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $url = route('cartas.cartas.show', $this->carta);
+        $url = CartasUrl::route('cartas.cartas.show', $this->carta);
 
         $remetenteNome = $this->carta->educando?->user?->name ?? 'um educando';
 
@@ -39,9 +40,9 @@ class CartaRecebidaNotification extends Notification implements ShouldQueue
             ->subject($subject)
             ->view('emails.cartas.carta-recebida', [
                 'voluntarioNome' => $notifiable->name,
-                'remetenteNome'  => $remetenteNome,
-                'isPrimeiraVez'  => $isPrimeiraVez,
-                'url'            => $url,
+                'remetenteNome' => $remetenteNome,
+                'isPrimeiraVez' => $isPrimeiraVez,
+                'url' => $url,
             ]);
     }
 }
