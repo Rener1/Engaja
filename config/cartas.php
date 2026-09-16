@@ -2,6 +2,12 @@
 
 return [
     /*
+    | Origem dos links enviados pelo Cartas (sem o prefixo /cartas).
+    | Obrigatoria para notificacoes com links; HTTPS em producao.
+    */
+    'url' => env('CARTAS_URL'),
+
+    /*
     |--------------------------------------------------------------------------
     | Papel timbrado (Cartas para Esperançar)
     |--------------------------------------------------------------------------
