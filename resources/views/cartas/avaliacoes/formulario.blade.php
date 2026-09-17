@@ -23,7 +23,7 @@
 
     <section style="max-width: 820px; margin: 0 auto; padding: 0 24px 48px;">
 
-      <div style="text-align: center; margin-bottom: 28px;">
+      <div style="text-align: center; margin-bottom: 28px; margin-top: 28px">
         <h1 class="cpe-title" style="font-size: 28px; margin-bottom: 8px;">
           Avaliação — {{ $tituloAvaliacao }}
         </h1>
