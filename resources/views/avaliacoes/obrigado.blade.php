@@ -21,7 +21,7 @@
           As informações compartilhadas serão tratadas em conformidade com a Lei Geral de Proteção de Dados - LGPD.
         </p>
 
-        <a href="{{ url('/') }}" class="btn btn-outline-secondary">
+        <a href="{{ $homeUrl ?? url('/') }}" class="btn btn-outline-secondary">
           Ir para a página inicial
         </a>
       </div>

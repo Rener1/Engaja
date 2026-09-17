@@ -2,18 +2,18 @@
 
 namespace App\Notifications\Cartas;
 
-use App\Models\Cartas\CartaMensagem;
+use App\Models\Avaliacao;
 use App\Support\CartasUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AjusteSolicitadoNotification extends Notification implements ShouldQueue
+class AvaliacaoEnviadaNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private readonly CartaMensagem $mensagem) {}
+    public function __construct(private readonly Avaliacao $avaliacao) {}
 
     /**
      * @return list<string>
@@ -25,13 +25,16 @@ class AjusteSolicitadoNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $url = CartasUrl::route('cartas.cartas.show', $this->mensagem->carta_id);
+        $url = CartasUrl::route('cartas.avaliacao.formulario', $this->avaliacao);
+
+        $titulo = $this->avaliacao->descricao_universal
+            ?: ($this->avaliacao->templateAvaliacao->nome ?? 'Avaliação');
 
         return (new MailMessage)
-            ->subject('Cartas para Esperançar - Precisamos de um ajuste no seu envio.')
-            ->view('emails.cartas.ajuste-solicitado', [
+            ->subject('Cartas para Esperançar - Avaliação disponível')
+            ->view('emails.cartas.avaliacao-enviada', [
                 'voluntarioNome' => $notifiable->name,
-                'parecerVerificacao' => $this->mensagem->parecer_verificacao,
+                'titulo' => $titulo,
                 'url' => $url,
             ]);
     }

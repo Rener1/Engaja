@@ -24,6 +24,7 @@ class AvaliacaoFactory extends Factory
             'atividade_id' => Atividade::factory(),
             'descricao_universal' => fake()->sentence(4),
             'anonima' => true,
+            'is_cartas' => false,
         ];
     }
 }

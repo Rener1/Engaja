@@ -11,11 +11,12 @@ class Avaliacao extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['template_avaliacao_id', 'descricao_universal', 'formulario_aberto', 'inscricao_id', 'atividade_id', 'anonima', 'transcricao'];
+    protected $fillable = ['template_avaliacao_id', 'descricao_universal', 'formulario_aberto', 'is_cartas', 'inscricao_id', 'atividade_id', 'anonima', 'transcricao'];
 
     protected $casts = [
         'anonima' => 'boolean',
         'formulario_aberto' => 'boolean',
+        'is_cartas' => 'boolean',
         'transcricao' => 'boolean',
     ];
 

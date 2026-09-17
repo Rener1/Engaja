@@ -4,6 +4,7 @@
 @php
   $isUniversal = $isUniversal ?? false;
   $isTranscricao = ($isTranscricao ?? false) || request('transcricao');
+  $formAction = $formAction ?? route('avaliacao.formulario.responder', $avaliacao);
   $tituloAvaliacao = $isUniversal
       ? ($avaliacao->descricao_universal ?: ($avaliacao->templateAvaliacao->nome ?? 'Avaliação universal'))
       : ($atividade?->descricao ?? $avaliacao->templateAvaliacao->nome ?? 'Avaliação');
@@ -66,7 +67,7 @@
           <div class="alert alert-info">Pré-visualização do formulário. As respostas não podem ser enviadas nesta tela.</div>
         @endif
 
-        <form method="POST" action="{{ route('avaliacao.formulario.responder', $avaliacao) }}">
+        <form method="POST" action="{{ $formAction }}">
           @csrf
           <input type="hidden" name="token" value="{{ old('token', $token) }}">
           @if(request('transcricao') || ($isTranscricao ?? false))

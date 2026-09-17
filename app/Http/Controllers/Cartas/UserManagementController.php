@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Cartas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Avaliacao;
 use App\Models\User;
+use App\Notifications\Cartas\AvaliacaoEnviadaNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -36,10 +38,18 @@ class UserManagementController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        $avaliacoes = Avaliacao::where('is_cartas', true)
+            ->whereNull('atividade_id')
+            ->where('formulario_aberto', true)
+            ->with('templateAvaliacao')
+            ->orderBy('id', 'desc')
+            ->get();
+
         return view('cartas.usuarios.index', [
             'users' => $users,
             'roles' => self::ROLES,
             'search' => $search,
+            'avaliacoes' => $avaliacoes,
         ]);
     }
 
@@ -103,6 +113,35 @@ class UserManagementController extends Controller
         return redirect()
             ->route('cartas.usuarios.index')
             ->with('status', 'Usuário atualizado.');
+    }
+
+    public function enviarAvaliacao(Request $request, User $managedUser): RedirectResponse
+    {
+        $this->authorizeAdmin($request);
+        $this->ensureCartasUser($managedUser);
+
+        $data = $request->validate([
+            'avaliacao_id' => ['required', 'integer', 'exists:avaliacaos,id'],
+        ], [
+            'avaliacao_id.required' => 'Selecione uma avaliação.',
+            'avaliacao_id.exists' => 'Avaliação não encontrada.',
+        ]);
+
+        $avaliacao = Avaliacao::where('is_cartas', true)
+            ->whereNull('atividade_id')
+            ->where('formulario_aberto', true)
+            ->findOrFail($data['avaliacao_id']);
+
+        $avaliacao->load('templateAvaliacao');
+
+        $managedUser->notify(new AvaliacaoEnviadaNotification($avaliacao));
+
+        $titulo = $avaliacao->descricao_universal
+            ?: ($avaliacao->templateAvaliacao->nome ?? 'Avaliação');
+
+        return redirect()
+            ->route('cartas.usuarios.index')
+            ->with('status', "Avaliação \"{$titulo}\" enviada para {$managedUser->email}.");
     }
 
     private function authorizeAdmin(Request $request): void
