@@ -15,7 +15,11 @@ Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [RegisteredUserController::class, 'store'])
+        ->middleware('throttle:6,1');
+
+    Route::get('register/reativar/pendente', [RegisteredUserController::class, 'reactivationPending'])
+        ->name('register.reactivate.pending');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
@@ -43,6 +47,15 @@ Route::middleware('guest')->group(function () {
 Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
+
+/*
+ * Confirmação de reativação de conta desativada (ver RegisteredUserController::
+ * requestReactivation). Aberta e sem sessão pelo mesmo motivo da rota acima: a
+ * identidade vem só da assinatura da URL.
+ */
+Route::get('register/reativar/{user}', [RegisteredUserController::class, 'confirmReactivation'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('register.reactivate');
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)

@@ -7,13 +7,16 @@ use App\Models\Estado;
 use App\Models\Municipio;
 use App\Models\Participante;
 use App\Models\User;
+use App\Notifications\Cartas\ReativacaoCadastroNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -105,6 +108,15 @@ class AuthController extends Controller
             ->where('estado_id', $data['estado_id'])
             ->firstOrFail();
 
+        $trashedUser = User::onlyTrashed()
+            ->where('email', $data['email'])
+            ->where('sistema_origem', User::SISTEMA_CARTAS)
+            ->first();
+
+        if ($trashedUser) {
+            return $this->requestReactivation($trashedUser, $data, $municipio);
+        }
+
         $user = DB::transaction(function () use ($data, $municipio) {
 
             $user = User::create([
@@ -136,6 +148,102 @@ class AuthController extends Controller
         $user->sendEmailVerificationNotification();
 
         return redirect()->route('cartas.verification.notice');
+    }
+
+    /**
+     * Conta desativada com este e-mail: não recria/loga nada agora. Os dados
+     * enviados ficam pendentes até a pessoa provar (clicando no link enviado
+     * por e-mail) que controla essa caixa de entrada — sem isso, qualquer um
+     * que soubesse o e-mail de uma conta desativada poderia sequestrá-la (o
+     * Cartas já loga o usuário antes de checar e-mail verificado, então
+     * reenviar a verificação depois não fecharia essa janela).
+     */
+    private function requestReactivation(User $trashedUser, array $data, Municipio $municipio): RedirectResponse
+    {
+        $pending = [
+            'name' => $data['name'],
+            'password' => Hash::make($data['password']),
+            'cartas_tipo_vinculo' => $data['cartas_tipo_vinculo'],
+            'cartas_limite_respostas' => $data['cartas_limite_respostas'],
+            'cpf' => $data['cpf'],
+            'telefone' => $data['telefone'],
+            'municipio_id' => $municipio->id,
+        ];
+
+        Cache::put("reactivation-pending:{$trashedUser->id}", $pending, now()->addMinutes(60));
+
+        $url = URL::temporarySignedRoute(
+            'cartas.register.reactivate',
+            now()->addMinutes(60),
+            ['user' => $trashedUser->id]
+        );
+
+        $trashedUser->notify(new ReativacaoCadastroNotification($url));
+
+        return redirect()->route('cartas.register.reactivate.pending');
+    }
+
+    /**
+     * Tela exibida após o pedido de reativação: aguarda o clique no link
+     * enviado por e-mail (ver requestReactivation()).
+     */
+    public function reactivationPending(): View
+    {
+        return view('cartas.auth.reactivation-pending');
+    }
+
+    /**
+     * Confirmação do link assinado enviado por requestReactivation(): só aqui
+     * a conta é de fato restaurada e atualizada com os dados pendentes.
+     */
+    public function confirmReactivation(int $user): RedirectResponse
+    {
+        $trashedUser = User::onlyTrashed()->find($user);
+
+        if (! $trashedUser) {
+            return redirect()->route('cartas.login')
+                ->with('status', 'Esta conta já está ativa. Faça login normalmente.');
+        }
+
+        $pending = Cache::pull("reactivation-pending:{$trashedUser->id}");
+
+        if (! $pending) {
+            return redirect()->route('cartas.register')
+                ->withErrors(['email' => 'O link de confirmação expirou. Refaça o cadastro.']);
+        }
+
+        $trashedUser = DB::transaction(function () use ($trashedUser, $pending) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'name' => $pending['name'],
+                'password' => $pending['password'],
+                'cartas_tipo_vinculo' => $pending['cartas_tipo_vinculo'],
+                'cartas_limite_respostas' => $pending['cartas_limite_respostas'],
+                'cartas_terms_accepted_at' => now(),
+            ]);
+            // Clicar no link já prova o e-mail: evita reenviar outra verificação.
+            $trashedUser->markEmailAsVerified();
+
+            $participante = $trashedUser->participante()->withTrashed()->first();
+            $participante?->restore();
+            $trashedUser->participante()->updateOrCreate(['user_id' => $trashedUser->id], [
+                'cpf' => $pending['cpf'],
+                'telefone' => $pending['telefone'],
+                'municipio_id' => $pending['municipio_id'],
+            ]);
+
+            if ($role = Role::where('name', 'cartas_voluntario')->where('guard_name', 'web')->first()) {
+                if (! $trashedUser->hasRole($role)) {
+                    $trashedUser->assignRole($role);
+                }
+            }
+
+            return $trashedUser;
+        });
+
+        Auth::login($trashedUser);
+
+        return redirect()->route('cartas.dashboard');
     }
 
     public function terms(Request $request): RedirectResponse|View
@@ -292,7 +400,7 @@ class AuthController extends Controller
         $data = $this->prepareRegistrationData($request);
         $validator = Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->where('sistema_origem', User::SISTEMA_CARTAS)],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->where('sistema_origem', User::SISTEMA_CARTAS)->whereNull('deleted_at')],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'cpf' => ['required', 'digits:11'],
             'telefone' => ['required', 'regex:/^\d{10,11}$/'],
@@ -340,7 +448,7 @@ class AuthController extends Controller
         $pendingRegistration = $request->session()->get(self::PENDING_REGISTRATION_SESSION_KEY);
         $data = Validator::make($pendingRegistration, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->where('sistema_origem', User::SISTEMA_CARTAS)],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->where('sistema_origem', User::SISTEMA_CARTAS)->whereNull('deleted_at')],
             'password' => ['required', 'string'],
             'cpf' => ['required', 'digits:11'],
             'telefone' => ['required', 'regex:/^\d{10,11}$/'],
@@ -409,7 +517,6 @@ class AuthController extends Controller
 
         return redirect()->route('cartas.verification.notice');
     }
-
 
     private function cpfDuplicado(string $cpf): bool
     {

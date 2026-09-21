@@ -59,7 +59,11 @@ Route::prefix('cartas')->name('cartas.')->group(function () {
         Route::get('/login', [CartasAuthController::class, 'login'])->name('login');
         Route::post('/login', [CartasAuthController::class, 'authenticate'])->name('login.store');
         Route::get('/cadastro', [CartasAuthController::class, 'register'])->name('register');
-        Route::post('/cadastro', [CartasAuthController::class, 'storeRegister'])->name('register.store');
+        Route::post('/cadastro', [CartasAuthController::class, 'storeRegister'])
+            ->middleware('throttle:6,1')
+            ->name('register.store');
+        Route::get('/cadastro/verificar-reativacao', [CartasAuthController::class, 'reactivationPending'])
+            ->name('register.reactivate.pending');
         Route::get('/recuperar-senha', [CartasAuthController::class, 'forgotPassword'])->name('password.request');
         Route::post('/recuperar-senha', [CartasAuthController::class, 'sendResetLink'])->name('password.email');
         Route::get('/resetar-senha/{token}', [CartasAuthController::class, 'resetPassword'])->name('password.reset');
@@ -74,6 +78,15 @@ Route::prefix('cartas')->name('cartas.')->group(function () {
     Route::get('/verificar-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
+
+    /*
+     * Confirmação de reativação de conta desativada (ver AuthController::
+     * requestReactivation). Aberta e sem sessão pelo mesmo motivo da rota
+     * acima: a identidade vem só da assinatura da URL.
+     */
+    Route::get('/cadastro/reativar/{user}', [CartasAuthController::class, 'confirmReactivation'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('register.reactivate');
 
     Route::middleware('auth')->group(function () {
         Route::get('/verificar-email', [CartasAuthController::class, 'verificationNotice'])->name('verification.notice');
