@@ -188,6 +188,9 @@
                 Verificar usuário
               </a>
               @hasanyrole('administrador|gerente')
+                <a class="admin-nav-link {{ request()->routeIs('usuarios.atualizacao-cadastral.*') ? 'active' : '' }}" href="{{ route('usuarios.atualizacao-cadastral.index') }}">
+                  Atualização de dados cadastrais
+                </a>
                 <a class="admin-nav-link {{ request()->routeIs('usuarios.participantes-exclusivos.*') ? 'active' : '' }}" href="{{ route('usuarios.participantes-exclusivos.index') }}">
                   Participantes exclusivos
                 </a>
