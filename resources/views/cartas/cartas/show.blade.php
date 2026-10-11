@@ -27,6 +27,13 @@
                     </div>
                 @endif
 
+                <div class="cpe-remetentes-trigger">
+                    <button type="button" class="cpe-button cpe-button--ghost" data-modal-open="remetentesModal">
+                        {{ $gestor ? 'Ver dados dos remetentes' : "Ver dados de {$remetentePrimeiroNome}" }}
+                    </button>
+                </div>
+
+
                 @if (session('status'))
                     <div class="cpe-alert">{{ session('status') }}</div>
                 @endif
@@ -348,9 +355,107 @@
         </div>
     @endif
 
+    <?php
+        // Bloco PHP puro de propósito: a diretiva de bloco do Blade casaria com as diretivas inline acima.
+        $remetentesModal = [
+            ['titulo' => 'Remetente', 'dados' => ($carta->educando ?? new \App\Models\Participante)->dadosRemetente()],
+        ];
+
+        if ($gestor) {
+            $remetentesModal[] = [
+                'titulo' => 'Voluntário',
+                'dados' => ($carta->voluntario?->participante ?? new \App\Models\Participante)->dadosRemetente($carta->voluntario),
+            ];
+        }
+
+        $remetentesRotulos = [
+            'nome' => 'Nome',
+            'cidade' => 'Cidade',
+            'estado' => 'Estado',
+            'idade' => 'Idade',
+            'sexo' => 'Identidade de gênero',
+        ];
+    ?>
+
+    <div class="cpe-modal" id="remetentesModal">
+        <div class="cpe-modal__backdrop" data-modal-close></div>
+        <div class="cpe-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="remetentesModalTitulo">
+            <h2 id="remetentesModalTitulo">{{ $gestor ? 'Dados dos remetentes' : 'Dados do remetente' }}</h2>
+
+            @foreach($remetentesModal as $remetenteModal)
+                <section class="cpe-remetente-dados">
+                    @if($gestor)
+                        <h3>{{ $remetenteModal['titulo'] }}</h3>
+                    @endif
+                    <dl>
+                        @foreach($remetentesRotulos as $campo => $rotulo)
+                            <div>
+                                <dt>{{ $rotulo }}</dt>
+                                <dd>{{ $remetenteModal['dados'][$campo] }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </section>
+            @endforeach
+
+            <div class="cpe-modal-actions cpe-modal-actions--single">
+                <button type="button" class="cpe-button cpe-button--ghost" data-modal-close>Fechar</button>
+            </div>
+        </div>
+    </div>
+
     @include('cartas.shared._scripts')
 
     <style>
+        .cpe-remetentes-trigger {
+            margin-bottom: 12px;
+        }
+
+        .cpe-remetente-dados + .cpe-remetente-dados {
+            margin-top: 20px;
+        }
+
+        .cpe-remetente-dados h3 {
+            margin: 0 0 8px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #222;
+        }
+
+        .cpe-remetente-dados dl {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 0;
+        }
+
+        .cpe-remetente-dados dl > div {
+            min-width: 0;
+            border: 1px solid #d6d6d6;
+            border-radius: 6px;
+            background: #fff;
+            padding: 10px 12px;
+        }
+
+        .cpe-remetente-dados dt {
+            color: #777;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .cpe-remetente-dados dd {
+            margin: 0;
+            overflow-wrap: anywhere;
+            color: #222;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .cpe-modal-actions--single {
+            grid-template-columns: 1fr;
+        }
+
         .cpe-conversation {
             position: relative;
             --cpe-sidebar-w: clamp(360px, 28vw, 460px);
@@ -843,7 +948,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .cpe-fixed-participants {
+            .cpe-fixed-participants,
+            .cpe-remetente-dados dl {
                 grid-template-columns: 1fr;
             }
         }
