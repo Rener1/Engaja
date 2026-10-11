@@ -5,9 +5,6 @@ namespace Tests\Feature\Cartas;
 use App\Models\Estado;
 use App\Models\Municipio;
 use App\Models\Regiao;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 class CartaRemetenteModalTest extends CartasBaseTest
 {
@@ -24,6 +21,11 @@ class CartaRemetenteModalTest extends CartasBaseTest
             'comunidade_tradicional' => 'Povos Ciganos',
         ]);
 
+        $this->educando->update([
+            'sexo' => 'Feminino',
+            'data_nascimento' => now()->subYears(30)->subDay()->toDateString(),
+        ]);
+
         $regiao = Regiao::create(['nome' => 'Nordeste']);
         $estado = Estado::create(['nome' => 'Pernambuco', 'sigla' => 'PE', 'regiao_id' => $regiao->id]);
         $municipio = Municipio::create([
@@ -32,15 +34,15 @@ class CartaRemetenteModalTest extends CartasBaseTest
             'regiao_id' => $regiao->id,
         ]);
 
-        $this->voluntario->update([
-            'name' => 'João Voluntário',
-            'identidade_genero' => 'Homem Transsexual',
-            'faixa_etaria' => 'Idoso (a partir dos 60 anos)',
+        $this->voluntario->update(['name' => 'João Voluntário']);
+        $this->voluntario->participante->update([
+            'municipio_id' => $municipio->id,
+            'sexo' => 'Masculino',
+            'data_nascimento' => now()->subYears(65)->toDateString(),
         ]);
-        $this->voluntario->participante->update(['municipio_id' => $municipio->id]);
     }
 
-    public function test_gestor_ve_dados_do_educando_e_do_voluntario_no_modal(): void
+    public function test_gestor_ve_somente_os_dados_do_remetente_no_modal(): void
     {
         $this->prepararDadosDosRemetentes();
         $carta = $this->criarCartaParaVoluntario();
@@ -49,23 +51,23 @@ class CartaRemetenteModalTest extends CartasBaseTest
 
         $response->assertOk();
         $response->assertSee('id="remetentesModal"', false);
-        $response->assertSee('Ver dados dos remetentes');
-
+        $response->assertSee('Ver dados de Maria');
         $response->assertSeeInOrder([
             'Maria Educanda',
-            'São Paulo (SP)',
-            'Mulher Cisgênero',
-            'João Voluntário',
-            'Recife',
-            'Pernambuco (PE)',
-            'Homem Transsexual',
+            'São Paulo',
+            'SP',
+            '30 anos',
+            'Feminino',
         ], false);
-        $response->assertSee('Identidade de gênero');
-        $response->assertDontSee('Adulto (18 a 59 anos)');
-        $response->assertDontSee('Idoso (a partir dos 60 anos)');
+
+        $response->assertDontSee('Ver dados dos remetentes');
+        $response->assertDontSee('<h3>Voluntário</h3>', false);
+        $response->assertDontSee('65 anos');
+        $response->assertDontSee('Pernambuco (PE)');
+        $response->assertDontSee('<dd>Masculino</dd>', false);
     }
 
-    public function test_voluntario_ve_somente_os_dados_do_educando(): void
+    public function test_voluntario_ve_o_mesmo_modal_do_remetente(): void
     {
         $this->prepararDadosDosRemetentes();
         $carta = $this->criarCartaParaVoluntario();
@@ -75,12 +77,23 @@ class CartaRemetenteModalTest extends CartasBaseTest
         $response->assertOk();
         $response->assertSee('id="remetentesModal"', false);
         $response->assertSee('Ver dados de Maria');
-        $response->assertSee('Mulher Cisgênero');
+        $response->assertSee('30 anos');
+        $response->assertSee('Feminino');
 
-        $response->assertDontSee('Ver dados dos remetentes');
-        $response->assertDontSee('<h3>Voluntário</h3>', false);
-        $response->assertDontSee('Homem Transsexual');
+        $response->assertDontSee('65 anos');
         $response->assertDontSee('Pernambuco (PE)');
+    }
+
+    public function test_modal_usa_o_rotulo_sexo_e_nao_identidade_de_genero(): void
+    {
+        $this->prepararDadosDosRemetentes();
+        $carta = $this->criarCartaParaVoluntario();
+
+        $response = $this->actingAs($this->gestor)->get(route('cartas.cartas.show', $carta));
+
+        $response->assertSee('<dt>Sexo</dt>', false);
+        $response->assertDontSee('Identidade de gênero');
+        $response->assertDontSee('Mulher Cisgênero');
     }
 
     public function test_modal_nao_expoe_dados_pessoais_nem_demograficos_sensiveis(): void
@@ -107,52 +120,14 @@ class CartaRemetenteModalTest extends CartasBaseTest
         }
     }
 
-    public function test_modal_funciona_sem_data_nascimento_e_mostra_nao_informado_na_idade(): void
+    public function test_dados_ausentes_aparecem_como_nao_informado(): void
     {
         $carta = $this->criarCartaParaVoluntario();
 
         $response = $this->actingAs($this->gestor)->get(route('cartas.cartas.show', $carta));
 
         $response->assertOk();
-        $this->assertMatchesRegularExpression(
-            '#<dt>Idade</dt>\s*<dd>Não informado</dd>#',
-            $response->getContent()
-        );
-    }
-
-    /**
-     * @return array<string, array{0: string}>
-     */
-    public static function tabelasComDataNascimento(): array
-    {
-        return [
-            'coluna em users' => ['users'],
-            'coluna em participantes' => ['participantes'],
-        ];
-    }
-
-    #[DataProvider('tabelasComDataNascimento')]
-    public function test_modal_mostra_idade_calculada_quando_a_coluna_data_nascimento_existe(string $tabela): void
-    {
-        // O DDL do Postgres é transacional: o RefreshDatabase desfaz a coluna ao fim do teste.
-        Schema::table($tabela, function (Blueprint $table) {
-            $table->date('data_nascimento')->nullable();
-        });
-
-        $nascimento = now()->subYears(30)->subDay()->toDateString();
-
-        if ($tabela === 'users') {
-            $this->remetente->update(['name' => 'Maria Educanda']);
-            $this->remetente->newQuery()->whereKey($this->remetente->id)->update(['data_nascimento' => $nascimento]);
-        } else {
-            $this->educando->newQuery()->whereKey($this->educando->id)->update(['data_nascimento' => $nascimento]);
-        }
-
-        $carta = $this->criarCartaParaVoluntario();
-
-        $response = $this->actingAs($this->voluntario)->get(route('cartas.cartas.show', $carta));
-
-        $response->assertOk();
-        $this->assertMatchesRegularExpression('#<dt>Idade</dt>\s*<dd>30 anos</dd>#', $response->getContent());
+        $this->assertMatchesRegularExpression('#<dt>Idade</dt>\s*<dd>Não informado</dd>#', $response->getContent());
+        $this->assertMatchesRegularExpression('#<dt>Sexo</dt>\s*<dd>Não informado</dd>#', $response->getContent());
     }
 }

@@ -29,7 +29,7 @@
 
                 <div class="cpe-remetentes-trigger">
                     <button type="button" class="cpe-button cpe-button--ghost" data-modal-open="remetentesModal">
-                        {{ $gestor ? 'Ver dados dos remetentes' : "Ver dados de {$remetentePrimeiroNome}" }}
+                        Ver dados de {{ $remetentePrimeiroNome }}
                     </button>
                 </div>
 
@@ -357,46 +357,32 @@
 
     <?php
         // Bloco PHP puro de propósito: a diretiva de bloco do Blade casaria com as diretivas inline acima.
-        $remetentesModal = [
-            ['titulo' => 'Remetente', 'dados' => ($carta->educando ?? new \App\Models\Participante)->dadosRemetente()],
-        ];
+        $remetenteDados = ($carta->educando ?? new \App\Models\Participante)->dadosRemetente();
 
-        if ($gestor) {
-            $remetentesModal[] = [
-                'titulo' => 'Voluntário',
-                'dados' => ($carta->voluntario?->participante ?? new \App\Models\Participante)->dadosRemetente($carta->voluntario),
-            ];
-        }
-
-        $remetentesRotulos = [
+        $remetenteRotulos = [
             'nome' => 'Nome',
             'cidade' => 'Cidade',
             'estado' => 'Estado',
             'idade' => 'Idade',
-            'sexo' => 'Identidade de gênero',
+            'sexo' => 'Sexo',
         ];
     ?>
 
     <div class="cpe-modal" id="remetentesModal">
         <div class="cpe-modal__backdrop" data-modal-close></div>
         <div class="cpe-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="remetentesModalTitulo">
-            <h2 id="remetentesModalTitulo">{{ $gestor ? 'Dados dos remetentes' : 'Dados do remetente' }}</h2>
+            <h2 id="remetentesModalTitulo">Dados do remetente</h2>
 
-            @foreach($remetentesModal as $remetenteModal)
-                <section class="cpe-remetente-dados">
-                    @if($gestor)
-                        <h3>{{ $remetenteModal['titulo'] }}</h3>
-                    @endif
-                    <dl>
-                        @foreach($remetentesRotulos as $campo => $rotulo)
-                            <div>
-                                <dt>{{ $rotulo }}</dt>
-                                <dd>{{ $remetenteModal['dados'][$campo] }}</dd>
-                            </div>
-                        @endforeach
-                    </dl>
-                </section>
-            @endforeach
+            <section class="cpe-remetente-dados">
+                <dl>
+                    @foreach($remetenteRotulos as $campo => $rotulo)
+                        <div>
+                            <dt>{{ $rotulo }}</dt>
+                            <dd>{{ $remetenteDados[$campo] }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            </section>
 
             <div class="cpe-modal-actions cpe-modal-actions--single">
                 <button type="button" class="cpe-button cpe-button--ghost" data-modal-close>Fechar</button>
@@ -409,17 +395,6 @@
     <style>
         .cpe-remetentes-trigger {
             margin-bottom: 12px;
-        }
-
-        .cpe-remetente-dados + .cpe-remetente-dados {
-            margin-top: 20px;
-        }
-
-        .cpe-remetente-dados h3 {
-            margin: 0 0 8px;
-            font-size: 14px;
-            font-weight: 800;
-            color: #222;
         }
 
         .cpe-remetente-dados dl {
