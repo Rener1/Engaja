@@ -247,6 +247,7 @@ const initTable = (el) => {
         paginationPageSize: pageSize,
         paginationPageSizeSelector: false,
         domLayout,
+        suppressRowVirtualisation: el.dataset.suppressRowVirtualisation === "true",
         rowHeight: customRowHeight || (hasHtmlColumn ? 52 : undefined),
         suppressCellFocus: true,
         suppressColumnVirtualisation: true,

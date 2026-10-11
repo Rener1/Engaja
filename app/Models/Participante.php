@@ -14,6 +14,8 @@ class Participante extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const SEXOS = ['Masculino', 'Feminino', 'Não preenchido'];
+  
     private const NAO_INFORMADO = 'Não informado';
 
     public const TAG_REDE_ENSINO = 'Rede de Ensino';
@@ -36,10 +38,14 @@ class Participante extends Model
         'tipo_organizacao',
         'tag',
         'data_entrada',
+        'data_nascimento',
+        'sexo',
         'autorizacao_imagem',
     ];
 
     protected $appends = ['cpf_valido'];
+
+    protected $casts = ['data_nascimento' => 'date:Y-m-d'];
 
     public function user()
     {

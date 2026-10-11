@@ -6,6 +6,7 @@ use App\Http\Controllers\AgendamentoNotificacaoController;
 use App\Http\Controllers\AgendamentoParticipanteController;
 use App\Http\Controllers\AtividadeAcaoController;
 use App\Http\Controllers\AtividadeController;
+use App\Http\Controllers\AtualizacaoCadastralController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\AutorizacaoImagemImportController;
 use App\Http\Controllers\AvaliacaoAtividadeController;
@@ -301,6 +302,14 @@ Route::middleware(['auth', 'role:administrador|gerente|eq_pedagogica|articulador
         Route::get('cadastrar', [UserManagementController::class, 'create'])->name('create');
         Route::post('/', [UserManagementController::class, 'store'])->name('store');
         Route::get('verificar', [UserManagementController::class, 'verificarIndex'])->name('verificar.index');
+        Route::prefix('atualizacao-cadastral')->name('atualizacao-cadastral.')->middleware('role:administrador|gerente')->controller(AtualizacaoCadastralController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/modelo', 'template')->name('modelo');
+            Route::post('/', 'upload')->name('upload');
+            Route::get('/preview', 'preview')->name('preview');
+            Route::post('/preview', 'savePage')->name('save');
+            Route::post('/confirmar', 'confirm')->name('confirmar');
+        });
         Route::post('verificar', [UserManagementController::class, 'verificarProcessar'])->name('verificar.processar');
         Route::get('verificar/exportar/{format}', [UserManagementController::class, 'verificarExportar'])->name('verificar.exportar');
         Route::middleware('role:administrador|gerente')->group(function () {
