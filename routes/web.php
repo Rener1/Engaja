@@ -302,7 +302,7 @@ Route::middleware(['auth', 'role:administrador|gerente|eq_pedagogica|articulador
         Route::get('cadastrar', [UserManagementController::class, 'create'])->name('create');
         Route::post('/', [UserManagementController::class, 'store'])->name('store');
         Route::get('verificar', [UserManagementController::class, 'verificarIndex'])->name('verificar.index');
-        Route::prefix('atualizacao-cadastral')->name('atualizacao-cadastral.')->middleware('role:administrador|gerente')->controller(AtualizacaoCadastralController::class)->group(function () {
+        Route::prefix('atualizacao-cadastral')->name('atualizacao-cadastral.')->middleware('role:administrador')->controller(AtualizacaoCadastralController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/modelo', 'template')->name('modelo');
             Route::post('/', 'upload')->name('upload');
