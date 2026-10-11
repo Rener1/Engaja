@@ -19,6 +19,5 @@
     </form>
     <h2 class="h5 mt-4">Colunas da planilha</h2>
     <p>{{ implode(', ', array_keys($columns)) }}</p>
-    <p>A última coluna é <code>data_nascimento</code>. Datas podem ser células de data do Excel, <strong>DD/MM/AAAA</strong> ou <strong>AAAA-MM-DD</strong>. O nascimento não pode estar no futuro. As demais colunas são opcionais; informe apenas os dados que deseja atualizar.</p>
 </div>
 @endsection

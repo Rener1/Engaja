@@ -181,16 +181,15 @@
           </h2>
           <div id="sidebarPessoas" class="accordion-collapse collapse {{ $pessoasOpen ? 'show' : '' }}" aria-labelledby="headingPessoas" data-bs-parent="#sidebarAccordion">
             <div class="accordion-body">
-              <a class="admin-nav-link {{ request()->routeIs('usuarios.index') || request()->routeIs('usuarios.edit') || request()->routeIs('usuarios.update') ? 'active' : '' }}" href="{{ route('usuarios.index') }}">
-                Gerenciar usuários
-              </a>
-              <a class="admin-nav-link {{ request()->routeIs('usuarios.verificar.*') ? 'active' : '' }}" href="{{ route('usuarios.verificar.index') }}">
-                Verificar usuário
-              </a>
-              @hasanyrole('administrador|gerente')
+              @role('administrador')
                 <a class="admin-nav-link {{ request()->routeIs('usuarios.atualizacao-cadastral.*') ? 'active' : '' }}" href="{{ route('usuarios.atualizacao-cadastral.index') }}">
                   Atualização de dados cadastrais
                 </a>
+              @endrole
+              <a class="admin-nav-link {{ request()->routeIs('usuarios.index') || request()->routeIs('usuarios.edit') || request()->routeIs('usuarios.update') ? 'active' : '' }}" href="{{ route('usuarios.index') }}">
+                Gerenciar usuários
+              </a>
+              @hasanyrole('administrador|gerente')
                 <a class="admin-nav-link {{ request()->routeIs('usuarios.participantes-exclusivos.*') ? 'active' : '' }}" href="{{ route('usuarios.participantes-exclusivos.index') }}">
                   Participantes exclusivos
                 </a>
@@ -200,6 +199,9 @@
 
 
               @endhasanyrole
+              <a class="admin-nav-link {{ request()->routeIs('usuarios.verificar.*') ? 'active' : '' }}" href="{{ route('usuarios.verificar.index') }}">
+                Verificar usuário
+              </a>
             </div>
           </div>
         </div>
