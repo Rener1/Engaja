@@ -4,15 +4,19 @@ namespace App\Models;
 
 use App\Models\Cartas\Carta;
 use App\Models\Cartas\CartaMensagem;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Throwable;
 
 class Participante extends Model
 {
     use HasFactory, SoftDeletes;
 
     public const SEXOS = ['Masculino', 'Feminino', 'Não preenchido'];
+  
+    private const NAO_INFORMADO = 'Não informado';
 
     public const TAG_REDE_ENSINO = 'Rede de Ensino';
 
@@ -113,6 +117,85 @@ class Participante extends Model
         return collect([$municipio, $estado])
             ->filter()
             ->implode(' - ');
+    }
+
+    /**
+     * Idade em anos completos, a partir de data_nascimento (ainda a ser criada
+     * pela equipe, em participantes ou em users). Sem a coluna, retorna null.
+     */
+    public function getIdadeAttribute(): ?int
+    {
+        return $this->calcularIdade($this->user);
+    }
+
+    /**
+     * Conjunto fechado de dados do remetente exibido no modal da carta.
+     * Qualquer outro atributo (CPF, telefone, e-mail, demográficos) fica de fora.
+     *
+     * @return array{nome: string, cidade: string, estado: string, idade: string, sexo: string}
+     */
+    public function dadosRemetente(?User $usuario = null): array
+    {
+        $usuario ??= $this->user;
+        $estado = $this->municipio?->estado;
+
+        $idade = $this->calcularIdade($usuario);
+        $idadeTexto = $idade !== null
+            ? $idade.' '.($idade === 1 ? 'ano' : 'anos')
+            : self::NAO_INFORMADO;
+
+        $sexo = $usuario?->identidade_genero;
+        if ($sexo === 'Outro' && filled($usuario?->identidade_genero_outro)) {
+            $sexo = $usuario->identidade_genero_outro;
+        }
+
+        return [
+            'nome' => $usuario?->name ?: 'Participante',
+            'cidade' => $this->municipio?->nome ?: self::NAO_INFORMADO,
+            'estado' => $this->rotuloEstado($estado?->nome, $estado?->sigla),
+            'idade' => $idadeTexto,
+            'sexo' => $sexo ?: self::NAO_INFORMADO,
+        ];
+    }
+
+    private function rotuloEstado(?string $nome, ?string $sigla): string
+    {
+        if (filled($nome) && filled($sigla)) {
+            return "{$nome} ({$sigla})";
+        }
+
+        return $nome ?: $sigla ?: self::NAO_INFORMADO;
+    }
+
+    private function calcularIdade(?User $usuario): ?int
+    {
+        $nascimento = $this->atributoSeExistir($this, 'data_nascimento')
+            ?? $this->atributoSeExistir($usuario, 'data_nascimento');
+
+        if (blank($nascimento)) {
+            return null;
+        }
+
+        try {
+            $data = Carbon::parse($nascimento);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $data->isFuture() ? null : $data->age;
+    }
+
+    /**
+     * Lê o atributo apenas se a coluna existir no registro carregado, para
+     * funcionar antes da migration e mesmo com strict mode do Eloquent.
+     */
+    private function atributoSeExistir(?Model $modelo, string $campo): mixed
+    {
+        if (! $modelo || ! array_key_exists($campo, $modelo->getAttributes())) {
+            return null;
+        }
+
+        return $modelo->getAttribute($campo);
     }
 
     private function validaCpf($cpf)
