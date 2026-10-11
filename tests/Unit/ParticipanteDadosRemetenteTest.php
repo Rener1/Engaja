@@ -54,22 +54,17 @@ class ParticipanteDadosRemetenteTest extends TestCase
         return $model;
     }
 
-    public function test_idade_e_calculada_a_partir_de_data_nascimento_do_participante(): void
+    public function test_idade_e_calculada_a_partir_de_data_nascimento(): void
     {
-        $this->assertSame(36, $this->participante(['data_nascimento' => '1990-10-10'])->idade);
+        $participante = $this->participante(['data_nascimento' => '1990-10-10']);
+
+        $this->assertSame(36, $participante->idade);
+        $this->assertSame('36 anos', $participante->dadosRemetente()['idade']);
     }
 
     public function test_idade_nao_conta_aniversario_que_ainda_nao_ocorreu(): void
     {
         $this->assertSame(35, $this->participante(['data_nascimento' => '1990-10-11'])->idade);
-    }
-
-    public function test_idade_le_data_nascimento_do_usuario_quando_participante_nao_tem_a_coluna(): void
-    {
-        $participante = $this->participante([], ['data_nascimento' => '2000-01-01']);
-
-        $this->assertSame(26, $participante->idade);
-        $this->assertSame('26 anos', $participante->dadosRemetente()['idade']);
     }
 
     public function test_idade_singular_para_um_ano(): void
@@ -81,13 +76,13 @@ class ParticipanteDadosRemetenteTest extends TestCase
 
     public function test_sem_data_nascimento_a_idade_e_nao_informado_mesmo_com_faixa_etaria(): void
     {
-        $participante = $this->participante([], ['faixa_etaria' => 'Adulto (18 a 59 anos)']);
+        $participante = $this->participante(['data_nascimento' => null], ['faixa_etaria' => 'Adulto (18 a 59 anos)']);
 
         $this->assertNull($participante->idade);
         $this->assertSame('Não informado', $participante->dadosRemetente()['idade']);
     }
 
-    public function test_sem_nenhuma_coluna_de_nascimento_nao_gera_erro(): void
+    public function test_sem_a_coluna_data_nascimento_nao_gera_erro(): void
     {
         $this->assertSame('Não informado', $this->participante()->dadosRemetente()['idade']);
     }
@@ -103,18 +98,24 @@ class ParticipanteDadosRemetenteTest extends TestCase
         $this->assertSame('Não informado', $invalida->dadosRemetente()['idade']);
     }
 
-    public function test_sexo_usa_identidade_de_genero_e_o_texto_livre_quando_outro(): void
+    public function test_sexo_vem_da_coluna_sexo_do_participante(): void
     {
-        $comum = $this->participante([], ['identidade_genero' => 'Mulher Cisgênero']);
-        $outro = $this->participante([], [
-            'identidade_genero' => 'Outro',
-            'identidade_genero_outro' => 'Agênero',
-        ]);
-        $vazio = $this->participante();
+        $this->assertSame('Feminino', $this->participante(['sexo' => 'Feminino'])->dadosRemetente()['sexo']);
+        $this->assertSame('Masculino', $this->participante(['sexo' => 'Masculino'])->dadosRemetente()['sexo']);
+    }
 
-        $this->assertSame('Mulher Cisgênero', $comum->dadosRemetente()['sexo']);
-        $this->assertSame('Agênero', $outro->dadosRemetente()['sexo']);
-        $this->assertSame('Não informado', $vazio->dadosRemetente()['sexo']);
+    public function test_sexo_nao_preenchido_vazio_ou_sem_coluna_vira_nao_informado(): void
+    {
+        $this->assertSame('Não informado', $this->participante(['sexo' => 'Não preenchido'])->dadosRemetente()['sexo']);
+        $this->assertSame('Não informado', $this->participante(['sexo' => null])->dadosRemetente()['sexo']);
+        $this->assertSame('Não informado', $this->participante()->dadosRemetente()['sexo']);
+    }
+
+    public function test_sexo_nao_usa_identidade_de_genero_do_usuario(): void
+    {
+        $participante = $this->participante(['sexo' => 'Não preenchido'], ['identidade_genero' => 'Mulher Cisgênero']);
+
+        $this->assertSame('Não informado', $participante->dadosRemetente()['sexo']);
     }
 
     public function test_cidade_e_estado_vem_do_municipio(): void
@@ -136,7 +137,7 @@ class ParticipanteDadosRemetenteTest extends TestCase
     public function test_dados_remetente_expoe_somente_os_cinco_campos(): void
     {
         $participante = $this->participante(
-            ['cpf' => '12345678901', 'telefone' => '81999999999'],
+            ['cpf' => '12345678901', 'telefone' => '81999999999', 'sexo' => 'Feminino'],
             [
                 'email' => 'maria@example.com',
                 'raca_cor' => 'Parda',
@@ -154,16 +155,5 @@ class ParticipanteDadosRemetenteTest extends TestCase
         foreach (['12345678901', '81999999999', 'maria@example.com', 'Parda', 'Bissexual'] as $sensivel) {
             $this->assertStringNotContainsString($sensivel, $json);
         }
-    }
-
-    public function test_dados_remetente_aceita_usuario_explicito_para_voluntario(): void
-    {
-        $voluntario = new User;
-        $voluntario->setRawAttributes(['name' => 'João Voluntário', 'identidade_genero' => 'Homem Cisgênero']);
-
-        $dados = (new Participante)->dadosRemetente($voluntario);
-
-        $this->assertSame('João Voluntário', $dados['nome']);
-        $this->assertSame('Homem Cisgênero', $dados['sexo']);
     }
 }
