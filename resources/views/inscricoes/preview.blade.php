@@ -121,6 +121,8 @@
             <th style="min-width:220px;">Tipo de Organização</th>
             <th style="min-width:220px;">Organização</th>
             <th style="min-width:200px;">Tag</th>
+            <th style="min-width:180px;">Data de nascimento *</th>
+            <th style="min-width:180px;">Sexo</th>
             @foreach($demograficoLabels as $campoDemo => $labelDemo)
             <th style="min-width:180px;">{{ $labelDemo }}</th>
             @endforeach
@@ -218,6 +220,25 @@
               @if(!empty($r['tag']) && empty($r['tag_ok']))
               <div class="invalid-feedback">Selecione uma tag válida.</div>
               @endif
+            </td>
+
+            <td>
+              <input type="date"
+                class="form-control form-control-sm @error("rows.$idx.data_nascimento") is-invalid @enderror"
+                name="rows[{{ $idx }}][data_nascimento]"
+                value="{{ old("rows.$idx.data_nascimento", $r['data_nascimento'] ?? '') }}"
+                max="{{ now()->toDateString() }}" required>
+              @error("rows.$idx.data_nascimento") <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </td>
+            <td>
+              <select class="form-select form-select-sm @error("rows.$idx.sexo") is-invalid @enderror"
+                name="rows[{{ $idx }}][sexo]">
+                <option value="">Selecione...</option>
+                @foreach(\App\Models\Participante::SEXOS as $sexo)
+                <option value="{{ $sexo }}" @selected(old("rows.$idx.sexo", $r['sexo'] ?? null) === $sexo)>{{ $sexo }}</option>
+                @endforeach
+              </select>
+              @error("rows.$idx.sexo") <div class="invalid-feedback">{{ $message }}</div> @enderror
             </td>
 
             {{-- Campos demográficos --}}
