@@ -10,11 +10,9 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class UsuariosSemVinculoExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class UsuariosSemVinculoExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping
 {
-    public function __construct(private User $viewer)
-    {
-    }
+    public function __construct(private User $viewer) {}
 
     public function collection(): Collection
     {
@@ -30,6 +28,8 @@ class UsuariosSemVinculoExport implements FromCollection, WithHeadings, WithMapp
             'Email',
             'CPF',
             'Telefone',
+            'Sexo',
+            'Idade',
             'Município',
             'Instituição',
             'Tipo de instituição',
@@ -39,11 +39,15 @@ class UsuariosSemVinculoExport implements FromCollection, WithHeadings, WithMapp
 
     public function map($user): array
     {
+        $idade = $user->participante?->idade;
+
         return [
             $user->name,
             $user->email,
             $user->participante?->cpf,
             $user->participante?->telefone,
+            $user->participante?->sexo,
+            $idade !== null ? "{$idade} anos" : null,
             $this->formatMunicipioEstado(
                 $user->participante?->municipio?->nome,
                 $user->participante?->municipio?->estado?->sigla
@@ -61,7 +65,7 @@ class UsuariosSemVinculoExport implements FromCollection, WithHeadings, WithMapp
         }
 
         if ($municipio && $estado) {
-            return $municipio . ' - ' . $estado;
+            return $municipio.' - '.$estado;
         }
 
         return $municipio ?: $estado;

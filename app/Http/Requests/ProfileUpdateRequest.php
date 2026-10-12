@@ -21,13 +21,15 @@ class ProfileUpdateRequest extends FormRequest
         $telDigits = preg_replace('/\D+/', '', (string) ($this->telefone ?? ''));
 
         $this->merge([
-            'name'         => isset($this->name) ? trim((string) $this->name) : null,
-            'email'        => isset($this->email) ? trim((string) $this->email) : null,
-            'cpf'          => $toNull($cpfDigits ?: null),
-            'telefone'     => $toNull($telDigits ?: null),
+            'name' => isset($this->name) ? trim((string) $this->name) : null,
+            'email' => isset($this->email) ? trim((string) $this->email) : null,
+            'cpf' => $toNull($cpfDigits ?: null),
+            'telefone' => $toNull($telDigits ?: null),
             'municipio_id' => $toNull($this->municipio_id ?? null),
+            'sexo' => $toNull($this->sexo ?? null),
+            'data_nascimento' => $toNull($this->data_nascimento ?? null),
             'remove_profile_photo' => $this->boolean('remove_profile_photo'),
-            'autorizacao_imagem'   => $this->boolean('autorizacao_imagem'),
+            'autorizacao_imagem' => $this->boolean('autorizacao_imagem'),
         ]);
     }
 
@@ -37,21 +39,23 @@ class ProfileUpdateRequest extends FormRequest
         $sistemaOrigem = $this->user()->sistema_origem ?? User::SISTEMA_ENGAJA;
 
         return [
-            'name'         => ['required', 'string', 'max:255'],
-            'email'        => [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
                 'required', 'email', 'max:255',
                 Rule::unique('users', 'email')
                     ->where('sistema_origem', $sistemaOrigem)
                     ->ignore($userId),
             ],
-            'cpf'          => ['required', 'digits:11'],
-            'telefone'     => ['nullable', 'regex:/^\d{10,11}$/'],
+            'cpf' => ['required', 'digits:11'],
+            'telefone' => ['nullable', 'regex:/^\d{10,11}$/'],
             'municipio_id' => ['nullable', 'exists:municipios,id'],
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:5120'],
             'remove_profile_photo' => ['nullable', 'boolean'],
-            'escola_unidade'   => ['nullable','string','max:255'],
-            'tipo_organizacao' => ['nullable','string','max:255', Rule::in(config('engaja.organizacoes', []))],
-            'tag'              => ['nullable', Rule::in(Participante::TAGS)],
+            'escola_unidade' => ['nullable', 'string', 'max:255'],
+            'tipo_organizacao' => ['nullable', 'string', 'max:255', Rule::in(config('engaja.organizacoes', []))],
+            'tag' => ['nullable', Rule::in(Participante::TAGS)],
+            'sexo' => ['nullable', 'string', Rule::in(Participante::SEXOS)],
+            'data_nascimento' => ['nullable', 'date', 'before_or_equal:today'],
             'autorizacao_imagem' => ['boolean'],
         ];
     }
@@ -79,10 +83,10 @@ class ProfileUpdateRequest extends FormRequest
         });
     }
 
-
     private function normalizeCpf(?string $cpf): ?string
     {
         $digits = preg_replace('/\D+/', '', (string) ($cpf ?? ''));
+
         return $digits !== '' ? $digits : null;
     }
 
@@ -93,12 +97,12 @@ class ProfileUpdateRequest extends FormRequest
             return false;
         }
 
-        $sistemaOrigem = $this->user()?->sistema_origem ?? \App\Models\User::SISTEMA_ENGAJA;
+        $sistemaOrigem = $this->user()?->sistema_origem ?? User::SISTEMA_ENGAJA;
 
         return Participante::query()
             ->whereNotNull('cpf')
             ->whereHas('user', fn ($query) => $query->where('sistema_origem', $sistemaOrigem))
-            ->when($ignorarId, fn($q) => $q->where('id', '!=', $ignorarId))
+            ->when($ignorarId, fn ($q) => $q->where('id', '!=', $ignorarId))
             ->whereRaw("regexp_replace(cpf, '[^0-9]', '', 'g') = ?", [$cpf])
             ->exists();
     }
@@ -133,17 +137,17 @@ class ProfileUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required'       => 'Nome é obrigatório.',
-            'email.required'      => 'E-mail é obrigatório.',
-            'email.email'         => 'Informe um e-mail válido.',
-            'email.unique'        => 'Este e-mail já está em uso.',
-            'cpf.required'        => 'CPF e obrigatorio.',
-            'cpf.digits'          => 'CPF deve conter 11 digitos.',
-            'telefone.regex'      => 'Telefone deve ter DDD e 10 ou 11 digitos.',
+            'name.required' => 'Nome é obrigatório.',
+            'email.required' => 'E-mail é obrigatório.',
+            'email.email' => 'Informe um e-mail válido.',
+            'email.unique' => 'Este e-mail já está em uso.',
+            'cpf.required' => 'CPF e obrigatorio.',
+            'cpf.digits' => 'CPF deve conter 11 digitos.',
+            'telefone.regex' => 'Telefone deve ter DDD e 10 ou 11 digitos.',
             'municipio_id.exists' => 'Municipio invalido.',
             'profile_photo.image' => 'Envie um arquivo de imagem valido.',
             'profile_photo.mimes' => 'A foto deve estar em JPG, JPEG, PNG, GIF ou WEBP.',
-            'profile_photo.max'   => 'A foto deve ter no maximo 5 MB.',
+            'profile_photo.max' => 'A foto deve ter no maximo 5 MB.',
         ];
     }
 }

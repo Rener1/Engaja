@@ -34,6 +34,8 @@
           ['field' => 'email', 'headerName' => 'Email', 'flex' => 2],
           ['field' => 'cpf', 'headerName' => 'CPF', 'flex' => 1],
           ['field' => 'telefone', 'headerName' => 'Telefone', 'flex' => 1],
+          ['field' => 'sexo', 'headerName' => 'Sexo', 'flex' => 1],
+          ['field' => 'idade', 'headerName' => 'Idade', 'flex' => 1],
           ['field' => 'municipio', 'headerName' => 'Município', 'flex' => 1],
           ['field' => 'instituicao', 'headerName' => 'Instituição', 'flex' => 1],
       ];
@@ -41,12 +43,15 @@
       $rows = $usuarios->map(function ($usuario) {
           $municipio = $usuario->participante?->municipio?->nome;
           $estado = $usuario->participante?->municipio?->estado?->sigla;
+          $idade = $usuario->participante?->idade;
 
           return [
               'nome' => $usuario->name,
               'email' => $usuario->email,
               'cpf' => $usuario->participante?->cpf ?? '-',
               'telefone' => $usuario->participante?->telefone ?? '-',
+              'sexo' => $usuario->participante?->sexo ?? '-',
+              'idade' => $idade !== null ? "{$idade} anos" : '-',
               'municipio' => $municipio && $estado ? "{$municipio} - {$estado}" : ($municipio ?? $estado ?? '-'),
               'instituicao' => $usuario->participante?->escola_unidade ?? '-',
           ];

@@ -58,6 +58,8 @@ class RegisteredUserController extends Controller
             'escola_unidade' => ['nullable', 'string', 'max:255'],
             'tipo_organizacao' => ['nullable', 'string', 'max:255', Rule::in(config('engaja.organizacoes', []))],
             'tag' => ['nullable', Rule::in(Participante::TAGS)],
+            'sexo' => ['nullable', 'string', Rule::in(Participante::SEXOS)],
+            'data_nascimento' => ['nullable', 'date', 'before_or_equal:today'],
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:5120'],
             'identidade_genero' => ['required', 'string'],
             'identidade_genero_outro' => ['nullable', 'string', 'max:255', 'required_if:identidade_genero,Outro'],
@@ -164,6 +166,8 @@ class RegisteredUserController extends Controller
             'escola_unidade' => $data['escola_unidade'] ?? null,
             'tipo_organizacao' => $data['tipo_organizacao'] ?? null,
             'tag' => $data['tag'] ?? null,
+            'sexo' => $data['sexo'] ?? 'Não preenchido',
+            'data_nascimento' => $data['data_nascimento'] ?? null,
         ];
     }
 
@@ -279,6 +283,8 @@ class RegisteredUserController extends Controller
             'escola_unidade' => $toNull(isset($request->escola_unidade) ? trim((string) $request->escola_unidade) : null),
             'tipo_organizacao' => $toNull(isset($request->tipo_organizacao) ? trim((string) $request->tipo_organizacao) : null),
             'tag' => $toNull(isset($request->tag) ? trim((string) $request->tag) : null),
+            'sexo' => $toNull($request->sexo ?? null),
+            'data_nascimento' => $toNull($request->data_nascimento ?? null),
             'profile_photo' => $request->file('profile_photo'),
         ]);
     }
