@@ -127,12 +127,12 @@
                                 </li>
                                 <li>
                                      <a class="dropdown-item text-engaja" href="{{ route('atividades.diario', $atividade) }}">
-                                         <i class="bi bi-card-checklist"></i>Diário de Presenças
+                                         Diário de Presenças
                                      </a>
                                 </li>
                                 <li>
                                     <button type="button" class="dropdown-item text-engaja" data-bs-toggle="modal" data-bs-target="#modalAgendamentoPresenca">
-                                        <i class="bi bi-clock-history me-1"></i>Agendar abertura/fechamento
+                                        </i>Agendar abertura/fechamento
                                     </button>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
