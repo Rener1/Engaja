@@ -111,7 +111,6 @@ class PresencaGerenciamentoController extends Controller
 
         $atividades = $query->paginate(25)->appends($request->query());
 
-        // Métricas rápidas no universo total
         $totalAtividades = Atividade::query()->whereNotNull('evento_id')->count();
         $comAgendamentoFuturo = Atividade::query()
             ->whereNotNull('evento_id')
