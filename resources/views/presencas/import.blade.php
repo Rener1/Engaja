@@ -26,8 +26,10 @@
       <label class="form-label">Arquivo Excel (.xlsx)</label>
       <input type="file" name="your_file" class="form-control" accept=".xlsx,.xls,.csv" required>
       <div class="form-text">
-        <strong>Cada registro de participante deve ter nome, além de pelo menos um identificador: E-mail ou CPF.</strong><br>
-        Colunas: nome, email, cpf, telefone, municipio, tipo_de_organizacao, organização, tag, status, data_entrada
+        <strong>Cada registro de participante deve ter nome e data de nascimento, além de pelo menos um identificador: E-mail ou CPF.</strong><br>
+        Colunas: nome, email, cpf, telefone, municipio, tipo_de_organizacao, organização, tag, data_nascimento, sexo, status, data_entrada<br>
+        Data de nascimento: use <code>DD/MM/AAAA</code>, <code>AAAA-MM-DD</code> ou uma célula de data do Excel. Datas futuras não são aceitas.<br>
+        Sexo é opcional: {{ implode(', ', \App\Models\Participante::SEXOS) }}. Campos opcionais vazios preservam os dados já cadastrados.
       </div>
       <div class="mt-2">
         <a href="{{ asset('modelos/modelo_presencas_engaja.xlsx') }}" class="btn btn-sm btn-outline-primary">

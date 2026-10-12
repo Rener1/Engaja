@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Participante;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 class ParticipanteImportValidator
 {
@@ -37,6 +41,36 @@ class ParticipanteImportValidator
     public function validate(array $rows): array
     {
         return $this->validateRows($rows);
+    }
+
+    protected function validateDadosPessoais(array $rows, array $additionalRules = [], array $additionalMessages = []): array
+    {
+        foreach ($rows as &$row) {
+            $row['data_nascimento'] = $this->normalizeDataNascimento($row['data_nascimento'] ?? null);
+            $sexo = $row['sexo'] ?? null;
+            if (is_scalar($sexo)) {
+                $sexo = trim((string) $sexo);
+                foreach (Participante::SEXOS as $option) {
+                    if (Str::lower(Str::ascii($sexo)) === Str::lower(Str::ascii($option))) {
+                        $sexo = $option;
+                        break;
+                    }
+                }
+            }
+            $row['sexo'] = $sexo === '' ? null : $sexo;
+        }
+        unset($row);
+
+        return $this->validateRows($rows, array_merge([
+            'data_nascimento' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'sexo' => ['nullable', 'string', Rule::in(Participante::SEXOS)],
+        ], $additionalRules), array_merge([
+            'data_nascimento.required' => 'Informe a data de nascimento.',
+            'data_nascimento.date_format' => 'Informe uma data de nascimento válida, com ano de quatro dígitos (DD/MM/AAAA ou AAAA-MM-DD).',
+            'data_nascimento.before_or_equal' => 'A data de nascimento não pode estar no futuro.',
+            'sexo.string' => 'Informe um sexo válido.',
+            'sexo.in' => 'Sexo não reconhecido. Selecione Masculino, Feminino ou Não preenchido.',
+        ], $additionalMessages));
     }
 
     protected function validateRows(array $rows, array $additionalRules = [], array $additionalMessages = []): array
@@ -85,6 +119,31 @@ class ParticipanteImportValidator
         }
 
         return $rows;
+    }
+
+    private function normalizeDataNascimento(mixed $value): mixed
+    {
+        if (! is_scalar($value)) {
+            return $value;
+        }
+
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+
+        if (is_numeric($value) && (float) $value > 0 && (float) $value < 100000) {
+            return ExcelDate::excelToDateTimeObject((float) $value)->format('Y-m-d');
+        }
+
+        foreach (['Y-m-d', 'd/m/Y'] as $format) {
+            $date = \DateTimeImmutable::createFromFormat('!'.$format, $value);
+            if ($date && $date->format($format) === $value) {
+                return $date->format('Y-m-d');
+            }
+        }
+
+        return $value;
     }
 
     public static function location(array $row, int $index = 0): string

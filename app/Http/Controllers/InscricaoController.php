@@ -1167,6 +1167,8 @@ class InscricaoController extends Controller
             'tipo_organizacao' => ['tipo de organizacao', 'tipo_da_organizacao', 'tipo organizacao', 'tipoorganizacao'],
             'organizacao' => ['organizacao', 'organização', 'escola_unidade', 'escola unidade', 'organizacao_nome'],
             'tag' => ['tag'],
+            'data_nascimento' => ['data_nascimento', 'data de nascimento', 'nascimento'],
+            'sexo' => ['sexo'],
             'data_entrada' => ['data_entrada', 'data entrada', 'data de entrada'],
             ...DemograficoNormalizerService::headerAliases(),
         ];
@@ -1248,6 +1250,8 @@ class InscricaoController extends Controller
                     $organizacao = $this->sheetCellValue($sheet, $fieldToColumn['organizacao'] ?? null, $rowNumber);
                     $tag = $this->sheetCellValue($sheet, $fieldToColumn['tag'] ?? null, $rowNumber);
                     $dataEntrada = $this->sheetCellValue($sheet, $fieldToColumn['data_entrada'] ?? null, $rowNumber);
+                    $dataNascimento = $this->sheetCellValue($sheet, $fieldToColumn['data_nascimento'] ?? null, $rowNumber);
+                    $sexo = $this->sheetCellValue($sheet, $fieldToColumn['sexo'] ?? null, $rowNumber);
                     $hasDemographicData = collect(array_keys(DemograficoNormalizerService::headerAliases()))
                         ->contains(fn ($field) => $this->sheetCellValue($sheet, $fieldToColumn[$field] ?? null, $rowNumber) !== '');
 
@@ -1262,6 +1266,8 @@ class InscricaoController extends Controller
                         $organizacao === '' &&
                         $tag === '' &&
                         $dataEntrada === '' &&
+                        $dataNascimento === '' &&
+                        $sexo === '' &&
                         ! $hasDemographicData
                     ) {
                         continue;
@@ -1310,6 +1316,8 @@ class InscricaoController extends Controller
                         'escola_unidade' => $organizacao,
                         'tag' => $tag !== '' ? $tag : null,
                         'tag_ok' => true,
+                        'data_nascimento' => $dataNascimento,
+                        'sexo' => $sexo !== '' ? $sexo : null,
                         'data_entrada' => $dataEntrada,
                     ], $demograficosNormalizados));
                 }
@@ -1473,7 +1481,7 @@ class InscricaoController extends Controller
      */
     public function savePage(Request $request, Evento $evento, InscricaoImportValidator $validator, ParticipanteImportIdentityResolver $resolver)
     {
-        $fields = ['nome', 'email', 'cpf', 'telefone', 'municipio_id', 'estado', 'tipo_organizacao', 'escola_unidade', 'tag', 'data_entrada'];
+        $fields = ['nome', 'email', 'cpf', 'telefone', 'municipio_id', 'estado', 'tipo_organizacao', 'escola_unidade', 'tag', 'data_nascimento', 'sexo', 'data_entrada'];
         $rules = [
             'session_key' => 'required|string|max:150',
             'rows' => 'required|array',
@@ -1486,6 +1494,8 @@ class InscricaoController extends Controller
             'rows.*.tipo_organizacao' => 'sometimes|nullable|string|max:255',
             'rows.*.escola_unidade' => 'sometimes|nullable|string|max:255',
             'rows.*.tag' => 'sometimes|nullable|string|max:255',
+            'rows.*.data_nascimento' => 'sometimes|nullable|string|max:255',
+            'rows.*.sexo' => 'sometimes|nullable|string|max:255',
             'rows.*.data_entrada' => 'sometimes|nullable|date_format:Y-m-d',
         ];
         foreach (config('engaja.demograficos', []) as $field => $definition) {
@@ -1695,6 +1705,8 @@ class InscricaoController extends Controller
                     'escola_unidade' => ($org !== '') ? $org : null,
                     'tipo_organizacao' => ($tipoOrg !== '') ? $tipoOrg : null,
                     'tag' => $tag,
+                    'data_nascimento' => $row['data_nascimento'],
+                    'sexo' => $row['sexo'],
                     'data_entrada' => $toDate($row['data_entrada'] ?? null),
                 ];
 

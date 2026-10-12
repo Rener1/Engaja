@@ -8,7 +8,7 @@ class InscricaoImportValidator extends ParticipanteImportValidator
 {
     public function validate(array $rows): array
     {
-        $rows = parent::validate($rows);
+        $rows = $this->validateDadosPessoais($rows);
         $errors = [];
         $groups = [];
         foreach ($rows as $index => $row) {

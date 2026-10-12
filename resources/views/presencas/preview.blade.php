@@ -22,7 +22,7 @@
   </div>
   @endif
 
-  <p class="text-muted"><strong>Nome e status são obrigatórios. Informe e-mail ou CPF em cada registro. Salve as alterações da página antes de confirmar.</strong></p>
+  <p class="text-muted"><strong>Nome, data de nascimento e status são obrigatórios. Informe e-mail ou CPF em cada registro. Salve as alterações da página antes de confirmar.</strong></p>
 
   <form method="POST" action="{{ route('atividades.presencas.savepage', $atividade) }}" class="mb-3">
     @csrf
@@ -41,6 +41,8 @@
             <th>Tipo de Organização</th>
             <th>Organização</th>
             <th>Tag</th>
+            <th style="min-width:180px;">Data de nascimento *</th>
+            <th style="min-width:180px;">Sexo</th>
             <th style="min-width:150px;">Status</th>
             <!-- <th>Justificativa</th> -->
             <!-- <th>Data entrada</th> -->
@@ -101,6 +103,24 @@
               @if(!empty($r['tag']) && empty($r['tag_ok']))
               <div class="invalid-feedback">Selecione uma tag válida.</div>
               @endif
+            </td>
+            <td>
+              <input type="date"
+                class="form-control form-control-sm @error("rows.$gi.data_nascimento") is-invalid @enderror"
+                name="rows[{{ $gi }}][data_nascimento]"
+                value="{{ old("rows.$gi.data_nascimento", $r['data_nascimento'] ?? '') }}"
+                max="{{ now()->toDateString() }}" required>
+              @error("rows.$gi.data_nascimento") <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </td>
+            <td>
+              <select class="form-select form-select-sm @error("rows.$gi.sexo") is-invalid @enderror"
+                name="rows[{{ $gi }}][sexo]">
+                <option value="">Selecione...</option>
+                @foreach(\App\Models\Participante::SEXOS as $sexo)
+                <option value="{{ $sexo }}" @selected(old("rows.$gi.sexo", $r['sexo'] ?? null) === $sexo)>{{ $sexo }}</option>
+                @endforeach
+              </select>
+              @error("rows.$gi.sexo") <div class="invalid-feedback">{{ $message }}</div> @enderror
             </td>
             <td>
               @php
