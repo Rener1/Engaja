@@ -159,6 +159,8 @@ class UserManagementController extends Controller
                     'escola_unidade' => $data['escola_unidade'] ?? null,
                     'tipo_organizacao' => $data['tipo_organizacao'] ?? null,
                     'tag' => $data['tag'] ?? null,
+                    'sexo' => $data['sexo'] ?? 'Não preenchido',
+                    'data_nascimento' => $data['data_nascimento'] ?? null,
                     'autorizacao_imagem' => $data['autorizacao_imagem'] ?? false,
                 ]
             );
@@ -249,6 +251,8 @@ class UserManagementController extends Controller
                 'escola_unidade' => $data['escola_unidade'] ?? null,
                 'tipo_organizacao' => $data['tipo_organizacao'] ?? null,
                 'tag' => $data['tag'] ?? null,
+                'sexo' => $data['sexo'] ?? 'Não preenchido',
+                'data_nascimento' => $data['data_nascimento'] ?? null,
                 'autorizacao_imagem' => $data['autorizacao_imagem'] ?? false,
             ]
         );

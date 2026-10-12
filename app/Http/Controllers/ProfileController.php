@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\Participante;
+use App\Models\Atividade;
 use App\Models\Certificado;
 use App\Models\Inscricao;
-use App\Models\Atividade;
+use App\Models\Municipio;
+use App\Models\Participante;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,17 +26,17 @@ class ProfileController extends Controller
         $user = $request->user()->load(['participante.municipio.estado']);
 
         // Se preferir carregar na view, pode remover isso:
-        $municipios = \App\Models\Municipio::with('estado')
+        $municipios = Municipio::with('estado')
             ->orderBy('nome')
-            ->get(['id','nome','estado_id']);
+            ->get(['id', 'nome', 'estado_id']);
 
         $organizacoes = config('engaja.organizacoes', []);
         $participanteTags = config('engaja.participante_tags', Participante::TAGS);
 
         return view('profile.edit', [
-            'user'             => $user,
-            'municipios'       => $municipios,
-            'organizacoes'     => $organizacoes,
+            'user' => $user,
+            'municipios' => $municipios,
+            'organizacoes' => $organizacoes,
             'participanteTags' => $participanteTags,
         ]);
     }
@@ -65,25 +67,25 @@ class ProfileController extends Controller
     public function completeDemographics(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'identidade_genero'        => ['required', 'string'],
-            'identidade_genero_outro'  => ['nullable', 'string', 'max:255', 'required_if:identidade_genero,Outro'],
-            'raca_cor'                 => ['required', 'string'],
-            'comunidade_tradicional'   => ['required', 'string'],
+            'identidade_genero' => ['required', 'string'],
+            'identidade_genero_outro' => ['nullable', 'string', 'max:255', 'required_if:identidade_genero,Outro'],
+            'raca_cor' => ['required', 'string'],
+            'comunidade_tradicional' => ['required', 'string'],
             'comunidade_tradicional_outro' => ['nullable', 'string', 'max:255', 'required_if:comunidade_tradicional,Outro'],
-            'faixa_etaria'             => ['required', 'string'],
-            'pcd'                      => ['required', 'string'],
-            'orientacao_sexual'        => ['required', 'string'],
-            'orientacao_sexual_outra'  => ['nullable', 'string', 'max:255', 'required_if:orientacao_sexual,Outra'],
+            'faixa_etaria' => ['required', 'string'],
+            'pcd' => ['required', 'string'],
+            'orientacao_sexual' => ['required', 'string'],
+            'orientacao_sexual_outra' => ['nullable', 'string', 'max:255', 'required_if:orientacao_sexual,Outra'],
         ], [
-            'identidade_genero.required'       => 'Identidade de gênero é obrigatória.',
-            'raca_cor.required'                => 'Raça/Cor é obrigatória.',
-            'comunidade_tradicional.required'  => 'Pertencimento a comunidade é obrigatório.',
-            'faixa_etaria.required'            => 'Faixa etária é obrigatória.',
-            'pcd.required'                     => 'Campo PcD é obrigatório.',
-            'orientacao_sexual.required'       => 'Orientação sexual é obrigatória.',
-            'identidade_genero_outro.required_if'      => 'Especifique sua identidade de gênero.',
+            'identidade_genero.required' => 'Identidade de gênero é obrigatória.',
+            'raca_cor.required' => 'Raça/Cor é obrigatória.',
+            'comunidade_tradicional.required' => 'Pertencimento a comunidade é obrigatório.',
+            'faixa_etaria.required' => 'Faixa etária é obrigatória.',
+            'pcd.required' => 'Campo PcD é obrigatório.',
+            'orientacao_sexual.required' => 'Orientação sexual é obrigatória.',
+            'identidade_genero_outro.required_if' => 'Especifique sua identidade de gênero.',
             'comunidade_tradicional_outro.required_if' => 'Especifique a comunidade tradicional.',
-            'orientacao_sexual_outra.required_if'      => 'Especifique sua orientação sexual.',
+            'orientacao_sexual_outra.required_if' => 'Especifique sua orientação sexual.',
         ]);
 
         $request->user()->update($data);
@@ -107,14 +109,14 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         $participante = Participante::where('user_id', $user->id)->first();
-        if (!$participante) {
+        if (! $participante) {
             return view('profile.presencas', ['atividades' => collect(), 'eventos' => collect()]);
         }
 
         $eventoId = $request->input('evento_id');
-        $dataDe   = $request->input('data_de');
-        $dataAte  = $request->input('data_ate');
-        $busca    = $request->input('busca');
+        $dataDe = $request->input('data_de');
+        $dataAte = $request->input('data_ate');
+        $busca = $request->input('busca');
 
         $inscricoes = Inscricao::where('participante_id', $participante->id)
             ->whereNull('deleted_at')
@@ -136,15 +138,15 @@ class ProfileController extends Controller
             ->whereIn('id', $atividadeIds)
             ->with([
                 'evento',
-                'presencas' => fn($q) => $q->whereIn('inscricao_id', $inscricoes->pluck('id')),
+                'presencas' => fn ($q) => $q->whereIn('inscricao_id', $inscricoes->pluck('id')),
             ]);
 
-        $atividadesQuery->when($eventoId, fn($q) => $q->where('evento_id', $eventoId));
-        $atividadesQuery->when($dataDe,   fn($q) => $q->where('dia', '>=', $dataDe));
-        $atividadesQuery->when($dataAte,  fn($q) => $q->where('dia', '<=', $dataAte));
-        $atividadesQuery->when($busca, function($q) use ($busca) {
+        $atividadesQuery->when($eventoId, fn ($q) => $q->where('evento_id', $eventoId));
+        $atividadesQuery->when($dataDe, fn ($q) => $q->where('dia', '>=', $dataDe));
+        $atividadesQuery->when($dataAte, fn ($q) => $q->where('dia', '<=', $dataAte));
+        $atividadesQuery->when($busca, function ($q) use ($busca) {
             $q->where('descricao', 'ilike', "%$busca%")
-            ->orWhereHas('evento', fn($qe) => $qe->where('nome', 'ilike', "%$busca%"));
+                ->orWhereHas('evento', fn ($qe) => $qe->where('nome', 'ilike', "%$busca%"));
         });
 
         $atividades = $atividadesQuery
@@ -154,7 +156,7 @@ class ProfileController extends Controller
 
         $dados = $atividades->map(function ($atividade) use ($inscricoes) {
             $inscricao = $inscricoes->get($atividade->id);
-            $presente  = $atividade->presencas
+            $presente = $atividade->presencas
                 ->where('inscricao_id', optional($inscricao)->id)
                 ->isNotEmpty();
             $status = 'Ausente';
@@ -164,25 +166,26 @@ class ProfileController extends Controller
             }
 
             return [
-                'data'    => $atividade->dia,
-                'hora'    => $atividade->hora_inicio,
+                'data' => $atividade->dia,
+                'hora' => $atividade->hora_inicio,
                 'momento' => $atividade->descricao,
-                'evento'  => $atividade->evento->nome ?? '',
-                'status'  => $status,
+                'evento' => $atividade->evento->nome ?? '',
+                'status' => $status,
             ];
         });
 
         return view('profile.presencas', [
             'atividades' => $dados,
-            'eventos'    => $eventos,
-            'filtros'    => [
+            'eventos' => $eventos,
+            'filtros' => [
                 'evento_id' => $eventoId,
-                'data_de'   => $dataDe,
-                'data_ate'  => $dataAte,
-                'busca'     => $busca,
+                'data_de' => $dataDe,
+                'data_ate' => $dataAte,
+                'busca' => $busca,
             ],
         ]);
     }
+
     /**
      * Update the user's profile information + participante.
      */
@@ -194,7 +197,7 @@ class ProfileController extends Controller
 
         $oldEmail = $user->email;
         $user->fill([
-            'name'  => $data['name'],
+            'name' => $data['name'],
             'email' => $data['email'],
         ]);
 
@@ -212,12 +215,14 @@ class ProfileController extends Controller
         $user->save();
 
         $participanteData = [
-            'cpf'              => $data['cpf']              ?? null,
-            'telefone'         => $data['telefone']         ?? null,
-            'municipio_id'     => $data['municipio_id']     ?? null,
-            'escola_unidade'   => $data['escola_unidade']   ?? null,
+            'cpf' => $data['cpf'] ?? null,
+            'telefone' => $data['telefone'] ?? null,
+            'municipio_id' => $data['municipio_id'] ?? null,
+            'escola_unidade' => $data['escola_unidade'] ?? null,
             'tipo_organizacao' => $data['tipo_organizacao'] ?? null,
-            'tag'              => $data['tag']              ?? null,
+            'tag' => $data['tag'] ?? null,
+            'sexo' => $data['sexo'] ?? 'Não preenchido',
+            'data_nascimento' => $data['data_nascimento'] ?? null,
             'autorizacao_imagem' => $data['autorizacao_imagem'] ?? false,
             // 'data_entrada'   => $data['data_entrada']   ?? null, // já 'Y-m-d' de <input type="date">
         ];
@@ -230,7 +235,7 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
-    private function storeProfilePhoto(Request $request, \App\Models\User $user): string
+    private function storeProfilePhoto(Request $request, User $user): string
     {
         $file = $request->file('profile_photo');
         $directory = "users/{$user->id}/perfil";
@@ -242,7 +247,7 @@ class ProfileController extends Controller
         return $file->storeAs($directory, $filename, 'public');
     }
 
-    private function deleteProfilePhoto(\App\Models\User $user): void
+    private function deleteProfilePhoto(User $user): void
     {
         if (! $user->profile_photo_path) {
             return;

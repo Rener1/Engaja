@@ -138,6 +138,30 @@
                                     </div>
 
                                     @include('auth.partials.municipio-select')
+
+                                    <div class="col-md-6">
+                                        <label for="sexo" class="form-label">Sexo</label>
+                                        <select id="sexo" name="sexo" class="form-select @error('sexo') is-invalid @enderror">
+                                            <option value="">Selecione...</option>
+                                            @foreach(\App\Models\Participante::SEXOS as $opcaoSexo)
+                                                <option value="{{ $opcaoSexo }}" @selected(old('sexo', 'Não preenchido') === $opcaoSexo)>{{ $opcaoSexo }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('sexo')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="data_nascimento" class="form-label">Data de nascimento</label>
+                                        <input type="date" id="data_nascimento" name="data_nascimento"
+                                               max="{{ date('Y-m-d') }}"
+                                               value="{{ old('data_nascimento') }}"
+                                               class="form-control @error('data_nascimento') is-invalid @enderror">
+                                        @error('data_nascimento')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
