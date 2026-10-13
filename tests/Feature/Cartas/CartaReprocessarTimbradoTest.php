@@ -100,6 +100,41 @@ class CartaReprocessarTimbradoTest extends TestCase
         $this->assertNull($fora->timbrado_aplicado_em);
     }
 
+    public function test_filtro_por_remetente_restringe_o_reprocessamento(): void
+    {
+        Storage::fake('local');
+
+        $educando = $this->mensagemComAnexoPendente();
+        $educando->forceFill(['tipo_remetente' => CartaMensagem::TIPO_REMETENTE_EDUCANDO])->save();
+
+        $voluntario = $this->mensagemComAnexoPendente();
+        $voluntario->forceFill(['tipo_remetente' => CartaMensagem::TIPO_REMETENTE_VOLUNTARIO])->save();
+
+        $this->artisan('cartas:reprocessar-timbrado', ['--remetente' => 'educando', '--force' => true])
+            ->assertExitCode(0);
+
+        $educando->refresh();
+        $voluntario->refresh();
+
+        $this->assertNotNull($educando->timbrado_aplicado_em);
+        $this->assertNull($voluntario->timbrado_aplicado_em);
+    }
+
+    public function test_remetente_invalido_falha_sem_alterar_nada(): void
+    {
+        Storage::fake('local');
+
+        $mensagem = $this->mensagemComAnexoPendente();
+
+        $this->artisan('cartas:reprocessar-timbrado', ['--remetente' => 'invalido'])
+            ->assertExitCode(1);
+
+        $mensagem->refresh();
+
+        $this->assertNull($mensagem->arquivo_final_path);
+        $this->assertNull($mensagem->timbrado_aplicado_em);
+    }
+
     public function test_anexo_incompativel_continua_sem_timbrado_e_e_reportado(): void
     {
         Storage::fake('local');
