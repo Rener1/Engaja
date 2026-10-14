@@ -61,6 +61,9 @@
                 <div class="p-2 border rounded bg-white d-inline-block">
                   <img src="{{ $qrBase64 }}" alt="QR Code para {{ $link }}" width="300" height="300" class="img-fluid">
                 </div>
+                <div class="mt-3">
+                  <a href="{{ $qrBase64 }}" download="qr-code-engaja.png" class="btn btn-engaja">Baixar QR Code</a>
+                </div>
               @else
                 <div class="alert alert-warning mb-0">Não foi possível gerar o QR Code neste ambiente.</div>
               @endif
