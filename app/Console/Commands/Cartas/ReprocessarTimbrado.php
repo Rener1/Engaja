@@ -25,7 +25,7 @@ class ReprocessarTimbrado extends Command
      *
      * @var string
      */
-    protected $description = 'Reaplica o papel timbrado nas cartas enviadas como anexo PDF que ficaram sem timbrado (ex.: poppler-utils ausente no servidor na época do envio)';
+    protected $description = 'Reaplica o papel timbrado nas cartas enviadas como anexo PDF que ficaram sem timbrado (ex.: poppler-utils ausente no servidor na época do envio). Só cartas de voluntários recebem timbrado (as dos educandos já vêm timbradas)';
 
     public function handle(CartaTimbradoService $timbrado): int
     {
@@ -34,6 +34,7 @@ class ReprocessarTimbrado extends Command
         $query = CartaMensagem::query()
             ->whereNotNull('anexo_original_path')
             ->whereNull('timbrado_aplicado_em')
+            ->where('tipo_remetente', CartaMensagem::TIPO_REMETENTE_VOLUNTARIO)
             ->when($ids !== [], fn ($q) => $q->whereIn('id', $ids))
             ->orderBy('id');
 

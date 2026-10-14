@@ -41,7 +41,7 @@ class CartaTimbradoTest extends TestCase
     {
         Storage::fake('local');
 
-        $mensagem = CartaMensagem::factory()->create([
+        $mensagem = CartaMensagem::factory()->doVoluntario()->create([
             'texto' => null,
             'canal_entrada' => CartaMensagem::CANAL_ANEXO_MANUSCRITO,
             'status' => CartaMensagem::STATUS_AGUARDANDO_VERIFICACAO,
@@ -62,6 +62,28 @@ class CartaTimbradoTest extends TestCase
         Storage::disk('local')->assertExists($mensagem->arquivo_final_path);
     }
 
+    public function test_aplicar_anexo_nao_aplica_timbrado_em_carta_de_educando(): void
+    {
+        Storage::fake('local');
+
+        $mensagem = CartaMensagem::factory()->doEducando()->create([
+            'texto' => null,
+            'canal_entrada' => CartaMensagem::CANAL_ANEXO_DIGITALIZADO,
+            'anexo_original_path' => Storage::disk('local')->putFile(
+                'cartas/anexos-teste',
+                new File(base_path('tests/Fixtures/cartas/exemplo-anexo.pdf'))
+            ),
+        ]);
+
+        (new CartaTimbradoService)->aplicarAnexo($mensagem);
+
+        $mensagem->refresh();
+
+        $this->assertNull($mensagem->arquivo_final_path);
+        $this->assertNull($mensagem->timbrado_aplicado_em);
+        $this->assertNotNull($mensagem->anexo_original_path);
+    }
+
     public function test_aplicar_anexo_com_pdf_nao_suportado_nao_derruba_o_envio(): void
     {
         Storage::fake('local');
@@ -69,7 +91,7 @@ class CartaTimbradoTest extends TestCase
         $path = 'cartas/anexos-teste/invalido.pdf';
         Storage::disk('local')->put($path, random_bytes(200));
 
-        $mensagem = CartaMensagem::factory()->create([
+        $mensagem = CartaMensagem::factory()->doVoluntario()->create([
             'texto' => null,
             'canal_entrada' => CartaMensagem::CANAL_ANEXO_MANUSCRITO,
             'status' => CartaMensagem::STATUS_AGUARDANDO_VERIFICACAO,
@@ -148,7 +170,7 @@ class CartaTimbradoTest extends TestCase
         $texto = "Linha um com espaço não quebrável NBSP\u{00A0}aqui e NNBSP\u{202F}aqui.\u{2028}".
                  "Linha dois após line separator Unicode.\u{2029}".
                  "Linha três com Em-space\u{2003}e Ideographic\u{3000}espaço.\r\n".
-                 "Linha quatro após retorno de carro clássico.";
+                 'Linha quatro após retorno de carro clássico.';
 
         $pdf = $service->render($texto);
 
