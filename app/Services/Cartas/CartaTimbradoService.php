@@ -49,6 +49,12 @@ class CartaTimbradoService
      */
     public function aplicarAnexo(CartaMensagem $mensagem): void
     {
+        // Cartas de educandos já chegam com o timbrado no próprio PDF; aplicar
+        // de novo duplicaria o papel timbrado. Só as dos voluntários são timbradas.
+        if ($mensagem->tipo_remetente !== CartaMensagem::TIPO_REMETENTE_VOLUNTARIO) {
+            return;
+        }
+
         $original = $mensagem->anexo_original_path;
 
         if (! $original) {

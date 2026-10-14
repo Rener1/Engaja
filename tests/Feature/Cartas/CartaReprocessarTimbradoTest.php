@@ -14,7 +14,7 @@ class CartaReprocessarTimbradoTest extends TestCase
 
     private function mensagemComAnexoPendente(): CartaMensagem
     {
-        return CartaMensagem::factory()->create([
+        return CartaMensagem::factory()->doVoluntario()->create([
             'canal_entrada' => CartaMensagem::CANAL_ANEXO_MANUSCRITO,
             'anexo_original_path' => Storage::disk('local')->putFile(
                 'cartas/anexos-teste',
@@ -100,7 +100,7 @@ class CartaReprocessarTimbradoTest extends TestCase
         $this->assertNull($fora->timbrado_aplicado_em);
     }
 
-    public function test_filtro_por_remetente_restringe_o_reprocessamento(): void
+    public function test_nao_reprocessa_cartas_de_educando(): void
     {
         Storage::fake('local');
 
@@ -108,31 +108,16 @@ class CartaReprocessarTimbradoTest extends TestCase
         $educando->forceFill(['tipo_remetente' => CartaMensagem::TIPO_REMETENTE_EDUCANDO])->save();
 
         $voluntario = $this->mensagemComAnexoPendente();
-        $voluntario->forceFill(['tipo_remetente' => CartaMensagem::TIPO_REMETENTE_VOLUNTARIO])->save();
 
-        $this->artisan('cartas:reprocessar-timbrado', ['--remetente' => 'educando', '--force' => true])
+        $this->artisan('cartas:reprocessar-timbrado', ['--force' => true])
             ->assertExitCode(0);
 
         $educando->refresh();
         $voluntario->refresh();
 
-        $this->assertNotNull($educando->timbrado_aplicado_em);
-        $this->assertNull($voluntario->timbrado_aplicado_em);
-    }
-
-    public function test_remetente_invalido_falha_sem_alterar_nada(): void
-    {
-        Storage::fake('local');
-
-        $mensagem = $this->mensagemComAnexoPendente();
-
-        $this->artisan('cartas:reprocessar-timbrado', ['--remetente' => 'invalido'])
-            ->assertExitCode(1);
-
-        $mensagem->refresh();
-
-        $this->assertNull($mensagem->arquivo_final_path);
-        $this->assertNull($mensagem->timbrado_aplicado_em);
+        $this->assertNull($educando->arquivo_final_path);
+        $this->assertNull($educando->timbrado_aplicado_em);
+        $this->assertNotNull($voluntario->timbrado_aplicado_em);
     }
 
     public function test_anexo_incompativel_continua_sem_timbrado_e_e_reportado(): void
@@ -142,7 +127,7 @@ class CartaReprocessarTimbradoTest extends TestCase
         $path = 'cartas/anexos-teste/invalido.pdf';
         Storage::disk('local')->put($path, random_bytes(200));
 
-        $mensagem = CartaMensagem::factory()->create([
+        $mensagem = CartaMensagem::factory()->doVoluntario()->create([
             'canal_entrada' => CartaMensagem::CANAL_ANEXO_MANUSCRITO,
             'anexo_original_path' => $path,
             'arquivo_final_path' => null,

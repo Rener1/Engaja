@@ -21,12 +21,6 @@ class CartaMensagem extends Model
 
     public const TIPO_REMETENTE_SISTEMA = 'sistema';
 
-    public const TIPOS_REMETENTE = [
-        self::TIPO_REMETENTE_EDUCANDO,
-        self::TIPO_REMETENTE_VOLUNTARIO,
-        self::TIPO_REMETENTE_SISTEMA,
-    ];
-
     public const CANAL_DIGITADA = 'digitada';
 
     public const CANAL_ANEXO_MANUSCRITO = 'anexo_manuscrito';

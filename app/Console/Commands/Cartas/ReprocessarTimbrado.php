@@ -17,7 +17,6 @@ class ReprocessarTimbrado extends Command
      */
     protected $signature = 'cartas:reprocessar-timbrado
         {--id=* : Restringe o reprocessamento a ids específicos de carta_mensagens}
-        {--remetente= : Restringe pelo tipo de remetente da mensagem (educando|voluntario|sistema)}
         {--dry-run : Apenas lista as mensagens pendentes, sem aplicar o timbrado}
         {--force : Não pede confirmação antes de aplicar}';
 
@@ -26,24 +25,17 @@ class ReprocessarTimbrado extends Command
      *
      * @var string
      */
-    protected $description = 'Reaplica o papel timbrado nas cartas enviadas como anexo PDF que ficaram sem timbrado (ex.: poppler-utils ausente no servidor na época do envio). Use --remetente para restringir a educando, voluntario ou sistema';
+    protected $description = 'Reaplica o papel timbrado nas cartas enviadas como anexo PDF que ficaram sem timbrado (ex.: poppler-utils ausente no servidor na época do envio). Só cartas de voluntários recebem timbrado (as dos educandos já vêm timbradas)';
 
     public function handle(CartaTimbradoService $timbrado): int
     {
         $ids = array_map('intval', array_filter($this->option('id')));
-        $remetente = $this->option('remetente');
-
-        if ($remetente !== null && ! in_array($remetente, CartaMensagem::TIPOS_REMETENTE, true)) {
-            $this->error('Tipo de remetente inválido: '.$remetente.'. Use '.implode(', ', CartaMensagem::TIPOS_REMETENTE).'.');
-
-            return self::FAILURE;
-        }
 
         $query = CartaMensagem::query()
             ->whereNotNull('anexo_original_path')
             ->whereNull('timbrado_aplicado_em')
+            ->where('tipo_remetente', CartaMensagem::TIPO_REMETENTE_VOLUNTARIO)
             ->when($ids !== [], fn ($q) => $q->whereIn('id', $ids))
-            ->when($remetente !== null, fn ($q) => $q->where('tipo_remetente', $remetente))
             ->orderBy('id');
 
         $total = $query->count();
