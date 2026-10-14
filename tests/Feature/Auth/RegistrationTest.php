@@ -73,6 +73,8 @@ class RegistrationTest extends TestCase
             'faixa_etaria' => 'Adulto (18 a 59 anos)',
             'pcd' => 'Não',
             'orientacao_sexual' => 'Heterossexual',
+            'sexo' => 'Feminino',
+            'data_nascimento' => '1996-03-20',
             'profile_photo' => UploadedFile::fake()->image('perfil.jpg'),
         ]);
 
@@ -85,6 +87,8 @@ class RegistrationTest extends TestCase
             'municipio_id' => $municipio->id,
             'escola_unidade' => 'Escola Teste',
             'tag' => Participante::TAGS[0],
+            'sexo' => 'Feminino',
+            'data_nascimento' => '1996-03-20',
         ]);
 
         $this->assertDatabaseHas('users', [
@@ -114,7 +118,19 @@ class RegistrationTest extends TestCase
             'faixa_etaria' => 'Adulto (18 a 59 anos)',
             'pcd' => 'Não',
             'orientacao_sexual' => 'Heterossexual',
+            'sexo' => 'Não preenchido',
         ], $overrides);
+    }
+
+    public function test_registration_validates_sexo_and_data_nascimento(): void
+    {
+        $response = $this->post('/register', $this->registrationPayload([
+            'email' => 'invalido@example.com',
+            'sexo' => 'Inexistente',
+            'data_nascimento' => now()->addYear()->format('Y-m-d'),
+        ]));
+
+        $response->assertSessionHasErrors(['sexo', 'data_nascimento']);
     }
 
     public function test_registering_with_deactivated_account_email_sends_reactivation_link_without_logging_in(): void

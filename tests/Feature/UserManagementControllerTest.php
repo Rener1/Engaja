@@ -189,4 +189,77 @@ class UserManagementControllerTest extends TestCase
 
         $this->assertNotSoftDeleted($admin);
     }
+
+    public function test_administrador_pode_atualizar_usuario_com_sexo_e_data_nascimento(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('administrador');
+
+        $target = User::factory()->create(['name' => 'Usuario Antes']);
+        $target->participante->update([
+            'cpf' => '39053344705',
+            'sexo' => 'Não preenchido',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->put(route('usuarios.update', $target), [
+                'name' => 'Usuario Atualizado',
+                'email' => $target->email,
+                'role' => 'participante',
+                'cpf' => '39053344705',
+                'sexo' => 'Feminino',
+                'data_nascimento' => '1995-05-10',
+            ]);
+
+        $response->assertRedirect(route('usuarios.index'))
+            ->assertSessionHas('success');
+
+        $participante = $target->fresh()->participante;
+        $this->assertSame('Feminino', $participante->sexo);
+        $this->assertSame('1995-05-10', $participante->data_nascimento->format('Y-m-d'));
+        $this->assertNotNull($participante->idade);
+    }
+
+    public function test_administrador_pode_cadastrar_usuario_com_sexo_e_data_nascimento(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('administrador');
+
+        $response = $this->actingAs($admin)
+            ->post(route('usuarios.store'), [
+                'name' => 'Novo Aluno',
+                'email' => 'aluno.novo@example.com',
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+                'role' => 'participante',
+                'cpf' => '39053344705',
+                'sexo' => 'Masculino',
+                'data_nascimento' => '2000-01-15',
+            ]);
+
+        $response->assertRedirect(route('usuarios.index'))
+            ->assertSessionHas('success');
+
+        $created = User::where('email', 'aluno.novo@example.com')->firstOrFail();
+        $this->assertSame('Masculino', $created->participante->sexo);
+        $this->assertSame('2000-01-15', $created->participante->data_nascimento->format('Y-m-d'));
+    }
+
+    public function test_edicao_usuario_rejeita_data_nascimento_futura_e_sexo_invalido(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('administrador');
+
+        $target = User::factory()->create();
+
+        $response = $this->actingAs($admin)
+            ->put(route('usuarios.update', $target), [
+                'name' => 'Teste',
+                'email' => $target->email,
+                'sexo' => 'Invalido',
+                'data_nascimento' => now()->addYear()->format('Y-m-d'),
+            ]);
+
+        $response->assertSessionHasErrors(['sexo', 'data_nascimento']);
+    }
 }

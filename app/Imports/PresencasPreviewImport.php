@@ -161,6 +161,8 @@ class PresencasPreviewImport implements OnEachRow, SkipsEmptyRows, WithHeadingRo
             'escola_unidade' => $organizacaoLivre,
             'tag' => $tagOut,
             'tag_ok' => $tagOk,
+            'data_nascimento' => $this->firstValue($row, ['data_nascimento', 'data_de_nascimento', 'nascimento']) ?? '',
+            'sexo' => $this->firstValue($row, ['sexo']),
             'status' => $status,
             'justificativa' => $justif,
             'data_entrada' => $entrada,
@@ -210,6 +212,9 @@ class PresencasPreviewImport implements OnEachRow, SkipsEmptyRows, WithHeadingRo
 
     private function parseDate($v): ?string
     {
+        if (is_string($v)) {
+            $v = trim($v);
+        }
         if (! $v) {
             return null;
         }

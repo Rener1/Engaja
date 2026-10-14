@@ -46,6 +46,31 @@ class ProfileTest extends TestCase
         $this->assertNull($user->email_verified_at);
     }
 
+    public function test_profile_participante_sexo_and_data_nascimento_can_be_updated(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => 'Test User',
+                'email' => $user->email,
+                'cpf' => '390.533.447-05',
+                'sexo' => 'Masculino',
+                'data_nascimento' => '1998-04-12',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $participante = $user->fresh()->participante;
+        $this->assertNotNull($participante);
+        $this->assertSame('Masculino', $participante->sexo);
+        $this->assertSame('1998-04-12', $participante->data_nascimento->format('Y-m-d'));
+        $this->assertNotNull($participante->idade);
+    }
+
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
         $user = User::factory()->create();

@@ -191,6 +191,8 @@ class ParticipantesPreviewImport implements OnEachRow, SkipsEmptyRows, WithHeadi
             'escola_unidade' => $organizacaoLivre,
             'tag' => $tagOut,
             'tag_ok' => $tagOk,
+            'data_nascimento' => $this->firstValue($raw, ['data_nascimento', 'data_de_nascimento', 'nascimento']) ?? '',
+            'sexo' => $this->firstValue($raw, ['sexo']),
             'data_entrada' => $this->firstValue($raw, ['data_entrada', 'data entrada', 'data-de-entrada']) ?? '',
         ], $demograficosNormalizados)));
     }

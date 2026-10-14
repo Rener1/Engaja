@@ -31,7 +31,7 @@
       <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
     </svg>
     <div>
-      <strong>Nome é obrigatório. Informe e-mail ou CPF em cada registro.</strong>
+      <strong>Nome e data de nascimento são obrigatórios. Informe e-mail ou CPF em cada registro.</strong>
       Todos os demais campos da planilha são opcionais durante o processo de importação.
     </div>
   </div>
@@ -117,7 +117,7 @@
 
         <div class="mb-3">
           <div class="form-text">
-            Colunas aceitas: <code>nome</code>, <code>email</code>, <code>cpf</code>, <code>telefone</code>, <code>municipio</code>, <code>estado</code>, <code>tipo_de_organizacao</code>, <code>organizacao</code>, <code>tag</code>, <code>identidade_genero</code>, <code>raca_cor</code>, <code>comunidade_tradicional</code>, <code>faixa_etaria</code>, <code>pcd</code>, <code>orientacao_sexual</code>.
+            Colunas aceitas: <code>nome</code>, <code>email</code>, <code>cpf</code>, <code>telefone</code>, <code>municipio</code>, <code>estado</code>, <code>tipo_de_organizacao</code>, <code>organizacao</code>, <code>tag</code>, <code>data_nascimento</code>, <code>sexo</code>, <code>identidade_genero</code>, <code>raca_cor</code>, <code>comunidade_tradicional</code>, <code>faixa_etaria</code>, <code>pcd</code>, <code>orientacao_sexual</code>.
             <br>
             Municípios não cadastrados serão consultados no IBGE e criados automaticamente. Informe o estado/UF quando houver cidades com o mesmo nome.
           </div>
@@ -169,7 +169,7 @@
 
         {{-- Aviso obrigatórios --}}
         <div class="alert alert-success py-2 mb-4">
-           <strong>Nome é obrigatório. Informe e-mail ou CPF em cada registro.</strong> Todos os outros campos são opcionais durante o processo de importação.
+           <strong>Nome e data de nascimento são obrigatórios. Informe e-mail ou CPF em cada registro.</strong> Todos os outros campos são opcionais durante o processo de importação.
         </div>
 
         {{-- Accordion por campo --}}
@@ -317,6 +317,41 @@
                   @endforeach
                 </ul>
                 <p class="mb-0 text-muted small">Valores fora da lista serão ignorados.</p>
+              </div>
+            </div>
+          </div>
+
+          {{-- Data de nascimento --}}
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#campo-nascimento">
+                <span class="badge bg-danger me-2">Obrigatório</span> Data de nascimento
+              </button>
+            </h2>
+            <div id="campo-nascimento" class="accordion-collapse collapse" data-bs-parent="#accordionCampos">
+              <div class="accordion-body">
+                <p>Informe em todos os registros uma data de nascimento válida, sem data futura. Use ano com quatro dígitos: <code>25/03/1990</code> ou <code>1990-03-25</code>.</p>
+                <p class="mb-0 text-muted small">Células reconhecidas pelo Excel como data também são aceitas, mesmo quando exibem o ano com dois dígitos.</p>
+              </div>
+            </div>
+          </div>
+
+          {{-- Sexo --}}
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#campo-sexo">
+                <span class="badge bg-secondary me-2">Opcional</span> Sexo
+              </button>
+            </h2>
+            <div id="campo-sexo" class="accordion-collapse collapse" data-bs-parent="#accordionCampos">
+              <div class="accordion-body">
+                <p>Informe uma das opções abaixo:</p>
+                <ul class="mb-2 small">
+                  @foreach(\App\Models\Participante::SEXOS as $sexo)
+                  <li><code>{{ $sexo }}</code></li>
+                  @endforeach
+                </ul>
+                <p class="mb-0 text-muted small">Deixe vazio para preservar o valor do cadastro existente. Valores fora da lista precisam ser corrigidos antes da importação.</p>
               </div>
             </div>
           </div>

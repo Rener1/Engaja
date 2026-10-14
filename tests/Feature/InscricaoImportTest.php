@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -109,7 +110,7 @@ class InscricaoImportTest extends TestCase
         $workbook = new Spreadsheet;
         $sheet = $workbook->getActiveSheet();
         $sheet->setTitle('Participantes');
-        $sheet->fromArray([['nome', 'email', 'cpf'], ['Maria', 'maria@example.com', '']]);
+        $sheet->fromArray([['nome', 'email', 'cpf', 'data_nascimento'], ['Maria', 'maria@example.com', '', '1990-03-25']]);
         $auxiliary = $workbook->createSheet()->setTitle($title);
         $auxiliary->setSheetState($state);
         $auxiliary->fromArray([['nome', 'email', 'cpf'], ['Não importar', '', '']]);
@@ -135,7 +136,7 @@ class InscricaoImportTest extends TestCase
         $workbook = new Spreadsheet;
         $sheet = $workbook->getActiveSheet()->setTitle('Participantes');
         $sheet->setCellValue('A1', 'Lista de inscrições');
-        $sheet->fromArray([['nome', 'email', 'cpf'], ['Sem identificação', '', '']], null, 'A5');
+        $sheet->fromArray([['nome', 'email', 'cpf', 'data_nascimento'], ['Sem identificação', '', '', '1990-03-25']], null, 'A5');
         $this->uploadWorkbook($workbook)->assertSessionHasErrors('rows.0.identificacao');
         $this->assertStringContainsString('Linha 6', session('errors')->first('rows.0.identificacao'));
     }
@@ -143,6 +144,12 @@ class InscricaoImportTest extends TestCase
     public function test_modelo_real_de_inscricoes_pode_ser_lido(): void
     {
         $workbook = IOFactory::load(public_path('modelos/modelo_inscricoes_engaja.xlsx'));
+        $sheet = $workbook->getActiveSheet();
+        $this->assertSame(['tag', 'data_nascimento', 'sexo', 'identidade_genero'], $sheet->rangeToArray('I1:L1')[0]);
+        $this->assertSame([null, null], $sheet->rangeToArray('J2:K2')[0]);
+        for ($line = 2; $line <= 3; $line++) {
+            $sheet->setCellValue('J'.$line, '1990-03-25');
+        }
         $response = $this->uploadWorkbook($workbook);
         $response->assertSessionHasNoErrors();
         $this->assertNotEmpty(session($this->sessionKey($response))['rows']);
@@ -430,6 +437,124 @@ class InscricaoImportTest extends TestCase
         }
     }
 
+    #[DataProvider('formats')]
+    public function test_importa_nascimento_e_sexo_em_todos_os_formatos(string $format): void
+    {
+        $workbook = new Spreadsheet;
+        $workbook->getActiveSheet()->fromArray([
+            ['nome', 'email', 'Data de nascimento', 'sexo'],
+            ['Ana', 'ana@example.com', '25/03/1990', ' feminino '],
+        ]);
+        $response = $this->uploadWorkbook($workbook, $format)->assertSessionHasNoErrors();
+        $key = $this->sessionKey($response);
+        $row = session($key)['rows'][0];
+        $this->assertSame('1990-03-25', $row['data_nascimento']);
+        $this->assertSame('Feminino', $row['sexo']);
+
+        $preview = $this->get($response->headers->get('Location'))->assertOk();
+        $dom = new \DOMDocument;
+        @$dom->loadHTML($preview->getContent());
+        $xpath = new \DOMXPath($dom);
+        $this->assertTrue($xpath->query('//input[@name="rows[0][data_nascimento]"]')->item(0)->hasAttribute('required'));
+        $this->assertSame(4, $xpath->query('//select[@name="rows[0][sexo]"]/option')->length);
+
+        $this->confirm($key)->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('participantes', [
+            'user_id' => User::where('email', 'ana@example.com')->firstOrFail()->id,
+            'data_nascimento' => '1990-03-25', 'sexo' => 'Feminino',
+        ]);
+    }
+
+    public function test_aceita_data_real_do_excel_exibida_com_ano_de_dois_digitos(): void
+    {
+        $workbook = new Spreadsheet;
+        $sheet = $workbook->getActiveSheet();
+        $sheet->fromArray([
+            ['nome', 'email', 'data_nascimento'],
+            ['Ana', 'ana@example.com', Date::PHPToExcel(new \DateTimeImmutable('1926-10-20'))],
+        ]);
+        $sheet->getStyle('C2')->getNumberFormat()->setFormatCode('dd/mm/yy');
+        $response = $this->uploadWorkbook($workbook)->assertSessionHasNoErrors();
+        $key = $this->sessionKey($response);
+        $this->assertSame('1926-10-20', session($key)['rows'][0]['data_nascimento']);
+        $this->confirm($key)->assertSessionHasNoErrors();
+        $participant = User::where('email', 'ana@example.com')->firstOrFail()->participante;
+        $this->assertSame('1926-10-20', $participant->data_nascimento->toDateString());
+        $this->assertSame('Não preenchido', $participant->sexo);
+    }
+
+    public function test_coluna_de_nascimento_ausente_bloqueia_importacao_inclusive_para_perfil_existente(): void
+    {
+        $user = $this->profile('ana@example.com', '12345678901');
+        $user->participante->update(['data_nascimento' => '1990-03-25']);
+        $workbook = new Spreadsheet;
+        $workbook->getActiveSheet()->fromArray([
+            ['nome', 'email', 'sexo'],
+            ['Ana', 'ana@example.com', 'Feminino'],
+        ]);
+        $this->uploadWorkbook($workbook)->assertSessionHasErrors('rows.0.data_nascimento');
+        $this->assertStringContainsString('Linha 2', session('errors')->first('rows.0.data_nascimento'));
+        $this->assertSame(0, Inscricao::count());
+        $this->assertSame('Não preenchido', $user->participante->fresh()->sexo);
+    }
+
+    public function test_upload_rejeita_nascimento_vazio_invalido_futuro_ano_curto_e_sexo_invalido(): void
+    {
+        $workbook = new Spreadsheet;
+        $workbook->getActiveSheet()->fromArray([
+            ['nome', 'email', 'data_nascimento', 'sexo'],
+            ['Vazio', 'vazio@example.com', '', ''],
+            ['Inválido', 'invalido@example.com', '31/02/1990', ''],
+            ['Futuro', 'futuro@example.com', now()->addDay()->toDateString(), ''],
+            ['Ano curto', 'curto@example.com', '20/10/26', ''],
+            ['Sexo inválido', 'sexo@example.com', '1990-03-25', 'invalido'],
+        ]);
+        $counts = [User::count(), Participante::count()];
+        $this->uploadWorkbook($workbook)->assertSessionHasErrors([
+            'rows.0.data_nascimento', 'rows.1.data_nascimento', 'rows.2.data_nascimento',
+            'rows.3.data_nascimento', 'rows.4.sexo',
+        ]);
+        $this->assertSame($counts, [User::count(), Participante::count()]);
+        $this->assertSame(0, Inscricao::count());
+    }
+
+    public function test_previa_revalida_nascimento_e_sexo_e_grava_edicoes(): void
+    {
+        $key = $this->preview([$this->row()]);
+        $before = session($key)['rows'];
+        foreach ([['data_nascimento' => ''], ['data_nascimento' => '31/02/1990'], ['sexo' => 'invalido']] as $edit) {
+            $this->save($key, [0 => $edit])->assertSessionHasErrors();
+            $this->assertSame($before, session($key)['rows']);
+        }
+        $this->save($key, [0 => ['data_nascimento' => '20/10/1980', 'sexo' => ' masculino ']])->assertSessionHasNoErrors();
+        $this->assertSame('1980-10-20', session($key)['rows'][0]['data_nascimento']);
+        $this->assertSame('Masculino', session($key)['rows'][0]['sexo']);
+        $this->confirm($key)->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('participantes', ['data_nascimento' => '1980-10-20', 'sexo' => 'Masculino']);
+    }
+
+    public function test_confirmacao_exige_nascimento_e_preserva_previa_sem_gravar(): void
+    {
+        $key = $this->preview([$this->row(), $this->row(['email' => 'segunda@example.com', 'data_nascimento' => null])]);
+        $counts = [User::count(), Participante::count()];
+        $this->confirm($key)->assertSessionHasErrors('rows.1.data_nascimento');
+        $this->assertSame($counts, [User::count(), Participante::count()]);
+        $this->assertSame(0, Inscricao::count());
+        $this->assertNotNull(session($key));
+    }
+
+    public function test_reimportacao_atualiza_nascimento_preserva_sexo_vazio_e_aceita_nao_preenchido(): void
+    {
+        $user = $this->profile('maria@example.com', '12345678901');
+        $user->participante->update(['data_nascimento' => '1980-01-01', 'sexo' => 'Feminino']);
+        $this->confirm($this->preview([$this->row(['data_nascimento' => '1990-03-25', 'sexo' => ''])]))->assertSessionHasNoErrors();
+        $participant = $user->participante->fresh();
+        $this->assertSame('1990-03-25', $participant->data_nascimento->toDateString());
+        $this->assertSame('Feminino', $participant->sexo);
+        $this->confirm($this->preview([$this->row(['sexo' => ' nao preenchido '])]))->assertSessionHasNoErrors();
+        $this->assertSame('Não preenchido', $participant->fresh()->sexo);
+    }
+
     private function row(array $extra = []): array
     {
         return array_merge([
@@ -437,7 +562,7 @@ class InscricaoImportTest extends TestCase
             'nome' => 'Maria Ana Alves', 'email' => 'maria@example.com', 'cpf' => null,
             'telefone' => null, 'municipio' => '', 'municipio_id' => null, 'estado' => '',
             'tipo_organizacao' => '', 'tipo_organizacao_ok' => true, 'escola_unidade' => '',
-            'tag' => null, 'tag_ok' => true, 'data_entrada' => '',
+            'tag' => null, 'tag_ok' => true, 'data_nascimento' => '1990-03-25', 'sexo' => null, 'data_entrada' => '',
         ], $extra);
     }
 
@@ -550,7 +675,14 @@ class InscricaoImportTest extends TestCase
             $sheet = $workbook->getSheetCount() === 1 && $workbook->getActiveSheet()->getTitle() === 'Worksheet'
                 ? $workbook->getActiveSheet() : $workbook->createSheet();
             $sheet->setTitle($title);
-            $sheet->fromArray(array_merge([['nome', 'email', 'cpf', 'telefone']], $rows));
+            $rows = array_map(function (array $row) {
+                if (collect($row)->contains(fn ($value) => $value !== null && trim((string) $value) !== '')) {
+                    $row[4] = '1990-03-25';
+                }
+
+                return $row;
+            }, $rows);
+            $sheet->fromArray(array_merge([['nome', 'email', 'cpf', 'telefone', 'data_nascimento']], $rows));
         }
 
         return $this->uploadWorkbook($workbook, $format);

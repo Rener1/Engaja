@@ -39,6 +39,7 @@ use App\Http\Controllers\RelatorioQuantitativoController;
 use App\Http\Controllers\TemplateAvaliacaoController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UsuariosSemVinculoController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -135,6 +136,16 @@ Route::middleware(['auth', 'role:administrador|gerente|eq_pedagogica|articulador
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/gerador-qr-code', function (Request $request) {
+        $dados = $request->validate([
+            'link' => ['nullable', 'string', 'max:2048', 'url:http,https'],
+        ]);
+
+        return view('qrcode.gerador', [
+            'link' => $dados['link'] ?? null,
+        ]);
+    })->name('qrcode.gerador');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

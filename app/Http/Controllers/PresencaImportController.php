@@ -115,7 +115,7 @@ class PresencaImportController extends Controller
         $data = $request->validate([
             'session_key' => 'required|string|max:150',
             'rows' => 'required|array',
-            'rows.*' => 'array:nome,email,cpf,telefone,municipio_id,tipo_organizacao,escola_unidade,tag,status,justificativa,data_entrada',
+            'rows.*' => 'array:nome,email,cpf,telefone,municipio_id,tipo_organizacao,escola_unidade,tag,data_nascimento,sexo,status,justificativa,data_entrada',
             'rows.*.nome' => 'sometimes|nullable|string|max:255',
             'rows.*.email' => 'sometimes|nullable|string|max:255',
             'rows.*.cpf' => 'sometimes|nullable|string|max:255',
@@ -124,6 +124,8 @@ class PresencaImportController extends Controller
             'rows.*.tipo_organizacao' => 'sometimes|nullable|string|max:255',
             'rows.*.escola_unidade' => 'sometimes|nullable|string|max:255',
             'rows.*.tag' => 'sometimes|nullable|string|max:255',
+            'rows.*.data_nascimento' => 'sometimes|nullable|string|max:255',
+            'rows.*.sexo' => 'sometimes|nullable|string|max:255',
             'rows.*.status' => 'sometimes|nullable|in:presente,ausente,justificado',
             'rows.*.justificativa' => 'sometimes|nullable|string',
             'rows.*.data_entrada' => 'sometimes|nullable|date_format:Y-m-d',
@@ -208,15 +210,23 @@ class PresencaImportController extends Controller
                     $tag = null;
                 }
 
-                $participante->fill([
+                $dados = [
                     'municipio_id' => $munId,
-                    'cpf' => $cpf ?? $participante->cpf,
-                    'telefone' => $tel ?: null,
-                    'escola_unidade' => $organizacaoLivre ?: null,   // grava a organização
-                    'tipo_organizacao' => $tipoOrganizacao ?: null,
+                    'cpf' => $cpf,
+                    'telefone' => $tel,
+                    'escola_unidade' => $organizacaoLivre,
+                    'tipo_organizacao' => $tipoOrganizacao,
                     'tag' => $tag,
+                    'data_nascimento' => $row['data_nascimento'],
+                    'sexo' => $row['sexo'],
                     'data_entrada' => $row['data_entrada'] ?? null,
-                ])->save();
+                ];
+
+                // Campos opcionais vazios não apagam informações já cadastradas.
+                $participante->fill(array_filter($dados, fn ($value) => filled($value)));
+                if ($participante->isDirty()) {
+                    $participante->save();
+                }
 
                 $resolver->remember($participante);
 
