@@ -29,7 +29,7 @@
 
                 <div class="cpe-remetentes-trigger">
                     <button type="button" class="cpe-button cpe-button--ghost" data-modal-open="remetentesModal">
-                        Ver dados de {{ $remetentePrimeiroNome }}
+                        Ver informações sobre {{ $remetentePrimeiroNome }}
                     </button>
                 </div>
 
@@ -371,7 +371,7 @@
     <div class="cpe-modal" id="remetentesModal">
         <div class="cpe-modal__backdrop" data-modal-close></div>
         <div class="cpe-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="remetentesModalTitulo">
-            <h2 id="remetentesModalTitulo">Dados do remetente</h2>
+            <h2 id="remetentesModalTitulo">Informações sobre {{$remetentePrimeiroNome}}</h2>
 
             <section class="cpe-remetente-dados">
                 <dl>
@@ -397,34 +397,189 @@
             margin-bottom: 12px;
         }
 
-        .cpe-remetente-dados dl {
+        /* Refino restrito ao modal: preserva o visual dos demais dialogos. */
+        #remetentesModal {
+            box-sizing: border-box;
+            color: var(--cpe-ink);
+        }
+
+        #remetentesModal .cpe-modal__backdrop {
+            background: rgba(17, 17, 17, .52);
+        }
+
+        #remetentesModal .cpe-modal__dialog {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+            width: min(100%, 600px);
+            max-height: calc(100vh - 48px);
+            max-height: calc(100dvh - 48px);
+            padding: 30px;
+            border: 1px solid var(--cpe-line);
+            border-top: 4px solid var(--cpe-purple);
+            border-radius: 18px;
+            box-shadow: 0 24px 64px rgba(17, 17, 17, .24), 0 4px 16px rgba(17, 17, 17, .08);
+        }
+
+        #remetentesModalTitulo {
+            flex-shrink: 0;
+            display: block;
+            grid-template-columns: 44px minmax(0, 1fr);
+            align-items: center;
+            gap: 14px;
+            margin: 0 0 24px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--cpe-line);
+            font-size: 23px;
+            font-weight: 800;
+            line-height: 1.35;
+            letter-spacing: -.4px;
+            overflow-wrap: anywhere;
+        }
+
+        #remetentesModalTitulo::before {
+            content: none;
+            width: 44px;
+            height: 44px;
+            box-sizing: border-box;
+            border: 1px solid rgba(0, 143, 189, .2);
+            border-radius: 12px;
+            background-color: rgba(0, 143, 189, .08);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23008fbd' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='3'/%3E%3Cpath d='m4 7 8 6 8-6'/%3E%3C/svg%3E");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 24px;
+        }
+
+        #remetentesModal .cpe-remetente-dados {
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        #remetentesModal .cpe-remetente-dados dl {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
             margin: 0;
         }
 
-        .cpe-remetente-dados dl > div {
+        #remetentesModal .cpe-remetente-dados dl > div {
+            box-sizing: border-box;
+            display: grid;
+            grid-template-rows: 1fr auto 1fr;
+            row-gap: 6px;
             min-width: 0;
-            border: 1px solid #d6d6d6;
-            border-radius: 6px;
+            min-height: 112px;
+            padding: 16px 18px;
+            border: 1px solid var(--cpe-line);
+            border-radius: 12px;
             background: #fff;
-            padding: 10px 12px;
+            box-shadow: 0 2px 5px rgba(17, 17, 17, .025);
+            text-align: left;
         }
 
-        .cpe-remetente-dados dt {
-            color: #777;
+        #remetentesModal .cpe-remetente-dados dl > div:first-child {
+            grid-column: 1 / -1;
+        }
+
+        #remetentesModal .cpe-remetente-dados dt {
+            align-self: start;
+            margin: 0;
+            color: var(--cpe-muted);
             font-size: 11px;
             font-weight: 700;
-            margin-bottom: 4px;
+            line-height: 1.4;
+            letter-spacing: .2px;
         }
 
-        .cpe-remetente-dados dd {
+        #remetentesModal .cpe-remetente-dados dd {
+            grid-row: 2;
+            min-width: 0;
             margin: 0;
             overflow-wrap: anywhere;
-            color: #222;
-            font-size: 13px;
+            color: var(--cpe-ink);
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        #remetentesModal .cpe-remetente-dados dl > div:first-child dd {
+            font-size: 18px;
             font-weight: 700;
+        }
+
+        #remetentesModal .cpe-modal-actions {
+            flex-shrink: 0;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--cpe-line);
+        }
+
+        #remetentesModal .cpe-modal-actions .cpe-button {
+            min-height: 44px;
+            height: auto;
+            padding: 10px 22px;
+            border-color: var(--cpe-purple);
+            border-radius: 8px;
+            background: var(--cpe-purple);
+            color: #fff;
+            line-height: 1.4;
+            box-shadow: 0 3px 8px rgba(169, 0, 217, .12);
+            transition: background-color .18s, border-color .18s;
+        }
+
+        #remetentesModal .cpe-modal-actions .cpe-button:hover,
+        #remetentesModal .cpe-modal-actions .cpe-button:focus {
+            border-color: #9600c7;
+            background: #9600c7;
+            color: #fff;
+        }
+
+        #remetentesModal .cpe-modal-actions .cpe-button:focus-visible {
+            outline: 3px solid var(--cpe-purple);
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 480px) {
+            #remetentesModal {
+                padding: 16px;
+            }
+
+            #remetentesModal .cpe-modal__dialog {
+                max-height: calc(100vh - 32px);
+                max-height: calc(100dvh - 32px);
+                padding: 22px 18px;
+                border-radius: 14px;
+            }
+
+            #remetentesModalTitulo {
+                grid-template-columns: 40px minmax(0, 1fr);
+                gap: 12px;
+                margin-bottom: 18px;
+                padding-bottom: 18px;
+                font-size: 20px;
+            }
+
+            #remetentesModalTitulo::before {
+                width: 40px;
+                height: 40px;
+            }
+
+            #remetentesModal .cpe-remetente-dados dl {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 10px;
+            }
+
+            #remetentesModal .cpe-remetente-dados dl > div {
+                min-height: 92px;
+                padding: 12px 16px;
+            }
+
+            #remetentesModal .cpe-modal-actions {
+                margin-top: 18px;
+                padding-top: 16px;
+            }
         }
 
         .cpe-modal-actions--single {
