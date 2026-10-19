@@ -34,6 +34,7 @@ class ReprocessarTimbrado extends Command
         $query = CartaMensagem::query()
             ->whereNotNull('anexo_original_path')
             ->whereNull('timbrado_aplicado_em')
+            ->where('timbrado_desativado', false)
             ->where('tipo_remetente', CartaMensagem::TIPO_REMETENTE_VOLUNTARIO)
             ->when($ids !== [], fn ($q) => $q->whereIn('id', $ids))
             ->orderBy('id');

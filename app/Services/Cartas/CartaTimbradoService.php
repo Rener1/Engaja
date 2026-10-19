@@ -46,13 +46,19 @@ class CartaTimbradoService
      * digitada) com o papel timbrado — cada página do anexo é escalada e
      * centralizada dentro da mesma área útil usada para o texto digitado — e
      * persiste os metadados do arquivo final na mensagem.
+     *
+     * Com `$forcar` (edição pelo gestor/admin marcando "aplicar timbrado"), as
+     * regras automáticas são ignoradas: o timbrado é aplicado em qualquer carta.
      */
-    public function aplicarAnexo(CartaMensagem $mensagem): void
+    public function aplicarAnexo(CartaMensagem $mensagem, bool $forcar = false): void
     {
-        // Cartas de educandos já chegam com o timbrado no próprio PDF; aplicar
-        // de novo duplicaria o papel timbrado. Só as dos voluntários são timbradas.
-        if ($mensagem->tipo_remetente !== CartaMensagem::TIPO_REMETENTE_VOLUNTARIO) {
-            return;
+        if (! $forcar) {
+            // Cartas de educandos já chegam com o timbrado no próprio PDF; aplicar
+            // de novo duplicaria o papel timbrado. Só as dos voluntários são timbradas.
+            // E respeita o gestor/admin que desligou o timbrado na edição.
+            if ($mensagem->tipo_remetente !== CartaMensagem::TIPO_REMETENTE_VOLUNTARIO || $mensagem->timbrado_desativado) {
+                return;
+            }
         }
 
         $original = $mensagem->anexo_original_path;
@@ -78,6 +84,25 @@ class CartaTimbradoService
         }
 
         $this->persistirFinal($mensagem, $conteudo);
+    }
+
+    /**
+     * Descarta o PDF final timbrado (arquivo e metadados): a carta volta a ser
+     * exibida/baixada pelo anexo original (ou pelo texto, se digitada).
+     */
+    public function removerTimbrado(CartaMensagem $mensagem): void
+    {
+        if ($mensagem->arquivo_final_path) {
+            Storage::disk('local')->delete($mensagem->arquivo_final_path);
+        }
+
+        $mensagem->forceFill([
+            'arquivo_final_path' => null,
+            'arquivo_final_nome' => null,
+            'arquivo_final_mime' => null,
+            'arquivo_final_tamanho' => null,
+            'timbrado_aplicado_em' => null,
+        ])->save();
     }
 
     private function persistirFinal(CartaMensagem $mensagem, string $conteudo): void

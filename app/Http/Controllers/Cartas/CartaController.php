@@ -559,6 +559,7 @@ class CartaController extends Controller
                 'verificada_por' => null,
                 'verificada_em' => null,
                 'enviada_em' => now(),
+                'timbrado_desativado' => false,
                 'atualizada_por' => $request->user()->id,
             ];
 
@@ -609,6 +610,89 @@ class CartaController extends Controller
             ->with('status', 'Ajuste enviado para verificação.');
     }
 
+    /**
+     * Edição de uma carta já enviada pelo gestor/admin: substitui o PDF
+     * original (o anterior é apagado do storage) e define se a carta recebe
+     * o papel timbrado — a escolha vale para qualquer carta, inclusive as de
+     * educandos, e é preservada pelo reprocessamento automático.
+     */
+    public function updateSentMessage(Request $request, CartaMensagem $mensagem): RedirectResponse
+    {
+        abort_unless($this->isGestor($request->user()), 403);
+
+        $request->validate([
+            'arquivo' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'aplicar_timbrado' => ['nullable', 'boolean'],
+        ], [
+            'arquivo.mimes' => 'Envie um arquivo em PDF.',
+            'arquivo.max' => 'O arquivo deve ter no máximo 10MB.',
+        ]);
+
+        $mensagem->load('carta');
+        $file = $request->file('arquivo');
+        $aplicarTimbrado = $request->boolean('aplicar_timbrado');
+        $originalAntigo = $mensagem->anexo_original_path;
+
+        DB::transaction(function () use ($request, $mensagem, $file, $aplicarTimbrado) {
+            $before = [
+                'anexo_original_path' => $mensagem->anexo_original_path,
+                'anexo_original_nome' => $mensagem->anexo_original_nome,
+                'timbrado_aplicado' => $mensagem->timbrado_aplicado_em !== null,
+            ];
+
+            $updates = [
+                'timbrado_desativado' => ! $aplicarTimbrado,
+                'atualizada_por' => $request->user()->id,
+            ];
+
+            if ($file) {
+                $updates = array_merge($updates, [
+                    'anexo_original_path' => $file->store("cartas/{$mensagem->carta_id}/originais", 'local'),
+                    'anexo_original_nome' => $file->getClientOriginalName(),
+                    'anexo_original_mime' => $file->getClientMimeType(),
+                    'anexo_original_tamanho' => $file->getSize(),
+                ]);
+            }
+
+            $mensagem->update($updates);
+
+            // Sempre descarta o PDF final anterior: ou ele seria do arquivo
+            // substituído, ou o timbrado foi desligado.
+            $this->timbrado->removerTimbrado($mensagem);
+
+            if ($aplicarTimbrado) {
+                if ($mensagem->anexo_original_path) {
+                    $this->timbrado->aplicarAnexo($mensagem, forcar: true);
+                } elseif (filled($mensagem->texto)) {
+                    $this->timbrado->aplicar($mensagem);
+                }
+            }
+
+            CartaEvento::create([
+                'carta_id' => $mensagem->carta_id,
+                'carta_mensagem_id' => $mensagem->id,
+                'user_id' => $request->user()->id,
+                'tipo' => CartaEvento::TIPO_EDITADA_ADMIN,
+                'dados_antes' => $before,
+                'dados_depois' => [
+                    'anexo_original_path' => $mensagem->anexo_original_path,
+                    'anexo_original_nome' => $mensagem->anexo_original_nome,
+                    'timbrado_aplicado' => $mensagem->timbrado_aplicado_em !== null,
+                ],
+            ]);
+        });
+
+        if ($file && $originalAntigo && $originalAntigo !== $mensagem->anexo_original_path) {
+            Storage::disk('local')->delete($originalAntigo);
+        }
+
+        $status = $aplicarTimbrado && ! $mensagem->timbrado_aplicado_em
+            ? 'Carta atualizada, mas não foi possível aplicar o timbrado.'
+            : 'Carta atualizada.';
+
+        return redirect()->route('cartas.cartas.show', $mensagem->carta)->with('status', $status);
+    }
+
     public function download(Request $request, CartaMensagem $mensagem)
     {
         $mensagem->load('carta.voluntario', 'carta.educando.user', 'carta.educando.municipio');
@@ -621,6 +705,23 @@ class CartaController extends Controller
         }
 
         return Storage::disk('local')->download($path, $this->gerarNomeArquivo($mensagem, $path));
+    }
+
+    /**
+     * Baixa o PDF original submetido, sem o papel timbrado aplicado pelo sistema.
+     */
+    public function downloadOriginal(Request $request, CartaMensagem $mensagem)
+    {
+        abort_unless($this->isGestor($request->user()), 403);
+
+        $mensagem->load('carta.voluntario', 'carta.educando.user', 'carta.educando.municipio');
+        $path = $mensagem->anexo_original_path;
+
+        if (! $path || ! Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->download($path, $this->gerarNomeArquivo($mensagem, $path, '_SEM_TIMBRADO'));
     }
 
     public function preview(Request $request, CartaMensagem $mensagem)
@@ -966,7 +1067,7 @@ class CartaController extends Controller
             ->update(['lida_em' => now()]);
     }
 
-    private function gerarNomeArquivo(CartaMensagem $mensagem, string $path): string
+    private function gerarNomeArquivo(CartaMensagem $mensagem, string $path, string $sufixo = ''): string
     {
         $carta = $mensagem->carta;
         $voluntario = $carta->voluntario;
@@ -1001,6 +1102,6 @@ class CartaController extends Controller
             $extension = pathinfo((string) $originalName, PATHINFO_EXTENSION) ?: 'pdf';
         }
 
-        return "PAEB_{$cidadeSanitized}_DE_{$remetenteSanitized}_PARA_{$destinatarioSanitized}.{$extension}";
+        return "PAEB_{$cidadeSanitized}_DE_{$remetenteSanitized}_PARA_{$destinatarioSanitized}{$sufixo}.{$extension}";
     }
 }

@@ -134,7 +134,7 @@
                             @if(! ($gestor && $mensagem->status === 'aguardando_verificacao'))
                                 <div class="cpe-letter-actions">
                                     @if($mensagem->anexo_original_path || $mensagem->arquivo_final_path)
-                                        <button type="button" class="cpe-button cpe-button--ghost" data-print-src="{{ route('cartas.mensagens.preview', $mensagem) }}">Imprimir</button>
+                                        <button type="button" class="cpe-button cpe-button--ghost" data-print-src="{{ route('cartas.mensagens.preview', ['mensagem' => $mensagem, 'v' => $mensagem->updated_at?->timestamp]) }}">Imprimir</button>
                                     @else
                                         <button type="button" class="cpe-button cpe-button--ghost">Imprimir</button>
                                     @endif
@@ -153,6 +153,18 @@
                                 </div>
                             @endif
                         </div>
+
+                        @if($gestor)
+                            <div class="cpe-letter-actions cpe-letter-actions--gestor">
+                                <button type="button" class="cpe-button cpe-button--ghost" data-modal-open="editMensagemModal-{{ $mensagem->id }}">Editar carta</button>
+                                @if($mensagem->arquivo_final_path)
+                                    <a href="{{ route('cartas.mensagens.download', $mensagem) }}" class="cpe-button cpe-button--ghost" download>Baixar com timbrado</a>
+                                @endif
+                                @if($mensagem->anexo_original_path)
+                                    <a href="{{ route('cartas.mensagens.download-original', $mensagem) }}" class="cpe-button cpe-button--ghost" download>Baixar original (sem timbrado)</a>
+                                @endif
+                            </div>
+                        @endif
 
                         @if($gestor && $mensagem->status === 'aguardando_verificacao')
                             <div class="cpe-verification-box">
@@ -182,11 +194,11 @@
                         @if($mensagem->anexo_original_path || $mensagem->arquivo_final_path)
                             @if(str_starts_with((string) $mensagemMime, 'image/'))
                                 <div class="cpe-letter-preview cpe-letter-preview--media cpe-aside-preview">
-                                    <img class="cpe-letter-media" src="{{ route('cartas.mensagens.preview', $mensagem) }}" alt="Carta enviada">
+                                    <img class="cpe-letter-media" src="{{ route('cartas.mensagens.preview', ['mensagem' => $mensagem, 'v' => $mensagem->updated_at?->timestamp]) }}" alt="Carta enviada">
                                 </div>
                             @elseif($mensagemMime === 'application/pdf')
                                 <div class="cpe-letter-doc"
-                                     data-pdf-src="{{ route('cartas.mensagens.preview', $mensagem) }}"
+                                     data-pdf-src="{{ route('cartas.mensagens.preview', ['mensagem' => $mensagem, 'v' => $mensagem->updated_at?->timestamp]) }}"
                                      data-mensagem-id="{{ $mensagem->id }}"
                                      data-diag-url="{{ route('cartas.diagnostico.visualizador') }}"
                                      role="img" aria-label="Carta enviada">
@@ -309,6 +321,43 @@
                 </form>
             </div>
         </div>
+
+        @foreach($carta->mensagens as $mensagem)
+            <div class="cpe-modal" id="editMensagemModal-{{ $mensagem->id }}">
+                <div class="cpe-modal__backdrop"></div>
+                <div class="cpe-modal__dialog">
+                    <h2>Editar carta</h2>
+                    <p>Envie um novo PDF para substituir o arquivo atual (o anterior será apagado) ou apenas altere o papel timbrado.</p>
+                    <form method="POST" action="{{ route('cartas.mensagens.update', $mensagem) }}" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <label class="cpe-upload">
+                            <input type="file" name="arquivo" accept=".pdf,application/pdf">
+                            <span>
+                                <span class="cpe-upload__icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 16V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 9l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+                                <span class="cpe-upload__link">Clique para selecionar o novo arquivo</span>
+                                <span class="cpe-upload__hint">PDF (máx. 10MB). Deixe em branco para manter o arquivo atual.</span>
+                            </span>
+                        </label>
+
+                        @if($mensagem->anexo_original_nome)
+                            <p class="cpe-current-file">Arquivo atual: {{ $mensagem->anexo_original_nome }}</p>
+                        @endif
+
+                        <label class="cpe-timbrado-check">
+                            <input type="hidden" name="aplicar_timbrado" value="0">
+                            <input type="checkbox" name="aplicar_timbrado" value="1" @checked($mensagem->timbrado_aplicado_em !== null)>
+                            <span>Aplicar o papel timbrado do sistema nesta carta</span>
+                        </label>
+
+                        <div class="cpe-modal-actions">
+                            <button type="button" class="cpe-button cpe-button--ghost" data-modal-close>Fechar</button>
+                            <button type="submit" class="cpe-button">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endforeach
     @else
         <div class="cpe-modal" id="respondCartaModal">
             <div class="cpe-modal__backdrop"></div>
@@ -580,6 +629,26 @@
                 margin-top: 18px;
                 padding-top: 16px;
             }
+        }
+
+        /* Acoes do gestor (editar / baixar com ou sem timbrado), em qualquer status */
+        .cpe-letter-actions--gestor {
+            margin-bottom: 12px;
+        }
+
+        .cpe-timbrado-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 16px 0 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .cpe-timbrado-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
         }
 
         .cpe-modal-actions--single {

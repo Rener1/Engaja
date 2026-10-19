@@ -120,6 +120,26 @@ class CartaReprocessarTimbradoTest extends TestCase
         $this->assertNotNull($voluntario->timbrado_aplicado_em);
     }
 
+    public function test_nao_reprocessa_mensagem_com_timbrado_desativado_pelo_gestor(): void
+    {
+        Storage::fake('local');
+
+        $desativada = $this->mensagemComAnexoPendente();
+        $desativada->forceFill(['timbrado_desativado' => true])->save();
+
+        $pendente = $this->mensagemComAnexoPendente();
+
+        $this->artisan('cartas:reprocessar-timbrado', ['--force' => true])
+            ->assertExitCode(0);
+
+        $desativada->refresh();
+        $pendente->refresh();
+
+        $this->assertNull($desativada->arquivo_final_path);
+        $this->assertNull($desativada->timbrado_aplicado_em);
+        $this->assertNotNull($pendente->timbrado_aplicado_em);
+    }
+
     public function test_anexo_incompativel_continua_sem_timbrado_e_e_reportado(): void
     {
         Storage::fake('local');

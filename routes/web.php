@@ -114,6 +114,8 @@ Route::prefix('cartas')->name('cartas.')->group(function () {
             Route::put('/mensagens/{mensagem}/ajustar', [CartasCartaController::class, 'updateAdjustedMessage'])->name('mensagens.update-adjustment');
             Route::get('/mensagens/{mensagem}/preview', [CartasCartaController::class, 'preview'])->name('mensagens.preview');
             Route::get('/mensagens/{mensagem}/download', [CartasCartaController::class, 'download'])->name('mensagens.download');
+            Route::get('/mensagens/{mensagem}/download-original', [CartasCartaController::class, 'downloadOriginal'])->name('mensagens.download-original');
+            Route::put('/mensagens/{mensagem}', [CartasCartaController::class, 'updateSentMessage'])->name('mensagens.update');
             Route::post('/diagnostico/visualizador', [CartasViewerDiagnosticController::class, 'store'])->name('diagnostico.visualizador');
             Route::post('/usuarios/{managedUser}/enviar-avaliacao', [CartasUserManagementController::class, 'enviarAvaliacao'])->name('usuarios.enviar-avaliacao');
         });

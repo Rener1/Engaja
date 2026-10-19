@@ -66,6 +66,7 @@ class CartaMensagem extends Model
         'arquivo_final_mime',
         'arquivo_final_tamanho',
         'timbrado_aplicado_em',
+        'timbrado_desativado',
         'enviada_em',
         'lida_em',
         'verificada_por',
@@ -79,6 +80,7 @@ class CartaMensagem extends Model
     {
         return [
             'timbrado_aplicado_em' => 'datetime',
+            'timbrado_desativado' => 'boolean',
             'enviada_em' => 'datetime',
             'lida_em' => 'datetime',
             'verificada_em' => 'datetime',
