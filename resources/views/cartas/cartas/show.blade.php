@@ -79,15 +79,6 @@
                                     <span class="cpe-msg-item__date">{{ optional($mensagem->enviada_em ?? $mensagem->created_at)->format('d/m/Y') }}</span>
                                 </span>
                             </button>
-                            @if($gestor)
-                                <a href="{{ route('cartas.mensagens.download', $mensagem) }}" class="cpe-icon-button cpe-msg-item__download" aria-label="Baixar anexo" download>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </a>
-                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -157,11 +148,21 @@
                         @if($gestor)
                             <div class="cpe-letter-actions cpe-letter-actions--gestor">
                                 <button type="button" class="cpe-button cpe-button--ghost" data-modal-open="editMensagemModal-{{ $mensagem->id }}">Editar carta</button>
-                                @if($mensagem->arquivo_final_path)
-                                    <a href="{{ route('cartas.mensagens.download', $mensagem) }}" class="cpe-button cpe-button--ghost" download>Baixar com timbrado</a>
-                                @endif
-                                @if($mensagem->anexo_original_path)
+                                @if($mensagem->arquivo_final_path && $mensagem->anexo_original_path)
+                                    <div class="cpe-download-menu" data-download-menu>
+                                        <button type="button" class="cpe-button cpe-button--ghost cpe-download-menu__trigger" aria-haspopup="true" aria-expanded="false">
+                                            Baixar carta
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </button>
+                                        <div class="cpe-download-menu__dropdown" role="menu">
+                                            <a href="{{ route('cartas.mensagens.download', $mensagem) }}" role="menuitem" download>Com timbrado</a>
+                                            <a href="{{ route('cartas.mensagens.download-original', $mensagem) }}" role="menuitem" download>Original (sem timbrado)</a>
+                                        </div>
+                                    </div>
+                                @elseif($mensagem->anexo_original_path)
                                     <a href="{{ route('cartas.mensagens.download-original', $mensagem) }}" class="cpe-button cpe-button--ghost" download>Baixar original (sem timbrado)</a>
+                                @elseif($mensagem->arquivo_final_path)
+                                    <a href="{{ route('cartas.mensagens.download', $mensagem) }}" class="cpe-button cpe-button--ghost" download>Baixar com timbrado</a>
                                 @endif
                             </div>
                         @endif
@@ -323,36 +324,43 @@
         </div>
 
         @foreach($carta->mensagens as $mensagem)
-            <div class="cpe-modal" id="editMensagemModal-{{ $mensagem->id }}">
-                <div class="cpe-modal__backdrop"></div>
-                <div class="cpe-modal__dialog">
-                    <h2>Editar carta</h2>
-                    <p>Envie um novo PDF para substituir o arquivo atual (o anterior será apagado) ou apenas altere o papel timbrado.</p>
+            <div class="cpe-modal cpe-modal--refinado cpe-modal--edicao" id="editMensagemModal-{{ $mensagem->id }}">
+                <div class="cpe-modal__backdrop" data-modal-close></div>
+                <div class="cpe-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="editMensagemModalTitulo-{{ $mensagem->id }}">
+                    <h2 id="editMensagemModalTitulo-{{ $mensagem->id }}">Editar carta</h2>
+
                     <form method="POST" action="{{ route('cartas.mensagens.update', $mensagem) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        <label class="cpe-upload">
-                            <input type="file" name="arquivo" accept=".pdf,application/pdf">
-                            <span>
-                                <span class="cpe-upload__icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 16V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 9l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-                                <span class="cpe-upload__link">Clique para selecionar o novo arquivo</span>
-                                <span class="cpe-upload__hint">PDF (máx. 10MB). Deixe em branco para manter o arquivo atual.</span>
-                            </span>
-                        </label>
 
-                        @if($mensagem->anexo_original_nome)
-                            <p class="cpe-current-file">Arquivo atual: {{ $mensagem->anexo_original_nome }}</p>
-                        @endif
+                        <div class="cpe-edicao-campos">
+                            <section class="cpe-edicao-card">
+                                <span class="cpe-edicao-card__label">Arquivo da carta</span>
+                                <span class="cpe-edicao-card__valor">{{ $mensagem->anexo_original_nome ?: 'Nenhum PDF anexado' }}</span>
 
-                        <label class="cpe-timbrado-check">
-                            <input type="hidden" name="aplicar_timbrado" value="0">
-                            <input type="checkbox" name="aplicar_timbrado" value="1" @checked($mensagem->timbrado_aplicado_em !== null)>
-                            <span>Aplicar o papel timbrado do sistema nesta carta</span>
-                        </label>
+                                <label class="cpe-upload cpe-upload--compact">
+                                    <input type="file" name="arquivo" accept=".pdf,application/pdf">
+                                    <span>
+                                        <span class="cpe-upload__icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 16V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 9l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+                                        <span class="cpe-upload__link">Clique para substituir o arquivo</span>
+                                        <span class="cpe-upload__hint">PDF (máx. 10MB). O arquivo atual será apagado. Deixe em branco para mantê-lo.</span>
+                                    </span>
+                                </label>
+                            </section>
+
+                            <section class="cpe-edicao-card">
+                                <span class="cpe-edicao-card__label">Papel timbrado</span>
+                                <label class="cpe-timbrado-check">
+                                    <input type="hidden" name="aplicar_timbrado" value="0">
+                                    <input type="checkbox" name="aplicar_timbrado" value="1" @checked($mensagem->timbrado_aplicado_em !== null)>
+                                    <span>Aplicar o papel timbrado do sistema nesta carta</span>
+                                </label>
+                            </section>
+                        </div>
 
                         <div class="cpe-modal-actions">
-                            <button type="button" class="cpe-button cpe-button--ghost" data-modal-close>Fechar</button>
-                            <button type="submit" class="cpe-button">Salvar</button>
+                            <button type="button" class="cpe-button cpe-button--ghost" data-modal-close>Cancelar</button>
+                            <button type="submit" class="cpe-button">Salvar alterações</button>
                         </div>
                     </form>
                 </div>
@@ -417,7 +425,7 @@
         ];
     ?>
 
-    <div class="cpe-modal" id="remetentesModal">
+    <div class="cpe-modal cpe-modal--refinado" id="remetentesModal">
         <div class="cpe-modal__backdrop" data-modal-close></div>
         <div class="cpe-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="remetentesModalTitulo">
             <h2 id="remetentesModalTitulo">Informações sobre {{$remetentePrimeiroNome}}</h2>
@@ -441,22 +449,60 @@
 
     @include('cartas.shared._scripts')
 
+    <script>
+        (() => {
+            const fecharMenus = (exceto = null) => {
+                document.querySelectorAll('[data-download-menu].is-open').forEach((menu) => {
+                    if (menu === exceto) {
+                        return;
+                    }
+
+                    menu.classList.remove('is-open');
+                    menu.querySelector('.cpe-download-menu__trigger')?.setAttribute('aria-expanded', 'false');
+                });
+            };
+
+            document.querySelectorAll('[data-download-menu]').forEach((menu) => {
+                const trigger = menu.querySelector('.cpe-download-menu__trigger');
+
+                trigger?.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    fecharMenus(menu);
+                    const isOpen = menu.classList.toggle('is-open');
+                    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+
+                menu.querySelectorAll('.cpe-download-menu__dropdown a').forEach((link) => {
+                    link.addEventListener('click', () => fecharMenus());
+                });
+            });
+
+            document.addEventListener('click', () => fecharMenus());
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    fecharMenus();
+                }
+            });
+        })();
+    </script>
+
     <style>
         .cpe-remetentes-trigger {
             margin-bottom: 12px;
         }
 
-        /* Refino restrito ao modal: preserva o visual dos demais dialogos. */
-        #remetentesModal {
+        /* Visual refinado compartilhado pelos modais de informações do remetente
+           e de edição da carta: preserva o visual dos demais dialogos. */
+        .cpe-modal--refinado {
             box-sizing: border-box;
             color: var(--cpe-ink);
         }
 
-        #remetentesModal .cpe-modal__backdrop {
+        .cpe-modal--refinado .cpe-modal__backdrop {
             background: rgba(17, 17, 17, .52);
         }
 
-        #remetentesModal .cpe-modal__dialog {
+        .cpe-modal--refinado .cpe-modal__dialog {
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -471,7 +517,7 @@
             box-shadow: 0 24px 64px rgba(17, 17, 17, .24), 0 4px 16px rgba(17, 17, 17, .08);
         }
 
-        #remetentesModalTitulo {
+        .cpe-modal--refinado .cpe-modal__dialog > h2 {
             flex-shrink: 0;
             display: block;
             grid-template-columns: 44px minmax(0, 1fr);
@@ -558,14 +604,14 @@
             font-weight: 700;
         }
 
-        #remetentesModal .cpe-modal-actions {
+        .cpe-modal--refinado .cpe-modal-actions {
             flex-shrink: 0;
             margin-top: 24px;
             padding-top: 20px;
             border-top: 1px solid var(--cpe-line);
         }
 
-        #remetentesModal .cpe-modal-actions .cpe-button {
+        .cpe-modal--refinado .cpe-modal-actions .cpe-button {
             min-height: 44px;
             height: auto;
             padding: 10px 22px;
@@ -578,31 +624,31 @@
             transition: background-color .18s, border-color .18s;
         }
 
-        #remetentesModal .cpe-modal-actions .cpe-button:hover,
-        #remetentesModal .cpe-modal-actions .cpe-button:focus {
+        .cpe-modal--refinado .cpe-modal-actions .cpe-button:hover,
+        .cpe-modal--refinado .cpe-modal-actions .cpe-button:focus {
             border-color: #9600c7;
             background: #9600c7;
             color: #fff;
         }
 
-        #remetentesModal .cpe-modal-actions .cpe-button:focus-visible {
+        .cpe-modal--refinado .cpe-modal-actions .cpe-button:focus-visible {
             outline: 3px solid var(--cpe-purple);
             outline-offset: 3px;
         }
 
         @media (max-width: 480px) {
-            #remetentesModal {
+            .cpe-modal--refinado {
                 padding: 16px;
             }
 
-            #remetentesModal .cpe-modal__dialog {
+            .cpe-modal--refinado .cpe-modal__dialog {
                 max-height: calc(100vh - 32px);
                 max-height: calc(100dvh - 32px);
                 padding: 22px 18px;
                 border-radius: 14px;
             }
 
-            #remetentesModalTitulo {
+            .cpe-modal--refinado .cpe-modal__dialog > h2 {
                 grid-template-columns: 40px minmax(0, 1fr);
                 gap: 12px;
                 margin-bottom: 18px;
@@ -625,15 +671,142 @@
                 padding: 12px 16px;
             }
 
-            #remetentesModal .cpe-modal-actions {
+            .cpe-modal--refinado .cpe-modal-actions {
                 margin-top: 18px;
                 padding-top: 16px;
+            }
+        }
+
+        /* Modal de edição: o formulário ocupa a caixa e só os campos rolam,
+           mantendo título e rodapé fixos como no modal de informações. */
+        .cpe-modal--edicao form {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .cpe-modal--edicao .cpe-edicao-campos {
+            display: grid;
+            gap: 12px;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .cpe-modal--edicao .cpe-edicao-card {
+            box-sizing: border-box;
+            display: grid;
+            row-gap: 6px;
+            min-width: 0;
+            padding: 16px 18px;
+            border: 1px solid var(--cpe-line);
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(17, 17, 17, .025);
+        }
+
+        .cpe-modal--edicao .cpe-edicao-card__label {
+            color: var(--cpe-muted);
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.4;
+            letter-spacing: .2px;
+        }
+
+        .cpe-modal--edicao .cpe-edicao-card__valor {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            color: var(--cpe-ink);
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .cpe-modal--edicao .cpe-upload {
+            margin-top: 6px;
+        }
+
+        .cpe-modal--edicao .cpe-timbrado-check {
+            margin: 0;
+            color: var(--cpe-ink);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .cpe-modal--edicao .cpe-timbrado-check input[type="checkbox"] {
+            flex: none;
+            accent-color: var(--cpe-purple);
+        }
+
+        /* Cancelar: secundário, ao lado do botão principal roxo */
+        .cpe-modal--edicao .cpe-modal-actions .cpe-button--ghost {
+            border: 1px solid var(--cpe-line);
+            background: #fff;
+            color: var(--cpe-ink);
+            box-shadow: none;
+        }
+
+        .cpe-modal--edicao .cpe-modal-actions .cpe-button--ghost:hover,
+        .cpe-modal--edicao .cpe-modal-actions .cpe-button--ghost:focus {
+            border-color: var(--cpe-purple);
+            background: #fff;
+            color: var(--cpe-purple);
+        }
+
+        @media (max-width: 480px) {
+            .cpe-modal--edicao .cpe-edicao-card {
+                padding: 12px 16px;
             }
         }
 
         /* Acoes do gestor (editar / baixar com ou sem timbrado), em qualquer status */
         .cpe-letter-actions--gestor {
             margin-bottom: 12px;
+        }
+
+        .cpe-download-menu {
+            position: relative;
+        }
+
+        .cpe-letter-stage .cpe-download-menu__trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cpe-download-menu__dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            z-index: 20;
+            min-width: 200px;
+            display: none;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 0, 0, .08);
+            box-shadow: 0 18px 38px rgba(0, 0, 0, .14);
+            padding: 6px;
+        }
+
+        .cpe-download-menu.is-open .cpe-download-menu__dropdown {
+            display: block;
+        }
+
+        .cpe-download-menu__dropdown a {
+            display: block;
+            border-radius: 5px;
+            padding: 8px 10px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #333;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .cpe-download-menu__dropdown a:hover,
+        .cpe-download-menu__dropdown a:focus {
+            color: var(--cpe-purple);
+            background: var(--cpe-bg);
+            outline: none;
         }
 
         .cpe-timbrado-check {
@@ -760,11 +933,6 @@
         .cpe-msg-item__date {
             color: #777;
             font-size: 14px;
-        }
-
-        .cpe-msg-item__download {
-            flex: none;
-            align-self: center;
         }
 
         /* O visualizador ocupa o espaco disponivel ao lado da lista, sem

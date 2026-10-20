@@ -260,9 +260,40 @@ class CartaEdicaoGestorTest extends CartasBaseTest
             ->assertOk()
             ->assertSee('editMensagemModal-'.$mensagem->id, false)
             ->assertSee(route('cartas.mensagens.update', $mensagem), false)
+            ->assertSee('name="aplicar_timbrado"', false)
+            // Com as duas versões disponíveis: um único botão com dropdown.
+            ->assertSee('class="cpe-download-menu"', false)
+            ->assertSeeInOrder(['Baixar carta', 'Com timbrado', 'Original (sem timbrado)'])
+            ->assertSee(route('cartas.mensagens.download', $mensagem), false)
             ->assertSee(route('cartas.mensagens.download-original', $mensagem), false)
+            ->assertDontSee('Baixar com timbrado')
+            ->assertDontSee('Baixar original (sem timbrado)')
+            ->assertDontSee('cpe-msg-item__download', false);
+    }
+
+    public function test_sem_timbrado_exibe_botao_unico_de_original_sem_dropdown(): void
+    {
+        $mensagem = $this->mensagemDeVoluntarioComTimbrado();
+        app(CartaTimbradoService::class)->removerTimbrado($mensagem);
+
+        $this->actingAs($this->gestor)->get(route('cartas.cartas.show', $mensagem->carta_id))
+            ->assertOk()
+            ->assertDontSee('class="cpe-download-menu"', false)
+            ->assertSee('Baixar original (sem timbrado)')
+            ->assertSee(route('cartas.mensagens.download-original', $mensagem), false)
+            ->assertDontSee(route('cartas.mensagens.download', $mensagem).'"', false);
+    }
+
+    public function test_carta_digitada_exibe_botao_unico_com_timbrado_sem_dropdown(): void
+    {
+        [$carta, $mensagem] = $this->criarCartaComRespostaAguardandoVerificacao();
+        app(CartaTimbradoService::class)->aplicar($mensagem);
+
+        $this->actingAs($this->gestor)->get(route('cartas.cartas.show', $carta))
+            ->assertOk()
+            ->assertDontSee('class="cpe-download-menu"', false)
             ->assertSee('Baixar com timbrado')
-            ->assertSee('name="aplicar_timbrado"', false);
+            ->assertDontSee(route('cartas.mensagens.download-original', $mensagem), false);
     }
 
     public function test_tela_da_carta_nao_exibe_acoes_de_gestor_para_voluntario(): void
