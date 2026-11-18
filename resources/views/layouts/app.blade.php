@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="{{ asset('images/engaja-favicon.png') }}">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
@@ -253,6 +253,16 @@
       font-size: .7rem;
       padding: .35rem .75rem .15rem;
       font-weight: 700;
+    }
+
+    /* Largura fixa da sidebar: os submenus fechados continuam no cálculo do
+       width: max-content (altura zero e invisíveis, em vez de display: none),
+       então a sidebar tem sempre a largura do maior item do menu, aberto ou não. */
+    .admin-sidebar__accordion .accordion-collapse.collapse:not(.show) {
+      display: block;
+      height: 0;
+      overflow: hidden;
+      visibility: hidden;
     }
 
     .admin-sidebar__account {
