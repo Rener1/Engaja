@@ -88,18 +88,18 @@
   pointer-events: none;
 }
 
-/* Botões de ação do filtro (Aplicar / Limpar) alinhados com os campos */
+/* Botões dentro do card de filtro: mesma altura dos campos (.eg-select / .eg-input) */
 .eg-filter-actions {
   display: flex;
   flex-wrap: wrap;
   gap: .5rem;
+}
 
-  .btn {
-    border-radius: .75rem;
-    padding: .65rem 1.1rem;
-    font-size: .875rem;
-    font-weight: 600;
-  }
+.eg-filter-card .btn:not(.btn-sm):not(.dropdown-toggle-split) {
+  padding: .65rem 1.1rem;
+  border-width: 1.5px;
+  border-radius: .75rem;
+  line-height: 1.5;
 }
 
 /* TomSelect (multi-selects) dentro do card de filtro */
@@ -126,18 +126,4 @@
   color: $engaja-purple;
   border-color: #d9bfdc;
   font-weight: 600;
-}
-
-/* "Limpar" neutro (o secondary do tema é azul) */
-.eg-filter-actions .btn-outline-secondary {
-  --bs-btn-color: #4b5563;
-  --bs-btn-border-color: #e5e7eb;
-  --bs-btn-bg: #fff;
-  --bs-btn-hover-color: #1f2937;
-  --bs-btn-hover-bg: #f3f4f6;
-  --bs-btn-hover-border-color: #d1d5db;
-  --bs-btn-active-color: #1f2937;
-  --bs-btn-active-bg: #e5e7eb;
-  --bs-btn-active-border-color: #d1d5db;
-  border-width: 1.5px;
 }

@@ -1,0 +1,79 @@
+/* ──────────────────────────────────────────────────────
+   TABELAS — superfície única (mesmo visual do card de filtros)
+   Vale para <x-data-table> solto, <x-data-table :paginator> / <x-ui.table-frame>
+   e para os wrappers (.card, .shadow-sm.rounded-*) que só envolvem a tabela.
+────────────────────────────────────────────────────── */
+$eg-table-radius: 1.1rem;
+$eg-table-shadow: 0 4px 24px rgba(66, 25, 68, .08), 0 1px 4px rgba(0, 0, 0, .04);
+
+@mixin eg-table-surface {
+  background: #fff;
+  border: 0;
+  border-radius: $eg-table-radius;
+  box-shadow: $eg-table-shadow;
+  overflow: hidden;
+}
+
+/* 1. Tabela AG Grid solta (sem moldura) */
+[data-ag-grid]:not(.dt-no-border) {
+  border-radius: $eg-table-radius;
+  box-shadow: $eg-table-shadow;
+
+  .ag-root-wrapper {
+    border: 0;
+    border-radius: $eg-table-radius;
+  }
+}
+
+/* 2. Moldura com rodapé de paginação */
+.dt-frame {
+  background: #fff;
+
+  .table {
+    margin-bottom: 0;
+  }
+}
+
+.dt-frame--bordered {
+  @include eg-table-surface;
+}
+
+/* 3. Card (ou wrapper com sombra) que contém uma tabela: o card vira a superfície
+      padrão e a tabela dentro dele fica sem moldura própria — vale tanto para
+      wrappers "puros" quanto para cards com barra de ferramentas acima da tabela. */
+.card:has([data-ag-grid]),
+.card:has(.dt-frame),
+.shadow-sm:has(> [data-ag-grid]),
+.shadow-sm:has(> .dt-frame) {
+  @include eg-table-surface;
+  box-shadow: $eg-table-shadow !important;   // .shadow-sm usa !important
+
+  > .card-body:only-child {
+    padding: 0;
+  }
+
+  > .card-header {
+    background: #fff;
+  }
+
+  [data-ag-grid] {
+    border-radius: 0;
+    box-shadow: none;
+
+    .ag-root-wrapper {
+      border-radius: 0;
+    }
+  }
+
+  .dt-frame--bordered {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Linhas: o AG Grid reserva 150px de altura mínima no modo autoHeight (espaço do
+   aviso "sem registros"). Só mantemos esse mínimo quando a tabela está vazia —
+   a classe .dt-empty é controlada em resources/js/lib/ag-grid-table.js. */
+[data-ag-grid]:not(.dt-empty) .ag-grid-scrolling-rows.ag-layout-auto-height {
+  min-height: 0;
+}

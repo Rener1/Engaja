@@ -4,7 +4,7 @@
 @use "sass:map";
 
 /* Fonte Montserrat */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 /* Paleta Engaja */
 $engaja-purple: #421944; // primária
@@ -21,8 +21,28 @@ $warning:   $engaja-yellow;
 $danger:    $engaja-pink;
 $info:      $engaja-blue;
 
-$body-color: #1f1f1f;
+/* Tipografia (ver também ui/_typography.scss) */
+$font-size-base: .9375rem;          // 15px: Montserrat é larga; 16px deixava os textos pesados
+$line-height-base: 1.6;
+$body-color: #374151;               // texto corrido em grafite, não preto puro
+$body-secondary-color: #6b7280;     // .text-muted / secundário
 $body-bg: #ffffff;
+$headings-font-weight: 700;         // o padrão (500) não era carregado e caía para 400
+$headings-color: #1f2937;
+$headings-line-height: 1.25;
+$btn-font-weight: 600;
+$btn-font-size: .875rem;
+$btn-padding-y: .5rem;
+$btn-padding-x: 1rem;
+$btn-border-radius: .65rem;
+$btn-font-size-sm: .8rem;
+$btn-padding-y-sm: .3rem;
+$btn-padding-x-sm: .75rem;
+$btn-border-radius-sm: .55rem;
+$btn-border-radius-lg: .8rem;
+$form-label-font-weight: 600;
+$form-label-color: #374151;
+$form-text-color: #6b7280;
 $border-radius: .6rem;
 $border-radius-lg: .8rem;
 
@@ -45,13 +65,16 @@ $theme-colors: map.merge(
 
 
 /* Componentes de UI compartilhados (padrão visual das páginas internas) */
+@import "ui/typography";
 @import "ui/page-hero";
 @import "ui/filter-card";
+@import "ui/form";
 @import "ui/segmented";
 @import "ui/stat-card";
 @import "ui/empty-state";
 @import "ui/modal";
 @import "ui/pagination";
+@import "ui/table";
 
 /* Custom utilities */
 .text-engaja     { color: $engaja-purple !important; }

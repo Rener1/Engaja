@@ -10,125 +10,77 @@
   </x-slot:actions>
 </x-ui.page-hero>
 
+@php
+  $paineis = [
+    ['cor' => 'purple', 'icone' => 'chat-square-text', 'rotulo' => 'Respostas', 'titulo' => 'Painel de formulários',
+     'texto' => 'Acompanhe médias, distribuições e respostas abertas com gráficos dinâmicos. Filtre por modelo, ação pedagógica ou período.',
+     'rota' => route('dashboards.avaliacoes'), 'botao' => 'Abrir dashboard de respostas'],
+    ['cor' => 'green', 'icone' => 'people', 'rotulo' => 'Presença', 'titulo' => 'Painel de presenças e inscrições',
+     'texto' => 'Acompanhe presenças e inscritos por ação pedagógica, com filtros, expansão de linhas e exportação em PDF.',
+     'rota' => route('dashboards.presencas'), 'botao' => 'Abrir dashboard de presenças'],
+    ['cor' => 'blue', 'icone' => 'bar-chart-line', 'rotulo' => 'BI', 'titulo' => 'Painel de indicadores educacionais',
+     'texto' => 'Acompanhe rankings e recortes por município para apoiar análises e decisões.',
+     'rota' => route('dashboards.bi'), 'botao' => 'Abrir dashboard BI'],
+    ['cor' => 'orange', 'icone' => 'globe2', 'rotulo' => 'Leitura', 'titulo' => 'Painel Leitura do mundo',
+     'texto' => 'Liste as leituras cadastradas no LimeSurvey e abra o dashboard por survey.',
+     'rota' => route('dashboards.leitura-mundo'), 'botao' => 'Abrir leitura do mundo'],
+  ];
+@endphp
+
 <div class="py-4">
-  <div class="row g-3 mb-4">
-    <div class="col-lg-3">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body d-flex">
-          <div class="d-flex flex-column w-100">
-              <p class="text-uppercase text-primary small fw-semibold mb-1">Respostas</p>
-              <h2 class="h5 fw-bold">Painel de formulários</h2>
-              <p class="text-muted mb-3">
-                Acompanhe médias, distribuições e respostas abertas com gráficos dinâmicos.
-                Filtre por modelo, ação pedagógica ou período.
-              </p>
-              <a href="{{ route('dashboards.avaliacoes') }}" class="btn btn-primary mt-auto align-self-start">
-                Abrir dashboard de respostas
-              </a>
-          </div>
-        </div>
+  <div class="row g-4 mb-4">
+    @foreach($paineis as $painel)
+      <div class="col-md-6 col-xl-3">
+        <a href="{{ $painel['rota'] }}" class="eg-nav-card eg-stat-card--{{ $painel['cor'] }} h-100">
+          <span class="eg-stat-icon"><i class="bi bi-{{ $painel['icone'] }}"></i></span>
+          <span class="eg-nav-card__eyebrow">{{ $painel['rotulo'] }}</span>
+          <span class="eg-nav-card__title">{{ $painel['titulo'] }}</span>
+          <span class="eg-nav-card__text">{{ $painel['texto'] }}</span>
+          <span class="eg-nav-card__cta">{{ $painel['botao'] }} <i class="bi bi-arrow-right"></i></span>
+        </a>
       </div>
-    </div>
-    <div class="col-lg-3">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body d-flex">
-          <div class="d-flex flex-column w-100">
-              <p class="text-uppercase text-success small fw-semibold mb-1">Presença</p>
-              <h2 class="h5 fw-bold">Painel de presenças e inscrições</h2>
-              <p class="text-muted mb-3">
-                Acompanhe presenças e inscritos por ação pedagógica,
-                com filtros, expansão de linhas e exportação em PDF.
-              </p>
-              <a href="{{ route('dashboards.presencas') }}" class="btn btn-success mt-auto align-self-start">
-                Abrir dashboard de presenças
-              </a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-3">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body d-flex">
-          <div class="d-flex flex-column w-100">
-              <p class="text-uppercase small fw-semibold mb-1" style="color:#421944;">BI</p>
-              <h2 class="h5 fw-bold">Painel de indicadores educacionais</h2>
-              <p class="text-muted mb-3">
-                Acompanhe rankings e recortes por município para apoiar análises e decisões.
-              </p>
-              <a href="{{ route('dashboards.bi') }}" class="btn btn-secondary mt-auto align-self-start">
-                Abrir dashboard BI
-              </a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-3">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body d-flex">
-          <div class="d-flex flex-column w-100">
-              <p class="text-uppercase small fw-semibold mb-1" style="color:#6c345e;">Leitura</p>
-              <h2 class="h5 fw-bold">Painel Leitura do mundo</h2>
-              <p class="text-muted mb-3">
-                Liste as leituras cadastradas no LimeSurvey e abra o dashboard por survey.
-              </p>
-              <a href="{{ route('dashboards.leitura-mundo') }}" class="btn btn-dark mt-auto align-self-start">
-                Abrir leitura do mundo
-              </a>
-          </div>
-        </div>
-      </div>
-    </div>
+    @endforeach
   </div>
 
-  <div class="row g-3">
+  <div class="row g-4">
     <div class="col-lg-7">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white border-0">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <p class="text-uppercase small text-muted mb-0">Modelos de formulário</p>
-              <h3 class="h6 fw-bold mb-0">Últimos utilizados</h3>
-            </div>
-          </div>
-        </div>
-        <div class="list-group list-group-flush">
+      <section class="eg-section-card h-100">
+        <p class="text-uppercase small text-muted mb-1">Modelos de formulário</p>
+        <h3 class="eg-section-card__title"><i class="bi bi-ui-checks"></i> Últimos utilizados</h3>
+        <div class="eg-list">
           @forelse($templatesDisponiveis as $template)
-          <div class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <div class="fw-semibold">{{ $template->nome }}</div>
+            <div class="eg-list__item">
+              <div class="eg-list__main">
+                <div class="eg-list__title">{{ $template->nome }}</div>
+              </div>
+              <a class="btn btn-sm btn-outline-primary" href="{{ route('dashboards.avaliacoes', ['template_id' => $template->id]) }}">
+                Ver respostas
+              </a>
             </div>
-            <a class="btn btn-sm btn-outline-primary" href="{{ route('dashboards.avaliacoes', ['template_id' => $template->id]) }}">
-              Ver respostas
-            </a>
-          </div>
           @empty
-          <div class="list-group-item text-muted">Nenhum modelo cadastrado ainda.</div>
+            <x-ui.empty-state compact muted icon="ui-checks">Nenhum modelo cadastrado ainda.</x-ui.empty-state>
           @endforelse
         </div>
-      </div>
+      </section>
     </div>
     <div class="col-lg-5">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white border-0">
-          <p class="text-uppercase small text-muted mb-0">Ações pedagógicas recentes</p>
-          <h3 class="h6 fw-bold mb-0">O que recebeu inscrições</h3>
-        </div>
-        <div class="card-body">
-          <div class="vstack gap-3">
-            @forelse($eventosRecentes as $evento)
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="fw-semibold">{{ $evento->nome }}</div>
-                <small class="text-muted">Criado em {{ optional($evento->created_at)->format('d/m/Y') }}</small>
+      <section class="eg-section-card h-100">
+        <p class="text-uppercase small text-muted mb-1">Ações pedagógicas recentes</p>
+        <h3 class="eg-section-card__title"><i class="bi bi-calendar-event"></i> O que recebeu inscrições</h3>
+        <div class="eg-list">
+          @forelse($eventosRecentes as $evento)
+            <div class="eg-list__item">
+              <div class="eg-list__main">
+                <div class="eg-list__title">{{ $evento->nome }}</div>
+                <div class="eg-list__meta">Criado em {{ optional($evento->created_at)->format('d/m/Y') }}</div>
               </div>
-              <a href="{{ route('eventos.show', $evento) }}" class="btn btn-sm btn-outline-secondary">Ver ação</a>
+              <a href="{{ route('eventos.show', $evento) }}" class="btn btn-sm btn-outline-primary">Ver ação</a>
             </div>
-            @empty
-            <div class="text-muted">Nenhuma ação pedagógica registrada.</div>
-            @endforelse
-          </div>
+          @empty
+            <x-ui.empty-state compact muted icon="calendar-x">Nenhuma ação pedagógica registrada.</x-ui.empty-state>
+          @endforelse
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </div>

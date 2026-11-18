@@ -1,0 +1,157 @@
+/* ──────────────────────────────────────────────────────
+   FORMULÁRIOS — mesmo acabamento dos filtros (.eg-select / .eg-input)
+   Uso: classe .eg-form num ancestral do formulário; cards de seção com
+   .card.eg-form-card + .eg-form-card__title (ícone Bootstrap Icons opcional).
+────────────────────────────────────────────────────── */
+.eg-form-card {
+  border: 0;
+  border-radius: 1.1rem;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(66, 25, 68, .08), 0 1px 4px rgba(0, 0, 0, .04);
+
+  > .card-header {
+    padding: 1.1rem 1.5rem;
+    background: #fff;
+    border-bottom: 1px solid #f0edf2;
+    border-radius: 1.1rem 1.1rem 0 0;
+  }
+
+  > .card-body {
+    padding: 1.5rem;
+  }
+}
+
+.eg-form-card__title {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+
+  .bi {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: .6rem;
+    background: #f3eaf4;
+    color: $engaja-purple;
+    font-size: 1rem;
+  }
+}
+
+.eg-form-card__subtitle {
+  margin: .35rem 0 0 2.65rem;
+  font-size: .8rem;
+  color: #6b7280;
+}
+
+/* Variante de zona de perigo (ex.: excluir conta) */
+.eg-form-card--danger {
+  box-shadow: 0 4px 24px rgba(230, 34, 112, .08), 0 1px 4px rgba(0, 0, 0, .04);
+
+  .eg-form-card__title {
+    color: #be185d;
+
+    .bi {
+      background: #fce7f3;
+      color: #be185d;
+    }
+  }
+}
+
+/* Campos */
+.eg-form {
+  .form-control,
+  .form-select {
+    border: 1.5px solid #e5e7eb !important;     // o layout força border-color com !important
+    border-radius: .75rem;
+    padding: .6rem .95rem;
+    background-color: #f9fafb;
+    color: #1f2937;
+    font-weight: 500;
+    transition: border-color .2s, box-shadow .2s, background-color .2s;
+
+    &::placeholder {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    &:focus {
+      border-color: $engaja-purple !important;
+      box-shadow: 0 0 0 3px rgba(66, 25, 68, .12);
+      background-color: #fff;
+    }
+
+    &:disabled,
+    &[readonly] {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+
+    &.is-invalid {
+      border-color: var(--bs-form-invalid-border-color) !important;
+      background-color: #fff;
+    }
+
+    &.is-valid {
+      border-color: var(--bs-form-valid-border-color) !important;
+    }
+  }
+
+  .form-select {
+    padding-right: 2.5rem;
+    background-position: right .9rem center;
+  }
+
+  /* Botão "Escolher arquivo" do input file */
+  .form-control[type="file"] {
+    padding: 0;
+    overflow: hidden;
+
+    &::file-selector-button {
+      height: 100%;
+      margin: 0 .9rem 0 0;
+      padding: .6rem 1rem;
+      border: 0;
+      border-right: 1.5px solid #e5e7eb;
+      background: #f3eaf4;
+      color: $engaja-purple;
+      font-weight: 600;
+    }
+
+    &:hover:not(:disabled)::file-selector-button {
+      background: #ead7ec;
+    }
+  }
+
+  /* Botões com a mesma altura dos campos */
+  .btn:not(.btn-sm):not(.btn-link):not(.btn-close) {
+    padding: .6rem 1.1rem;
+    border-width: 1.5px;
+    border-radius: .75rem;
+    line-height: 1.6;
+  }
+
+  .form-label {
+    margin-bottom: .4rem;
+    font-size: .85rem;
+  }
+
+  .form-text {
+    margin-top: .35rem;
+  }
+
+  .form-check-input:checked {
+    background-color: $engaja-purple;
+    border-color: $engaja-purple;
+  }
+
+  .form-check-input:focus {
+    border-color: $engaja-purple;
+    box-shadow: 0 0 0 3px rgba(66, 25, 68, .12);
+  }
+}

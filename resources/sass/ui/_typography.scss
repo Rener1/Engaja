@@ -1,0 +1,233 @@
+/* ──────────────────────────────────────────────────────
+   TIPOGRAFIA — ajustes globais sobre o Bootstrap
+   (tamanho base, cores e pesos ficam nas variáveis do app.scss)
+────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  letter-spacing: -.01em;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+strong,
+b {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Rótulos em caixa alta usados como "eyebrow" de seções e cards */
+.text-uppercase.small,
+.small.text-uppercase {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.form-text {
+  font-size: .8rem;
+}
+
+/* Código inline (nomes de colunas, campos etc.) */
+code {
+  padding: .1em .4em;
+  border-radius: .35rem;
+  background: #f3eaf4;
+  color: $engaja-purple;
+  font-size: .82em;
+}
+
+/* Alertas mais leves: fundo suave + barra lateral na cor do contexto */
+.alert {
+  border-width: 0 0 0 4px;
+  border-radius: .75rem;
+  line-height: 1.55;
+}
+
+/* Bloco de texto explicativo com largura de leitura confortável */
+.eg-prose {
+  max-width: 78ch;
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Lista de passos/regras com ícone */
+.eg-checklist {
+  display: grid;
+  gap: .6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: .65rem;
+    align-items: flex-start;
+  }
+
+  .bi {
+    flex-shrink: 0;
+    margin-top: .2rem;
+    color: $engaja-purple;
+  }
+}
+
+/* Ocupa a altura restante do card (pai em flex-column) e distribui o espaço entre os itens */
+.eg-checklist--fill {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+/* Card de seção simples com título e ícone (conteúdo das páginas) */
+.eg-section-card {
+  background: #fff;
+  border: 1px solid #ece7ee;
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 12px rgba(66, 25, 68, .06);
+  padding: 1.5rem;
+}
+
+.eg-section-card__title {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+
+  .bi {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: .6rem;
+    background: #f3eaf4;
+    color: $engaja-purple;
+    font-size: 1rem;
+  }
+}
+
+/* Card de navegação (atalho para outra tela) — usa as cores dos stat cards */
+.eg-nav-card {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #ece7ee;
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 12px rgba(66, 25, 68, .06);
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow .2s, transform .15s, border-color .2s;
+
+  .eg-stat-icon {
+    margin-bottom: .6rem;
+  }
+
+  &:hover {
+    color: inherit;
+    border-color: rgba(66, 25, 68, .14);
+    box-shadow: 0 8px 28px rgba(66, 25, 68, .12);
+    transform: translateY(-2px);
+
+    .eg-nav-card__cta .bi {
+      transform: translateX(3px);
+    }
+  }
+}
+
+.eg-nav-card__eyebrow {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--stat-accent, #{$engaja-purple});
+}
+
+.eg-nav-card__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1f2937;
+}
+
+.eg-nav-card__text {
+  flex: 1;
+  font-size: .875rem;
+  color: #6b7280;
+}
+
+.eg-nav-card__cta {
+  margin-top: .75rem;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--stat-accent, #{$engaja-purple});
+
+  .bi {
+    display: inline-block;
+    transition: transform .15s;
+  }
+}
+
+/* Lista simples dentro de cards de seção */
+.eg-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 0;
+  border-top: 1px solid #f0edf2;
+
+  &:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+.eg-list__main {
+  min-width: 0;
+}
+
+.eg-list__title {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.eg-list__meta {
+  font-size: .8rem;
+  color: #6b7280;
+}
+
+/* Tabelas (AG Grid) com a mesma fonte e cores de texto do restante do site */
+[data-ag-grid] {
+  --ag-font-family: var(--bs-body-font-family);
+  --ag-font-size: 13.5px;
+  --ag-foreground-color: #374151;
+  --ag-header-text-color: #1f2937;
+  --ag-header-font-weight: 600;
+}
+
+/* Botão neutro (Limpar, Voltar, Cancelar…): o "secondary" do tema é o azul da
+   marca, que competia com o botão principal roxo. */
+.btn-outline-secondary {
+  --bs-btn-color: #4b5563;
+  --bs-btn-border-color: #d1d5db;
+  --bs-btn-bg: #fff;
+  --bs-btn-hover-color: #1f2937;
+  --bs-btn-hover-bg: #f3f4f6;
+  --bs-btn-hover-border-color: #c4c8cf;
+  --bs-btn-active-color: #1f2937;
+  --bs-btn-active-bg: #e5e7eb;
+  --bs-btn-active-border-color: #c4c8cf;
+  --bs-btn-disabled-color: #9ca3af;
+  --bs-btn-disabled-border-color: #e5e7eb;
+}
