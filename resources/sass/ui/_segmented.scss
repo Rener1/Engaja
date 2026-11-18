@@ -50,3 +50,17 @@
 body.eg-loading * {
   cursor: wait !important;
 }
+
+/* Variante com rádios (.btn-check) — mantém o comportamento nativo dos inputs:
+   <div class="eg-segmented"><input type="radio" class="btn-check" id="a"><label class="eg-seg-btn" for="a">A</label>…</div> */
+.btn-check:checked + .eg-seg-btn {
+  background: #fff;
+  color: $engaja-purple;
+  box-shadow: 0 2px 8px rgba(66, 25, 68, .14), 0 1px 3px rgba(0, 0, 0, .08);
+  font-weight: 700;
+}
+
+.btn-check:focus-visible + .eg-seg-btn {
+  outline: 2px solid rgba(66, 25, 68, .35);
+  outline-offset: 1px;
+}

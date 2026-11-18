@@ -18,66 +18,67 @@
         color: #fff;
     }
 </style>
+<x-ui.page-hero contained
+    eyebrow="Dashboards" eyebrow-icon="people"
+    title="Inscrições, Presenças e Ausências"
+    subtitle="Visual completo das ações pedagógicas com expansão de presenças e exportação em PDF."
+    class="mb-0">
+    <x-slot:actions>
+        <a href="{{ route('dashboard') }}" class="eg-hero-btn"><i class="bi bi-grid me-1"></i> Hub de dashboards</a>
+        <a href="{{ route('dashboards.bi') }}" class="eg-hero-btn"><i class="bi bi-bar-chart-line me-1"></i> Dashboard BI</a>
+        <a href="{{ route('dashboards.avaliacoes') }}" class="eg-hero-btn"><i class="bi bi-chat-square-text me-1"></i> Dashboard de respostas</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
-        <div>
-            <p class="text-uppercase small text-muted mb-1">Dashboards</p>
-            <h1 class="h4 mb-0">Inscrições, Presenças e Ausências</h1>
-            <p class="text-muted small mb-0">Visual completo das ações pedagógicas com expansão de presenças e exportação em PDF.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm">Hub de dashboards</a>
-            <a href="{{ route('dashboards.bi') }}" class="btn btn-outline-secondary btn-sm">Dashboard BI</a>
-            <a href="{{ route('dashboards.avaliacoes') }}" class="btn btn-outline-primary btn-sm">Dashboard de respostas</a>
-        </div>
-    </div>
+    <x-ui.filter-card>
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="eg-filter-label">Ação pedagógica (evento)</label>
+                <x-ui.select name="evento_id">
+                    <option value="">Todas</option>
+                    @foreach($eventos as $id => $nome)
+                    <option value="{{ $id }}" @selected(request('evento_id')==$id)>{{ $nome }}</option>
+                    @endforeach
+                </x-ui.select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="eg-filter-label">De</label>
+                <x-ui.input type="date" name="de" value="{{ request('de') }}" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="eg-filter-label">Até</label>
+                <x-ui.input type="date" name="ate" value="{{ request('ate') }}" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="eg-filter-label">Buscar (momento/ação)</label>
+                <x-ui.input type="text" name="q" value="{{ request('q') }}" placeholder="Digite para filtrar..." />
+            </div>
+
+            <div class="col-md-2">
+                <label class="eg-filter-label">Por página</label>
+                <x-ui.select name="per_page" onchange="this.form.submit()">
+                    <option value="25" @selected(request('per_page', 25)==25)>25</option>
+                    <option value="50" @selected(request('per_page')==50)>50</option>
+                    <option value="100" @selected(request('per_page')==100)>100</option>
+                </x-ui.select>
+            </div>
+
+            {{-- mantém sort/dir atuais --}}
+            <input type="hidden" name="sort" value="{{ request('sort', 'dia') }}">
+            <input type="hidden" name="dir" value="{{ request('dir', 'desc') }}">
+
+            <div class="col-md-auto eg-filter-actions">
+                <button class="btn btn-engaja">Filtrar</button>
+                <a href="{{ route('dashboards.presencas') }}" class="btn btn-outline-secondary">Limpar</a>
+            </div>
+        </form>
+    </x-ui.filter-card>
+
     <div class="card shadow-sm">
-        <div class="card-header bg-white">
-            <form method="GET" class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label mb-1">Ação pedagógica (evento)</label>
-                    <select name="evento_id" class="form-select form-select-sm">
-                        <option value="">Todas</option>
-                        @foreach($eventos as $id => $nome)
-                        <option value="{{ $id }}" @selected(request('evento_id')==$id)>{{ $nome }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label mb-1">De</label>
-                    <input type="date" name="de" value="{{ request('de') }}" class="form-control form-control-sm">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label mb-1">Até</label>
-                    <input type="date" name="ate" value="{{ request('ate') }}" class="form-control form-control-sm">
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label mb-1">Buscar (momento/ação)</label>
-                    <input type="text" name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="Digite para filtrar...">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label mb-1">Por página</label>
-                    <select name="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="25" @selected(request('per_page', 25)==25)>25</option>
-                        <option value="50" @selected(request('per_page')==50)>50</option>
-                        <option value="100" @selected(request('per_page')==100)>100</option>
-                    </select>
-                </div>
-
-                {{-- mantém sort/dir atuais --}}
-                <input type="hidden" name="sort" value="{{ request('sort', 'dia') }}">
-                <input type="hidden" name="dir" value="{{ request('dir', 'desc') }}">
-
-                <div class="col-md-auto d-flex gap-2">
-                    <button class="btn btn-primary btn-sm">Filtrar</button>
-                    <a href="{{ route('dashboards.presencas') }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
-                </div>
-            </form>
-        </div>
 
         <div class="card-body p-0">
             {{-- barra de ações da tabela --}}
@@ -181,10 +182,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form method="GET" action="{{ route('dashboard.export.excel') }}">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title fw-bold" id="exportExcelModalLabel">Baixar Excel (Matriz de Frequência)</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
+                <x-ui.modal-header title-id="exportExcelModalLabel" title="Baixar Excel (Matriz de Frequência)" />
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label mb-1">Ação pedagógica <span class="text-danger">*</span></label>
@@ -211,10 +209,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form method="GET" action="{{ route('dashboard.export') }}" target="_blank">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold" id="exportPdfModalLabel">Gerar PDF do dashboard</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
+                <x-ui.modal-header title-id="exportPdfModalLabel" title="Gerar PDF do dashboard" />
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">

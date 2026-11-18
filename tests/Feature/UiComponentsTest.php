@@ -138,6 +138,32 @@ class UiComponentsTest extends TestCase
             ->assertSee('no período');
     }
 
+    public function test_stat_card_aceita_slots_com_atributos_para_scripts(): void
+    {
+        $view = $this->blade(
+            '<x-ui.stat-card color="green" value-id="kpi-abertas" value="3" label="Abertos" />
+            <x-ui.stat-card icon="calendar">
+                <x-slot:value data-total="eventos">-</x-slot>
+                <x-slot:label data-total-label="eventos">Ações</x-slot>
+                <x-slot:hint data-total-help="eventos">Com respostas</x-slot>
+            </x-ui.stat-card>'
+        );
+
+        $view->assertSee('id="kpi-abertas"', false)
+            ->assertSee('class="eg-stat-value" data-total="eventos"', false)
+            ->assertSee('class="eg-stat-label" data-total-label="eventos"', false)
+            ->assertSee('class="eg-stat-hint" data-total-help="eventos"', false);
+    }
+
+    public function test_modal_header_renderiza_subtitulo_com_atributos(): void
+    {
+        $view = $this->blade(
+            '<x-ui.modal-header title="Agendar"><x-slot:subtitle id="modal-momento-titulo"></x-slot></x-ui.modal-header>'
+        );
+
+        $view->assertSee('class="eg-modal-header__subtitle" id="modal-momento-titulo"', false);
+    }
+
     public function test_empty_state_renderiza_icone_titulo_e_texto(): void
     {
         $view = $this->blade('<x-ui.empty-state icon="search" muted compact title="Nada encontrado">Ajuste os filtros.</x-ui.empty-state>');

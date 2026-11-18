@@ -1,47 +1,32 @@
 <div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
-        <div>
-            <p class="text-uppercase small text-muted mb-1">Dashboards</p>
-            <h1 class="h4 mb-0">BI Educacional</h1>
-            <p class="text-muted small mb-0">Painel de indicadores educacionais para análise territorial e acompanhamento anual.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm">Hub de dashboards</a>
-            <a href="{{ route('dashboards.avaliacoes') }}" class="btn btn-outline-primary btn-sm">Dashboard de respostas</a>
-            <a href="{{ route('dashboards.presencas') }}" class="btn btn-outline-success btn-sm">Dashboard de presenças</a>
-        </div>
-    </div>
-
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
+    <x-ui.filter-card>
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label for="bi-ano" class="form-label mb-1">Ano do indicador</label>
-                    <select id="bi-ano" wire:model.live="ano" class="form-select">
+                    <label for="bi-ano" class="eg-filter-label">Ano do indicador</label>
+                    <x-ui.select id="bi-ano" wire:model.live="ano">
                         @forelse($anosDisponiveis as $itemAno)
                             <option value="{{ $itemAno }}">{{ $itemAno }}</option>
                         @empty
                             <option value="{{ $ano }}">{{ $ano }}</option>
                         @endforelse
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div class="col-md-5">
-                    <label for="bi-municipio" class="form-label mb-1">Município (gráficos por dimensão)</label>
-                    <select id="bi-municipio" wire:model.live="municipioId" class="form-select">
+                    <label for="bi-municipio" class="eg-filter-label">Município (gráficos por dimensão)</label>
+                    <x-ui.select id="bi-municipio" wire:model.live="municipioId">
                         <option value="">Todos os municípios</option>
                         @foreach($municipiosDisponiveis as $municipio)
                             <option value="{{ $municipio['id'] }}">{{ $municipio['nome'] }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
             </div>
-        </div>
-    </div>
+    </x-ui.filter-card>
 
     @if(empty($anosDisponiveis))
-        <div class="alert alert-warning">
+        <x-ui.empty-state icon="database-x" muted title="Sem dados de BI">
             Não há dados de BI carregados para exibição no dashboard.
-        </div>
+        </x-ui.empty-state>
     @else
         @php($anoAtual = (int) $ano)
         @php($municipioIdAtual = $this->municipioIdNormalizado())

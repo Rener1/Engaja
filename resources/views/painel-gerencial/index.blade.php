@@ -2,105 +2,91 @@
 
 @section('content')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<x-ui.page-hero contained
+    eyebrow="Relatórios" eyebrow-icon="speedometer2"
+    title="Painel Gerencial de Quantitativos"
+    subtitle="Quadro de referência: público esperado × inscritos × presentes × avaliações, por Ação Pedagógica."
+    class="mb-0">
+    <x-slot:actions>
+        <a href="{{ route('painel-gerencial.exportar') }}?{{ http_build_query(array_merge(request()->query(), ['formato' => 'pdf'])) }}" class="eg-hero-btn" title="Exportar como PDF">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+        </a>
+        <a href="{{ route('painel-gerencial.exportar') }}?{{ http_build_query(array_merge(request()->query(), ['formato' => 'xlsx'])) }}" class="eg-hero-btn" title="Exportar como Excel">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Excel
+        </a>
+        <a href="{{ route('painel-gerencial.exportar') }}?{{ http_build_query(array_merge(request()->query(), ['formato' => 'docx'])) }}" class="eg-hero-btn" title="Exportar como Word">
+            <i class="bi bi-file-earmark-word me-1"></i> Word
+        </a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="container py-4">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
-        <div>
-            <p class="text-uppercase small text-muted mb-1">Relatórios</p>
-            <h1 class="h4 mb-0">Painel Gerencial de Quantitativos</h1>
-            <p class="text-muted small mb-0">Quadro de referência: público esperado × inscritos × presentes × avaliações, por Ação Pedagógica.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('painel-gerencial.exportar') }}?{{ http_build_query(array_merge(request()->query(), ['formato' => 'pdf'])) }}" class="btn btn-sm btn-outline-danger" title="Exportar como PDF">
-                <i class="bi bi-filetype-pdf"></i> PDF
-            </a>
-            <a href="{{ route('painel-gerencial.exportar') }}?{{ http_build_query(array_merge(request()->query(), ['formato' => 'xlsx'])) }}" class="btn btn-sm btn-outline-success" title="Exportar como Excel">
-                <i class="bi bi-file-earmark-spreadsheet"></i> Excel
-            </a>
-            <a href="{{ route('painel-gerencial.exportar') }}?{{ http_build_query(array_merge(request()->query(), ['formato' => 'docx'])) }}" class="btn btn-sm btn-outline-primary" title="Exportar como Word">
-                <i class="bi bi-file-earmark-word"></i> Word
-            </a>
-        </div>
-    </div>
-
     {{-- Filtros --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-body py-3">
-            <form method="GET" action="{{ route('painel-gerencial.index') }}" class="row g-2 align-items-end">
-                <div class="col-md-3 col-lg-3">
-                    <label class="form-label mb-1 small fw-semibold">Ação</label>
-                    <select name="evento_id" id="filter-evento" class="form-select form-select-sm">
-                        <option value="">Todas</option>
-                        @foreach($eventos as $id => $nome)
-                            <option value="{{ $id }}" @selected(request('evento_id') == $id)>{{ $nome }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3 col-lg-2">
-                    <label class="form-label mb-1 small fw-semibold">Região</label>
-                    <select name="regiao_id" class="form-select form-select-sm">
-                        <option value="">Todas</option>
-                        @foreach($regioes as $regiao)
-                            <option value="{{ $regiao->id }}" @selected(request('regiao_id') == $regiao->id)>{{ $regiao->nome }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3 col-lg-3">
-                    <label class="form-label mb-1 small fw-semibold">Município</label>
-                    <select name="municipio_id" id="filter-municipio" class="form-select form-select-sm">
-                        <option value="">Todos</option>
-                        @foreach($municipios as $municipio)
-                            <option value="{{ $municipio->id }}" @selected(request('municipio_id') == $municipio->id)>{{ $municipio->nome_com_estado }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3 col-lg-2">
-                    <label class="form-label mb-1 small fw-semibold">Intervalo</label>
-                    <input type="text" id="filter-daterange" class="form-control form-control-sm" placeholder="De ... até">
-                    <input type="hidden" name="de" id="filter-de" value="{{ request('de') }}">
-                    <input type="hidden" name="ate" id="filter-ate" value="{{ request('ate') }}">
-                </div>
-                <div class="col-md-2 col-lg-2">
-                    <label class="form-label mb-1 small fw-semibold">Período</label>
-                    <select name="periodo" class="form-select form-select-sm">
-                        <option value="">Todos</option>
-                        <option value="manha" @selected(request('periodo') == 'manha')>Manhã</option>
-                        <option value="tarde" @selected(request('periodo') == 'tarde')>Tarde</option>
-                        <option value="noite" @selected(request('periodo') == 'noite')>Noite</option>
-                    </select>
-                </div>
-                <div class="col-auto d-flex gap-2">
-                    <button type="submit" class="btn btn-sm text-white" style="background-color:#421944;">Filtrar</button>
-                    <a href="{{ route('painel-gerencial.index') }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
-                </div>
-            </form>
-        </div>
-    </div>
+    <x-ui.filter-card>
+        <form method="GET" action="{{ route('painel-gerencial.index') }}" class="row g-3 align-items-end">
+            <x-ui.filter-field class="col-md-6 col-lg-3" label="Ação" icon="calendar-event" for="filter-evento">
+                <x-ui.select name="evento_id" id="filter-evento">
+                    <option value="">Todas</option>
+                    @foreach($eventos as $id => $nome)
+                        <option value="{{ $id }}" @selected(request('evento_id') == $id)>{{ $nome }}</option>
+                    @endforeach
+                </x-ui.select>
+            </x-ui.filter-field>
+            <x-ui.filter-field class="col-md-6 col-lg-2" label="Região" icon="map" for="filter-regiao">
+                <x-ui.select name="regiao_id" id="filter-regiao">
+                    <option value="">Todas</option>
+                    @foreach($regioes as $regiao)
+                        <option value="{{ $regiao->id }}" @selected(request('regiao_id') == $regiao->id)>{{ $regiao->nome }}</option>
+                    @endforeach
+                </x-ui.select>
+            </x-ui.filter-field>
+            <x-ui.filter-field class="col-md-6 col-lg-3" label="Município" icon="geo-alt" for="filter-municipio">
+                <x-ui.select name="municipio_id" id="filter-municipio">
+                    <option value="">Todos</option>
+                    @foreach($municipios as $municipio)
+                        <option value="{{ $municipio->id }}" @selected(request('municipio_id') == $municipio->id)>{{ $municipio->nome_com_estado }}</option>
+                    @endforeach
+                </x-ui.select>
+            </x-ui.filter-field>
+            <x-ui.filter-field class="col-md-6 col-lg-2" label="Intervalo" icon="calendar-range" for="filter-daterange">
+                <x-ui.input id="filter-daterange" placeholder="De ... até" />
+                <input type="hidden" name="de" id="filter-de" value="{{ request('de') }}">
+                <input type="hidden" name="ate" id="filter-ate" value="{{ request('ate') }}">
+            </x-ui.filter-field>
+            <x-ui.filter-field class="col-md-6 col-lg-2" label="Período" icon="clock" for="filter-periodo">
+                <x-ui.select name="periodo" id="filter-periodo">
+                    <option value="">Todos</option>
+                    <option value="manha" @selected(request('periodo') == 'manha')>Manhã</option>
+                    <option value="tarde" @selected(request('periodo') == 'tarde')>Tarde</option>
+                    <option value="noite" @selected(request('periodo') == 'noite')>Noite</option>
+                </x-ui.select>
+            </x-ui.filter-field>
+            <div class="col-12 eg-filter-actions justify-content-end">
+                <a href="{{ route('painel-gerencial.index') }}" class="btn btn-outline-secondary">Limpar</a>
+                <button type="submit" class="btn btn-engaja"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+            </div>
+        </form>
+    </x-ui.filter-card>
 
     {{-- KPIs --}}
     @php
         $cards = [
-            ['Municípios ativos', $kpis['municipios_ativos'], 'bi-geo-alt'],
-            ['Participantes totais', $kpis['participantes_totais'], 'bi-people'],
-            ['Participantes únicos', $kpis['participantes_unicos'], 'bi-person-check'],
-            ['Eventos realizados', $kpis['eventos_realizados'], 'bi-calendar-event'],
-            ['Horas presenciais', $kpis['horas_presenciais'], 'bi-building'],
-            ['Horas EaD', $kpis['horas_ead'], 'bi-laptop'],
-            ['Certificados emitidos', $kpis['certificados_emitidos'], 'bi-award'],
-            ['Avaliações respondidas', $kpis['avaliacoes_respondidas'], 'bi-clipboard-check'],
-            ['Pendências de documentação', $kpis['pendencias_documentacao'], 'bi-exclamation-triangle'],
+            ['Municípios ativos', $kpis['municipios_ativos'], 'geo-alt-fill', 'purple'],
+            ['Participantes totais', $kpis['participantes_totais'], 'people-fill', 'blue'],
+            ['Participantes únicos', $kpis['participantes_unicos'], 'person-check-fill', 'green'],
+            ['Eventos realizados', $kpis['eventos_realizados'], 'calendar-event-fill', 'orange'],
+            ['Horas presenciais', $kpis['horas_presenciais'], 'building-fill', 'purple'],
+            ['Horas EaD', $kpis['horas_ead'], 'laptop-fill', 'blue'],
+            ['Certificados emitidos', $kpis['certificados_emitidos'], 'award-fill', 'green'],
+            ['Avaliações respondidas', $kpis['avaliacoes_respondidas'], 'clipboard2-check-fill', 'orange'],
+            ['Pendências de documentação', $kpis['pendencias_documentacao'], 'exclamation-triangle-fill', 'pink'],
         ];
     @endphp
-    <div class="row g-3 mb-4">
-        @foreach($cards as [$label, $valor, $icon])
-            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body py-3">
-                        <div class="text-muted small mb-1"><i class="bi {{ $icon }}"></i> {{ $label }}</div>
-                        <div class="h4 mb-0">{{ is_float($valor) ? number_format($valor, 1, ',', '.') : number_format($valor, 0, ',', '.') }}</div>
-                    </div>
-                </div>
-            </div>
+    <div class="eg-stats-row eg-stats-row--auto mb-4">
+        @foreach($cards as [$label, $valor, $icon, $cor])
+            <x-ui.stat-card :color="$cor" :icon="$icon" :label="$label"
+                :value="is_float($valor) ? number_format($valor, 1, ',', '.') : number_format($valor, 0, ',', '.')" />
         @endforeach
     </div>
 

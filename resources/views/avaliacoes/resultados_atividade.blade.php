@@ -1,39 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
+<x-ui.page-hero contained
+    eyebrow="Relatório anónimo" eyebrow-icon="shield-lock"
+    :title="'Avaliação — '.$atividade->descricao"
+    class="mb-0">
+    <p class="mb-0">
+        {{ \Carbon\Carbon::parse($atividade->dia)->format('d/m/Y') }}
+        @if($atividade->municipios->isNotEmpty())
+            · {{ $atividade->municipios->map(fn($m) => $m->nome_com_estado ?? $m->nome)->join(', ') }}
+        @endif
+    </p>
+    <p class="mb-0">Ação pedagógica: <strong>{{ $atividade->evento->nome ?? '—' }}</strong></p>
+    <x-slot:actions>
+        @if($submissoes->isNotEmpty())
+            <a href="{{ route('atividades.avaliacoes.pdf', $atividade) }}" class="eg-hero-btn">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Baixar PDF
+            </a>
+            <a href="{{ route('atividades.avaliacoes.pdf', ['atividade' => $atividade, 'formato' => 'docx']) }}" class="eg-hero-btn">
+                <i class="bi bi-file-earmark-word me-1"></i> Baixar Word
+            </a>
+        @endif
+        <a href="{{ route('eventos.show', $atividade->evento_id) }}" class="eg-hero-btn">
+            <i class="bi bi-arrow-left me-1"></i> Voltar à ação pedagógica
+        </a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
-        <div>
-            <p class="text-uppercase small text-muted mb-1">Relatório anónimo</p>
-            <h1 class="h3 fw-bold mb-1" style="color:#421944;">
-                Avaliação — {{ $atividade->descricao }}
-            </h1>
-            <p class="text-muted mb-0">
-                {{ \Carbon\Carbon::parse($atividade->dia)->format('d/m/Y') }}
-                @if($atividade->municipios->isNotEmpty())
-                    · {{ $atividade->municipios->map(fn($m) => $m->nome_com_estado ?? $m->nome)->join(', ') }}
-                @endif
-            </p>
-            <p class="text-muted small mt-1 mb-0">
-                Ação pedagógica: <strong>{{ $atividade->evento->nome ?? '—' }}</strong>
-            </p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            @if($submissoes->isNotEmpty())
-                <a href="{{ route('atividades.avaliacoes.pdf', $atividade) }}"
-                   class="btn btn-primary">
-                    Baixar PDF
-                </a>
-                <a href="{{ route('atividades.avaliacoes.pdf', ['atividade' => $atividade, 'formato' => 'docx']) }}"
-                   class="btn btn-outline-primary">
-                    <i class="bi bi-file-earmark-word"></i> Baixar Word
-                </a>
-            @endif
-            <a href="{{ route('eventos.show', $atividade->evento_id) }}"
-               class="btn btn-outline-secondary">← Voltar à ação pedagógica</a>
-        </div>
-    </div>
+<div class="container py-4">
 
     <div class="alert alert-info d-flex align-items-center gap-2 mb-4" role="alert">
         <span style="font-size:1.2rem;">🔒</span>
@@ -44,43 +38,15 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-3">
-        <div class="col-lg-3 col-sm-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <p class="text-uppercase small text-muted mb-1">Submissões</p>
-                    <div class="h3 fw-bold mb-0" style="color:#421944;">{{ number_format($totais['submissoes'] ?? 0, 0, ',', '.') }}</div>
-                    <small class="text-muted">Respostas completas registadas</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <p class="text-uppercase small text-muted mb-1">Questões com resposta</p>
-                    <div class="h3 fw-bold mb-0" style="color:#421944;">{{ number_format($totais['questoes'] ?? 0, 0, ',', '.') }}</div>
-                    <small class="text-muted">Com alguma resposta agregada</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <p class="text-uppercase small text-muted mb-1">Itens de resposta</p>
-                    <div class="h3 fw-bold mb-0" style="color:#421944;">{{ number_format($totais['respostas'] ?? 0, 0, ',', '.') }}</div>
-                    <small class="text-muted">Total de campos preenchidos</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-sm-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <p class="text-uppercase small text-muted mb-1">Última resposta</p>
-                    <div class="h4 fw-bold mb-0" style="color:#421944;">{{ $totais['ultima'] ?? '—' }}</div>
-                    <small class="text-muted">Data/hora do último envio</small>
-                </div>
-            </div>
-        </div>
+    <div class="eg-stats-row">
+        <x-ui.stat-card color="purple" icon="people-fill" label="Submissões" hint="Respostas completas registadas"
+            :value="number_format($totais['submissoes'] ?? 0, 0, ',', '.')" />
+        <x-ui.stat-card color="blue" icon="list-check" label="Questões com resposta" hint="Com alguma resposta agregada"
+            :value="number_format($totais['questoes'] ?? 0, 0, ',', '.')" />
+        <x-ui.stat-card color="green" icon="chat-dots-fill" label="Itens de resposta" hint="Total de campos preenchidos"
+            :value="number_format($totais['respostas'] ?? 0, 0, ',', '.')" />
+        <x-ui.stat-card color="orange" icon="clock-history" label="Última resposta" hint="Data/hora do último envio" small
+            :value="$totais['ultima'] ?? '—'" />
     </div>
 
     @if($submissoes->isEmpty())
@@ -94,9 +60,9 @@
                 </div>
             </div>
         </div>
-        <div class="alert alert-warning mb-0">
+        <x-ui.empty-state icon="inbox" muted title="Sem avaliações">
             Nenhuma avaliação recebida ainda para este momento.
-        </div>
+        </x-ui.empty-state>
     @else
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body py-3">
@@ -126,10 +92,9 @@
 <div class="modal fade" id="textAnswersModalMomento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title js-text-modal-title">Respostas</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
+            <x-ui.modal-header>
+                <span class="js-text-modal-title">Respostas</span>
+            </x-ui.modal-header>
             <div class="modal-body">
                 <div class="text-muted small mb-2 js-text-modal-count"></div>
                 <div class="vstack gap-2 js-text-modal-list" style="max-height: 60vh; overflow: auto;"></div>

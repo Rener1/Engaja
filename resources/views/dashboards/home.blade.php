@@ -1,30 +1,16 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-  <div class="card shadow-sm border-0 mb-4" style="background:#ecdeec;">
-    <div class="card-body d-flex flex-wrap justify-content-between align-items-start gap-3">
-      <div>
-        <p class="text-uppercase small mb-1" style="color:#421944;">Dashboards</p>
-        <h1 class="h4 fw-bold mb-1" style="color:#421944;">Escolha o painel</h1>
-      </div>
-      <div class="d-flex flex-wrap gap-2 align-self-center">
-        <a class="btn btn-outline-secondary" href="{{ route('dashboards.bi') }}">
-          BI Educacional
-        </a>
-        <a class="btn btn-outline-primary" href="{{ route('dashboards.avaliacoes') }}">
-          Respostas de formulários
-        </a>
-        <a class="btn btn-primary" href="{{ route('dashboards.presencas') }}">
-          Presenças e inscrições
-        </a>
-        <a class="btn btn-outline-dark" href="{{ route('dashboards.leitura-mundo') }}">
-          Leitura do mundo
-        </a>
-      </div>
-    </div>
-  </div>
+<x-ui.page-hero contained eyebrow="Dashboards" eyebrow-icon="grid" title="Escolha o painel" class="mb-0">
+  <x-slot:actions>
+    <a class="eg-hero-btn" href="{{ route('dashboards.bi') }}"><i class="bi bi-bar-chart-line me-1"></i> BI Educacional</a>
+    <a class="eg-hero-btn" href="{{ route('dashboards.avaliacoes') }}"><i class="bi bi-chat-square-text me-1"></i> Respostas de formulários</a>
+    <a class="eg-hero-btn" href="{{ route('dashboards.presencas') }}"><i class="bi bi-people me-1"></i> Presenças e inscrições</a>
+    <a class="eg-hero-btn" href="{{ route('dashboards.leitura-mundo') }}"><i class="bi bi-globe2 me-1"></i> Leitura do mundo</a>
+  </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
   <div class="row g-3 mb-4">
     <div class="col-lg-3">
       <div class="card h-100 shadow-sm border-0">

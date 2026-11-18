@@ -52,6 +52,13 @@
   padding-right: 1rem;
 }
 
+.eg-input[type="date"],
+.eg-input[type="time"] {
+  padding-left: .75rem;
+  padding-right: .6rem;
+  min-width: 0;
+}
+
 .eg-input::placeholder {
   color: #9ca3af;
   font-weight: 500;
@@ -119,4 +126,18 @@
   color: $engaja-purple;
   border-color: #d9bfdc;
   font-weight: 600;
+}
+
+/* "Limpar" neutro (o secondary do tema é azul) */
+.eg-filter-actions .btn-outline-secondary {
+  --bs-btn-color: #4b5563;
+  --bs-btn-border-color: #e5e7eb;
+  --bs-btn-bg: #fff;
+  --bs-btn-hover-color: #1f2937;
+  --bs-btn-hover-bg: #f3f4f6;
+  --bs-btn-hover-border-color: #d1d5db;
+  --bs-btn-active-color: #1f2937;
+  --bs-btn-active-bg: #e5e7eb;
+  --bs-btn-active-border-color: #d1d5db;
+  border-width: 1.5px;
 }

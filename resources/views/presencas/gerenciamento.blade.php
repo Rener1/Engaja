@@ -1,174 +1,107 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-lg-4 py-4">
+<x-ui.page-hero eyebrow="Operações / Gerenciamento" eyebrow-icon="calendar2-check"
+    title="Controle de Confirmação de Presenças"
+    subtitle="Gerencie em tempo real a abertura, o fechamento e os agendamentos automáticos de presença em todos os momentos pedagógicos.">
+    <x-slot:actions>
+        <a href="{{ route('eventos.index') }}" class="eg-hero-btn">
+            <i class="bi bi-arrow-left me-1"></i> Ações Pedagógicas
+        </a>
+        <a href="{{ route('dashboards.presencas') }}" class="eg-hero-btn">
+            <i class="bi bi-bar-chart-fill me-1"></i> Dashboard de Presenças
+        </a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
-    {{-- Cabeçalho da tela --}}
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <p class="text-uppercase text-muted small mb-1">
-                <i class="bi bi-calendar2-check me-1"></i> Operações / Gerenciamento
-            </p>
-            <h1 class="h4 fw-bold text-engaja mb-1">Controle de Confirmação de Presenças</h1>
-            <p class="text-muted small mb-0">
-                Gerencie em tempo real a abertura, o fechamento e os agendamentos automáticos de presença em todos os momentos pedagógicos.
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('eventos.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Ações Pedagógicas
-            </a>
-            <a href="{{ route('dashboards.presencas') }}" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-bar-chart-fill me-1"></i> Dashboard de Presenças
-            </a>
-        </div>
-    </div>
+<div>
 
     {{-- Cards de resumo rápido --}}
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-light text-engaja me-3" style="width: 52px; height: 52px;">
-                        <i class="bi bi-collection-fill fs-4"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small">Total de Momentos</div>
-                        <div class="fs-4 fw-bold text-dark">{{ $totalAtividades }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-success-subtle text-success me-3" style="width: 52px; height: 52px;">
-                        <i class="bi bi-check-circle-fill fs-4"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small">Nesta Listagem (Abertos)</div>
-                        <div class="fs-4 fw-bold text-success" id="kpi-abertas">
-                            {{ $atividades->getCollection()->filter(fn($a) => $a->presencaEstaAberta())->count() }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-secondary-subtle text-secondary me-3" style="width: 52px; height: 52px;">
-                        <i class="bi bi-lock-fill fs-4"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small">Nesta Listagem (Fechados)</div>
-                        <div class="fs-4 fw-bold text-secondary" id="kpi-fechadas">
-                            {{ $atividades->getCollection()->filter(fn($a) => ! $a->presencaEstaAberta())->count() }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-primary-subtle text-primary me-3" style="width: 52px; height: 52px;">
-                        <i class="bi bi-clock-history fs-4"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small">Com Agendamento Futuro</div>
-                        <div class="fs-4 fw-bold text-primary">{{ $comAgendamentoFuturo }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="eg-stats-row">
+        <x-ui.stat-card color="purple" icon="collection-fill" label="Total de Momentos" :value="$totalAtividades" />
+        <x-ui.stat-card color="green" icon="check-circle-fill" label="Nesta Listagem (Abertos)" value-id="kpi-abertas"
+            :value="$atividades->getCollection()->filter(fn($a) => $a->presencaEstaAberta())->count()" />
+        <x-ui.stat-card color="gray" icon="lock-fill" label="Nesta Listagem (Fechados)" value-id="kpi-fechadas"
+            :value="$atividades->getCollection()->filter(fn($a) => ! $a->presencaEstaAberta())->count()" />
+        <x-ui.stat-card color="blue" icon="clock-history" label="Com Agendamento Futuro" :value="$comAgendamentoFuturo" />
     </div>
 
     {{-- Barra de Filtros --}}
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body p-3">
-            <form method="GET" action="{{ route('presencas.gerenciamento') }}" class="row g-2 align-items-end">
+    <x-ui.filter-card>
+        <form method="GET" action="{{ route('presencas.gerenciamento') }}" class="row g-3 align-items-end">
 
-                {{-- Busca textual --}}
-                <div class="col-12 col-md-3">
-                    <label class="form-label small fw-semibold text-muted mb-1">Buscar (momento ou ação)</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                        <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Nome do momento ou ação...">
-                    </div>
-                </div>
+            {{-- Busca textual --}}
+            <div class="col-12 col-lg-4">
+                <label class="eg-filter-label">Buscar (momento ou ação)</label>
+                <x-ui.input type="text" name="q" value="{{ request('q') }}" placeholder="Nome do momento ou ação..." />
+            </div>
 
-                {{-- Status de Presença --}}
-                <div class="col-6 col-md-2">
-                    <label class="form-label small fw-semibold text-muted mb-1">Status da Presença</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="">Todos os status</option>
-                        <option value="aberta" @selected(request('status') === 'aberta')>Aberta agora</option>
-                        <option value="fechada" @selected(request('status') === 'fechada')>Fechada agora</option>
-                        <option value="agendada" @selected(request('status') === 'agendada')>Com agendamento futuro</option>
-                    </select>
-                </div>
+            {{-- Status de Presença --}}
+            <div class="col-6 col-lg-2">
+                <label class="eg-filter-label">Status da Presença</label>
+                <x-ui.select name="status">
+                    <option value="">Todos os status</option>
+                    <option value="aberta" @selected(request('status') === 'aberta')>Aberta agora</option>
+                    <option value="fechada" @selected(request('status') === 'fechada')>Fechada agora</option>
+                    <option value="agendada" @selected(request('status') === 'agendada')>Com agendamento futuro</option>
+                </x-ui.select>
+            </div>
 
-                {{-- Ação Pedagógica (Evento) --}}
-                <div class="col-6 col-md-3">
-                    <label class="form-label small fw-semibold text-muted mb-1">Ação Pedagógica</label>
-                    <select name="evento_id" class="form-select form-select-sm">
-                        <option value="">Todas as ações</option>
-                        @foreach($eventos as $id => $nome)
-                            <option value="{{ $id }}" @selected(request('evento_id') == $id)>{{ $nome }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            {{-- Ação Pedagógica (Evento) --}}
+            <div class="col-6 col-lg-3">
+                <label class="eg-filter-label">Ação Pedagógica</label>
+                <x-ui.select name="evento_id">
+                    <option value="">Todas as ações</option>
+                    @foreach($eventos as $id => $nome)
+                        <option value="{{ $id }}" @selected(request('evento_id') == $id)>{{ $nome }}</option>
+                    @endforeach
+                </x-ui.select>
+            </div>
 
-                {{-- Município --}}
-                <div class="col-6 col-md-2">
-                    <label class="form-label small fw-semibold text-muted mb-1">Município</label>
-                    <select name="municipio_id" class="form-select form-select-sm">
-                        <option value="">Todos</option>
-                        @foreach($municipios as $m)
-                            <option value="{{ $m->id }}" @selected(request('municipio_id') == $m->id)>
-                                {{ $m->nome }} ({{ $m->estado->sigla ?? '—' }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+            {{-- Município --}}
+            <div class="col-6 col-lg-3">
+                <label class="eg-filter-label">Município</label>
+                <x-ui.select name="municipio_id">
+                    <option value="">Todos</option>
+                    @foreach($municipios as $m)
+                        <option value="{{ $m->id }}" @selected(request('municipio_id') == $m->id)>
+                            {{ $m->nome }} ({{ $m->estado->sigla ?? '—' }})
+                        </option>
+                    @endforeach
+                </x-ui.select>
+            </div>
 
-                {{-- Período (De) --}}
-                <div class="col-3 col-md-1">
-                    <label class="form-label small fw-semibold text-muted mb-1">De</label>
-                    <input type="date" name="de" value="{{ request('de') }}" class="form-control form-control-sm">
-                </div>
+            {{-- Período (De) --}}
+            <div class="col-6 col-md-3 col-lg-2">
+                <label class="eg-filter-label">De</label>
+                <x-ui.input type="date" name="de" value="{{ request('de') }}" />
+            </div>
 
-                {{-- Período (Até) --}}
-                <div class="col-3 col-md-1">
-                    <label class="form-label small fw-semibold text-muted mb-1">Até</label>
-                    <input type="date" name="ate" value="{{ request('ate') }}" class="form-control form-control-sm">
-                </div>
+            {{-- Período (Até) --}}
+            <div class="col-6 col-md-3 col-lg-2">
+                <label class="eg-filter-label">Até</label>
+                <x-ui.input type="date" name="ate" value="{{ request('ate') }}" />
+            </div>
 
-                {{-- Botões de ação --}}
-                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                    @if(request()->anyFilled(['q', 'status', 'evento_id', 'municipio_id', 'de', 'ate']))
-                        <a href="{{ route('presencas.gerenciamento') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-x-circle me-1"></i> Limpar filtros
-                        </a>
-                    @endif
-                    <button type="submit" class="btn btn-engaja btn-sm px-3">
-                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+            {{-- Botões de ação --}}
+            <div class="col eg-filter-actions justify-content-end">
+                @if(request()->anyFilled(['q', 'status', 'evento_id', 'municipio_id', 'de', 'ate']))
+                    <a href="{{ route('presencas.gerenciamento') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i> Limpar filtros
+                    </a>
+                @endif
+                <button type="submit" class="btn btn-engaja px-3">
+                    <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </x-ui.filter-card>
 
     {{-- Tabela de Dados (AG-Grid via <x-data-table>) --}}
     @if ($atividades->isEmpty())
-        <div class="alert alert-info shadow-sm d-flex align-items-center gap-2">
-            <i class="bi bi-info-circle-fill fs-5"></i>
-            <div>Nenhum momento encontrado para os filtros selecionados.</div>
-        </div>
+        <x-ui.empty-state icon="calendar-x" muted title="Nenhum momento encontrado">
+            Ajuste ou limpe os filtros para ver outros momentos.
+        </x-ui.empty-state>
     @else
         @php
             $fuso = \App\Support\AgendamentoPresenca::FUSO;
@@ -363,17 +296,11 @@
 {{-- Modal Unificado de Agendamento de Presença --}}
 <div class="modal fade" id="modalGerenciamentoAgendamento" tabindex="-1" aria-labelledby="modalGerenciamentoAgendamentoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
+        <div class="modal-content border-0 shadow-lg">
 
-            <div class="modal-header border-bottom-0 pb-0">
-                <div>
-                    <h5 class="modal-title fw-bold text-engaja" id="modalGerenciamentoAgendamentoLabel">
-                        <i class="bi bi-clock-history me-1"></i> Agendar Confirmação de Presença
-                    </h5>
-                    <div class="small text-muted text-truncate" style="max-width: 420px;" id="modal-momento-titulo"></div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            <x-ui.modal-header icon="clock-history" title="Agendar Confirmação de Presença" title-id="modalGerenciamentoAgendamentoLabel">
+                <x-slot:subtitle id="modal-momento-titulo"></x-slot:subtitle>
+            </x-ui.modal-header>
 
             <form action="" method="POST" id="form-gerenciamento-agendamento">
                 @csrf

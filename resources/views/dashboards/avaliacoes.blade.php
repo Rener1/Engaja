@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero contained
+    eyebrow="Dashboards" eyebrow-icon="chat-square-text"
+    title="Respostas dos formulários"
+    class="mb-0">
+    <x-slot:actions>
+        <button type="button" id="btn-exportar-pdf" class="eg-hero-btn">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Gerar PDF
+        </button>
+        <a href="{{ route('dashboard') }}" class="eg-hero-btn"><i class="bi bi-grid me-1"></i> Hub de dashboards</a>
+        <a href="{{ route('dashboards.bi') }}" class="eg-hero-btn"><i class="bi bi-bar-chart-line me-1"></i> Ir para BI</a>
+        <a href="{{ route('dashboards.presencas') }}" class="eg-hero-btn"><i class="bi bi-people me-1"></i> Ir para presenças</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="container py-4" id="avaliacoes-dashboard" data-endpoint="{{ route('dashboards.avaliacoes.data', request()->only(['fonte', 'survey_id'])) }}">
-  <div class="mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-      <div>
-        <p class="text-uppercase small text-muted mb-1">Dashboards</p>
-        <h1 class="h3 fw-bold mb-1">Respostas dos formulários</h1>
-        {{-- <p class="text-muted mb-0">Visual limpo, na paleta do projeto, com filtros instantâneos.</p> --}}
-      </div>
-      <div class="d-flex gap-2">
-        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">Hub de dashboards</a>
-        <a href="{{ route('dashboards.bi') }}" class="btn btn-outline-secondary">Ir para BI</a>
-        <a href="{{ route('dashboards.presencas') }}" class="btn btn-outline-primary">Ir para presenças</a>
-      </div>
-    </div>
-  </div>
 
   @if(request('fonte') === 'limesurvey')
     <div class="alert alert-info border-0 shadow-sm py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -35,50 +35,44 @@
     </div>
   @endif
 
-  <div class="card shadow-sm border-0 mb-3">
-    <div class="card-body">
-      <div class="mb-3 d-flex justify-content-between align-items-end">
-        <div>
-          <label class="form-label text-muted small mb-1">Tipo de formulário</label>
-          <div class="btn-group" role="group" aria-label="Tipo de formulário">
-            <input type="radio" class="btn-check js-filter" name="tipo-dashboard" id="tipo-momento" value="momento" checked>
-            <label class="btn btn-outline-secondary" for="tipo-momento">Por momento</label>
+  <x-ui.filter-card>
+      <div class="mb-3">
+        <span class="eg-filter-label"><i class="bi bi-ui-radios me-1"></i> Tipo de formulário</span>
+        <div class="eg-segmented eg-segmented--auto" role="group" aria-label="Tipo de formulário">
+          <input type="radio" class="btn-check js-filter" name="tipo-dashboard" id="tipo-momento" value="momento" checked>
+          <label class="eg-seg-btn" for="tipo-momento">Por momento</label>
 
-            <input type="radio" class="btn-check js-filter" name="tipo-dashboard" id="tipo-transcricao" value="transcricao">
-            <label class="btn btn-outline-secondary" for="tipo-transcricao">Transcrições</label>
+          <input type="radio" class="btn-check js-filter" name="tipo-dashboard" id="tipo-transcricao" value="transcricao">
+          <label class="eg-seg-btn" for="tipo-transcricao">Transcrições</label>
 
-            <input type="radio" class="btn-check js-filter" name="tipo-dashboard" id="tipo-universal" value="universal">
-            <label class="btn btn-outline-secondary" for="tipo-universal">Universais</label>
-          </div>
+          <input type="radio" class="btn-check js-filter" name="tipo-dashboard" id="tipo-universal" value="universal">
+          <label class="eg-seg-btn" for="tipo-universal">Universais</label>
         </div>
-        <button type="button" id="btn-exportar-pdf" class="btn btn-danger">
-          Gerar PDF
-        </button>
       </div>
       <div class="row g-3 align-items-end">
         <div class="col-lg-3 col-md-6 filter-momento">
-         <label class="form-label text-muted small mb-1">Ação Pedagógica (Obrigatório)</label>
-          <select class="form-select js-filter" id="f-evento">
+         <label class="eg-filter-label">Ação Pedagógica (Obrigatório)</label>
+          <x-ui.select class="js-filter" id="f-evento">
             <option value="">-- Selecione uma ação --</option>
             @foreach($eventos as $evento)
             <option value="{{ $evento->id }}">{{ $evento->nome }}</option>
             @endforeach
-          </select>
+          </x-ui.select>
         </div>
         <div class="col-lg-3 col-md-6 filter-universal d-none">
-          <label class="form-label text-muted small mb-1">Avaliação universal</label>
-          <select class="form-select js-filter" id="f-avaliacao-universal">
+          <label class="eg-filter-label">Avaliação universal</label>
+          <x-ui.select class="js-filter" id="f-avaliacao-universal">
             <option value="">-- Selecione uma avaliação --</option>
             @foreach($avaliacoesUniversais as $avaliacaoUniversal)
             <option value="{{ $avaliacaoUniversal->id }}">
               {{ $avaliacaoUniversal->descricao_universal ?: ($avaliacaoUniversal->templateAvaliacao->nome ?? 'Avaliação universal') }}
             </option>
             @endforeach
-          </select>
+          </x-ui.select>
         </div>
         <div class="col-lg-3 col-md-6 filter-momento">
-          <label class="form-label text-muted small mb-1">Momento</label>
-          <select class="form-select js-filter" id="f-atividade">
+          <label class="eg-filter-label">Momento</label>
+          <x-ui.select class="js-filter" id="f-atividade">
             <option value="">Primeiro selecione a ação pedagógica</option>
             @foreach($atividades as $atividade)
             @php
@@ -88,23 +82,22 @@
               {{ $atividade->descricao ?? 'Momento' }} - {{ $diaFormatado }} {{ $atividade->hora_inicio }}
             </option>
             @endforeach
-          </select>
+          </x-ui.select>
         </div>
         <div class="col-lg-3 col-md-6">
-          <div class="row g-2">
+          <div class="row g-3">
             <div class="col-6">
-              <label class="form-label text-muted small mb-1">De</label>
-              <input type="date" class="form-control js-filter" id="f-de">
+              <label class="eg-filter-label">De</label>
+              <x-ui.input type="date" class="js-filter" id="f-de" />
             </div>
             <div class="col-6">
-              <label class="form-label text-muted small mb-1">Até</label>
-              <input type="date" class="form-control js-filter" id="f-ate">
+              <label class="eg-filter-label">Até</label>
+              <x-ui.input type="date" class="js-filter" id="f-ate" />
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+  </x-ui.filter-card>
 
   <div id="dashboard-avaliacoes-notice" class="alert alert-info border-0 shadow-sm py-2 px-3 small mb-3 d-none" role="alert" aria-live="polite"></div>
 
@@ -113,43 +106,21 @@
     @include('dashboards.avaliacoes._cards-totais')
     @include('dashboards.avaliacoes._bi-matriz')
   @else
-    <div class="row g-3 mb-3" id="cards-totais">
-      <div class="col-lg-3 col-sm-6">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <p class="text-uppercase small text-muted mb-1">Submissões</p>
-            <div class="h3 fw-bold mb-0" data-total="submissoes">-</div>
-            <small class="text-muted">Respostas completas registradas</small>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-sm-6">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <p class="text-uppercase small text-muted mb-1">Questões</p>
-            <div class="h3 fw-bold mb-0" data-total="questoes">-</div>
-            <small class="text-muted">Com alguma resposta</small>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-sm-6">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <p class="text-uppercase small text-muted mb-1" data-total-label="eventos">Ações Pedagógicas</p>
-            <div class="h3 fw-bold mb-0" data-total="eventos">-</div>
-            <small class="text-muted" data-total-help="eventos">Com respostas vinculadas</small>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-sm-6">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <p class="text-uppercase small text-muted mb-1">Última resposta</p>
-            <div class="h3 fw-bold mb-0" data-total="ultima">-</div>
-            <small class="text-muted">Horário da última entrada</small>
-          </div>
-        </div>
-      </div>
+    <div class="eg-stats-row" id="cards-totais">
+      <x-ui.stat-card color="purple" icon="people-fill" label="Submissões" hint="Respostas completas registradas">
+        <x-slot:value data-total="submissoes">-</x-slot:value>
+      </x-ui.stat-card>
+      <x-ui.stat-card color="blue" icon="list-check" label="Questões" hint="Com alguma resposta">
+        <x-slot:value data-total="questoes">-</x-slot:value>
+      </x-ui.stat-card>
+      <x-ui.stat-card color="green" icon="calendar-event-fill">
+        <x-slot:value data-total="eventos">-</x-slot:value>
+        <x-slot:label data-total-label="eventos">Ações Pedagógicas</x-slot:label>
+        <x-slot:hint data-total-help="eventos">Com respostas vinculadas</x-slot:hint>
+      </x-ui.stat-card>
+      <x-ui.stat-card color="orange" icon="clock-history" label="Última resposta" hint="Horário da última entrada" small>
+        <x-slot:value data-total="ultima">-</x-slot:value>
+      </x-ui.stat-card>
     </div>
   @endif
 

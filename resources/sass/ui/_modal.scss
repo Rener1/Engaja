@@ -21,3 +21,16 @@
 .eg-modal-header--danger {
   background: $engaja-pink;
 }
+
+.eg-modal-header__subtitle {
+  font-size: .8rem;
+  color: rgba(255, 255, 255, .72);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 420px;
+}
+
+.eg-modal-header .min-w-0 {
+  min-width: 0;
+}

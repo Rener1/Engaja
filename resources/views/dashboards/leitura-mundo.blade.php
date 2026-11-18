@@ -1,19 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-    <div>
-      <p class="text-uppercase small text-muted mb-1">Dashboards</p>
-      <h1 class="h4 fw-bold mb-1">Leitura do mundo</h1>
-      <p class="text-muted mb-0">Selecione uma leitura para abrir o dashboard de respostas.</p>
-    </div>
-    <div class="d-flex gap-2">
-      <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">Hub de dashboards</a>
-      <a href="{{ route('dashboards.avaliacoes') }}" class="btn btn-outline-primary">Dashboard de respostas</a>
-    </div>
-  </div>
+<x-ui.page-hero contained
+    eyebrow="Dashboards" eyebrow-icon="globe2"
+    title="Leitura do mundo"
+    subtitle="Selecione uma leitura para abrir o dashboard de respostas."
+    class="mb-0">
+  <x-slot:actions>
+    <a href="{{ route('dashboard') }}" class="eg-hero-btn"><i class="bi bi-grid me-1"></i> Hub de dashboards</a>
+    <a href="{{ route('dashboards.avaliacoes') }}" class="eg-hero-btn"><i class="bi bi-chat-square-text me-1"></i> Dashboard de respostas</a>
+  </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
   @if($erro)
     <div class="alert alert-danger border-0 shadow-sm">
       Não foi possível carregar as leituras do LimeSurvey: {{ $erro }}
@@ -69,7 +68,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="7" class="text-center text-muted py-4">Nenhuma leitura encontrada.</td>
+                <td colspan="7"><x-ui.empty-state compact muted icon="journal-x" title="Nenhuma leitura encontrada." /></td>
               </tr>
             @endforelse
           </tbody>
