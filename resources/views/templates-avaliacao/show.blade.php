@@ -1,16 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="files" :title="$template->nome">
+    <p class="text-muted mb-0">{{ $template->descricao ?: 'Sem descrição' }}</p>
+    <x-slot:actions>
+        <a href="{{ route('templates-avaliacao.edit', $template) }}" class="eg-hero-btn">Editar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-8">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold text-engaja mb-1">{{ $template->nome }}</h1>
-        <p class="text-muted mb-0">{{ $template->descricao ?: 'Sem descrição' }}</p>
-      </div>
-      <a href="{{ route('templates-avaliacao.edit', $template) }}" class="btn btn-outline-secondary">Editar</a>
-    </div>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <h2 class="h6 fw-semibold text-uppercase text-muted mb-3">Questões</h2>

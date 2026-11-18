@@ -47,110 +47,105 @@
         ->locale('pt_BR')->translatedFormat('l, d \\d\\e F \\d\\e Y');
         $presencaAberta = $atividade->presencaEstaAberta();
     @endphp
+    <x-header-atividade hero contained :atividade="$atividade" class="mb-0">
+        <div class="mt-2">
+            <span class="badge {{ $presencaAberta ? 'bg-success' : 'bg-secondary' }} d-inline-flex align-items-center gap-1">
+                <i class="bi {{ $presencaAberta ? 'bi-check-circle-fill' : 'bi-lock-fill' }}"></i>
+                {{ $atividade->status_presenca_label }}
+            </span>
+        </div>
+        <x-slot:actions>
+            {{-- Ação Principal (Sempre visível para o usuário final) --}}
+            @auth
+                <form action="{{ route('atividades.presenca.checkin', $atividade) }}" method="POST" class="d-inline">
+                    @csrf
+                    <button class="eg-hero-btn eg-hero-btn--solid" {{ $presencaAberta ? '' : 'disabled' }}>
+                        Confirmar minha presença
+                    </button>
+                </form>
+            @else
+                @if($presencaAberta)
+                    <a class="eg-hero-btn eg-hero-btn--solid" href="{{ route('presenca.confirmar', $atividade) }}">
+                        Confirmar presença
+                    </a>
+                @endif
+            @endauth
+
+            {{-- menu gerenciar --}}
+            @php
+                $mostrarMenuGerenciarAtividade = $podeImportar || auth()->user()?->can('presenca.abrir');
+            @endphp
+
+            @if($mostrarMenuGerenciarAtividade)
+                <div class="dropdown">
+                    <button class="eg-hero-btn dropdown-toggle" type="button" id="dropdownGerenciarAtividade"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        Gerenciar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownGerenciarAtividade">
+
+                        @if($podeImportar)
+                            <li>
+                                <a class="dropdown-item text-engaja" href="{{ route('atividades.presencas.import', $atividade) }}">
+                                    Importar presenças
+                                </a>
+                            </li>
+                        @endif
+
+                        @can('presenca.abrir')
+                            <li>
+                                <button type="button" class="dropdown-item text-engaja" data-bs-toggle="modal" data-bs-target="#modalListaPresenca">
+                                    Baixar Lista de Presença
+                                </button>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-engaja" href="{{ route('atividades.lista-autorizacao.pdf', $atividade) }}">
+                                    Baixar Autorização de Imagem
+                                </a>
+                            </li>
+                            <li>
+                                 <a class="dropdown-item text-engaja" href="{{ route('atividades.diario', $atividade) }}">
+                                     Diário de Presenças
+                                 </a>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item text-engaja" data-bs-toggle="modal" data-bs-target="#modalAgendamentoPresenca">
+                                    </i>Agendar abertura/fechamento
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('atividades.presenca.toggle', $atividade) }}" method="POST" class="m-0">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="dropdown-item {{ $presencaAberta ? 'text-danger' : 'text-success' }}">
+                                        {{ $presencaAberta ? 'Fechar presença' : 'Abrir presença' }}
+                                    </button>
+                                </form>
+                            </li>
+                        @endcan
+
+                    </ul>
+                </div>
+            @endif
+        </x-slot:actions>
+    </x-header-atividade>
+
     <div class="container py-4">
 
-        {{-- Cabeçalho do momento --}}
-        <div class="d-flex justify-content-between align-items-start mb-4">
-            <div>
-                <x-header-atividade :atividade="$atividade" />
-                <div class="mt-2">
-                    <span class="badge {{ $presencaAberta ? 'bg-success' : 'bg-secondary' }} d-inline-flex align-items-center gap-1">
-                        <i class="bi {{ $presencaAberta ? 'bi-check-circle-fill' : 'bi-lock-fill' }}"></i>
-                        {{ $atividade->status_presenca_label }}
-                    </span>
+        {{-- Alerta de dados demográficos pendentes --}}
+        @if (session('erro_demograficos'))
+            <div class="mb-3">
+                <div class="alert alert-warning d-flex align-items-start gap-2 mb-0" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    <div>
+                        <strong>Dados demográficos pendentes!</strong><br>
+                        {{ session('erro_demograficos') }}
+                    </div>
                 </div>
             </div>
-
-        <div class="d-flex flex-wrap gap-2 mb-3">
-                {{-- Alerta de dados demográficos pendentes --}}
-                @if (session('erro_demograficos'))
-                    <div class="w-100 mb-2">
-                        <div class="alert alert-warning d-flex align-items-start gap-2 mb-0" role="alert">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" viewBox="0 0 16 16">
-                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                            </svg>
-                            <div>
-                                <strong>Dados demográficos pendentes!</strong><br>
-                                {{ session('erro_demograficos') }}
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                {{-- Ação Principal (Sempre visível para o usuário final) --}}
-                @auth
-                    <form action="{{ route('atividades.presenca.checkin', $atividade) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button class="btn btn-primary" {{ $presencaAberta ? '' : 'disabled' }}>
-                            Confirmar minha presença
-                        </button>
-                    </form>
-                @else
-                    @if($presencaAberta)
-                        <a class="btn btn-primary" href="{{ route('presenca.confirmar', $atividade) }}">
-                            Confirmar presença
-                        </a>
-                    @endif
-                @endauth
-
-                {{-- menu gerenciar --}}
-                @php
-                    $mostrarMenuGerenciarAtividade = $podeImportar || auth()->user()?->can('presenca.abrir');
-                @endphp
-
-                @if($mostrarMenuGerenciarAtividade)
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownGerenciarAtividade"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            Gerenciar
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownGerenciarAtividade">
-
-                            @if($podeImportar)
-                                <li>
-                                    <a class="dropdown-item text-engaja" href="{{ route('atividades.presencas.import', $atividade) }}">
-                                        Importar presenças
-                                    </a>
-                                </li>
-                            @endif
-
-                            @can('presenca.abrir')
-                                <li>
-                                    <button type="button" class="dropdown-item text-engaja" data-bs-toggle="modal" data-bs-target="#modalListaPresenca">
-                                        Baixar Lista de Presença
-                                    </button>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-engaja" href="{{ route('atividades.lista-autorizacao.pdf', $atividade) }}">
-                                        Baixar Autorização de Imagem
-                                    </a>
-                                </li>
-                                <li>
-                                     <a class="dropdown-item text-engaja" href="{{ route('atividades.diario', $atividade) }}">
-                                         Diário de Presenças
-                                     </a>
-                                </li>
-                                <li>
-                                    <button type="button" class="dropdown-item text-engaja" data-bs-toggle="modal" data-bs-target="#modalAgendamentoPresenca">
-                                        </i>Agendar abertura/fechamento
-                                    </button>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="{{ route('atividades.presenca.toggle', $atividade) }}" method="POST" class="m-0">
-                                        @csrf @method('PATCH')
-                                        <button type="submit" class="dropdown-item {{ $presencaAberta ? 'text-danger' : 'text-success' }}">
-                                            {{ $presencaAberta ? 'Fechar presença' : 'Abrir presença' }}
-                                        </button>
-                                    </form>
-                                </li>
-                            @endcan
-
-                        </ul>
-                    </div>
-                @endif
-            </div>
-        </div>
+        @endif
 
         @auth
             {{-- QR Code de presença --}}
@@ -253,10 +248,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
 
-                    <div class="modal-header border-bottom-0 pb-0">
-                        <h5 class="modal-title fw-bold text-engaja" id="modalListaPresencaLabel">Baixar Lista de Presença</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+                    <x-ui.modal-header title-id="modalListaPresencaLabel" title="Baixar Lista de Presença" />
 
                     <form action="{{ route('atividades.lista-presenca.pdf', $atividade) }}" method="GET">
                         <div class="modal-body py-4">
@@ -298,12 +290,7 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
 
-                        <div class="modal-header border-bottom-0 pb-0">
-                            <h5 class="modal-title fw-bold text-engaja" id="modalAgendamentoPresencaLabel">
-                                <i class="bi bi-clock-history me-1"></i> Agendar Confirmação de Presença
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
+                        <x-ui.modal-header icon="clock-history" title-id="modalAgendamentoPresencaLabel" title="Agendar Confirmação de Presença" />
 
                         <form action="{{ route('atividades.presenca.agendamento', $atividade) }}" method="POST" id="form-agendamento-presenca">
                             @csrf

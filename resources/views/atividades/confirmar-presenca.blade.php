@@ -2,13 +2,13 @@
 
 @section('content')
 
+  <x-header-atividade hero contained :atividade="$atividade" class="mb-0" />
+
   <div class="container py-4">
     <div class="row justify-content-center">
       <div class="col-md-8">
         <div class="card ev-card">
           <div class="card-body">
-            <x-header-atividade :atividade="$atividade" class="mb-4" />
-
             {{-- Erro genérico / retorno de bloqueio --}}
             @if (session('error') && !session('demograficos_pendentes'))
               <div class="alert alert-danger" role="alert">
@@ -35,7 +35,7 @@
                 </div>
               </div>
             @else
-              <h1 class="h5 fw-bold mb-3">Olá, seja bem vindo(a)!</h1>
+              <h2 class="h5 fw-bold mb-3">Olá, seja bem vindo(a)!</h2>
               <p class="mb-3">Para confirmar a sua presença nesta atividade e/ou responder a avaliação, preencha o campo com
                 o seu e-mail, CPF ou
                 telefone e clique no botão.<br /></p>
@@ -89,11 +89,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
 
-        <div class="modal-header bg-engaja text-white">
-          <h5 class="modal-title fw-bold" id="modalDemograficosLabel">
-            📋 Dados demográficos pendentes
-          </h5>
-        </div>
+        <x-ui.modal-header icon="clipboard-data" title="Dados demográficos pendentes" title-id="modalDemograficosLabel" :dismissible="false" />
 
         <div class="modal-body">
           {{-- Banner identificando o usuário --}}
@@ -311,10 +307,7 @@
 
     <div class="modal-dialog modal modal-dialog-centered mt-1">
         <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title fw-bold" id="confirmacaoPresencaModalLabel">{{ session('status_presenca_label', 'Presença') }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
+        <x-ui.modal-header :title="session('status_presenca_label', 'Presença')" title-id="confirmacaoPresencaModalLabel" />
 
         <div class="modal-body">
           <div class="text-center pt-2 pb-3">
@@ -352,10 +345,7 @@
     aria-hidden="true">
     <div class="modal-dialog modal modal-dialog-centered mt-1">
       <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title fw-bold" id="confirmacaoPresencaModalLabel">Dados não encontrados no sistema!</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
+        <x-ui.modal-header title-id="confirmacaoPresencaModalLabel" title="Dados não encontrados no sistema!" />
 
         <div class="modal-body">
           <div class="text-center pt-2 pb-3">

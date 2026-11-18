@@ -42,6 +42,22 @@
   flex: 1 1 320px;
 }
 
+.eg-hero__media {
+  flex: 0 0 auto;
+  width: 132px;
+  padding: .5rem;
+  background: rgba(255, 255, 255, .95);
+  border-radius: .85rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: .5rem;
+  }
+}
+
 .eg-hero__eyebrow {
   font-size: .72rem;
   text-transform: uppercase;
@@ -133,6 +149,10 @@
 }
 
 @media (max-width: 576px) {
+  .eg-hero__media {
+    width: 96px;
+  }
+
   .eg-hero__title {
     font-size: 1.4rem;
   }

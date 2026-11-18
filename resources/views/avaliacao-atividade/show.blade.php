@@ -17,22 +17,21 @@
     $checklistSalvo = $relatorio->checklist_pos_acao ?? [];
 @endphp
 
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-4">
-        <div>
-            <h1 class="h4 fw-bold text-engaja mb-1">Visualização do Relatório do Momento</h1>
-            <p class="text-muted mb-0">
-                Relatório preenchido por {{ $nomeResponsavel }}
-            </p>
-        </div>
-        <a href="{{ route('avaliacao-atividade.index') }}" class="btn btn-outline-secondary">
+<x-ui.page-hero contained eyebrow="Relatórios" eyebrow-icon="journal-text" title="Visualização do Relatório do Momento" class="mb-0">
+    <p class="text-muted mb-0">
+        Relatório preenchido por {{ $nomeResponsavel }}
+    </p>
+    <x-slot:actions>
+        <a href="{{ route('avaliacao-atividade.index') }}" class="eg-hero-btn">
             Voltar para relatórios
         </a>
-        <a href="{{ route('avaliacao-atividade.download', $relatorio) }}" class="btn btn-outline-dark" target="_blank">
+        <a href="{{ route('avaliacao-atividade.download', $relatorio) }}" class="eg-hero-btn" target="_blank">
             Baixar PDF
         </a>
-    </div>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="row g-3">

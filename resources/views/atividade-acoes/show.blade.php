@@ -1,13 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="diagram-2" :title="$atividadeAcao->nome">
+    <x-slot:actions>
+        <a href="{{ route('atividade-acoes.edit', $atividadeAcao) }}" class="eg-hero-btn">Editar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-lg-8 col-xl-7">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h3 fw-bold text-engaja mb-0">{{ $atividadeAcao->nome }}</h1>
-      <a href="{{ route('atividade-acoes.edit', $atividadeAcao) }}" class="btn btn-outline-secondary">Editar</a>
-    </div>
-
     <div class="card shadow-sm mb-3">
       <div class="card-body">
         <p class="mb-2">

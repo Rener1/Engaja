@@ -20,16 +20,15 @@
   }
 @endphp
 
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="qr-code" title="Link e QR Code">
+    <p class="text-muted mb-0">{{ $avaliacao->descricao_universal ?: ($avaliacao->templateAvaliacao->nome ?? 'Avaliação universal') }}</p>
+    <x-slot:actions>
+        <a href="{{ route('avaliacoes-universais.index') }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-8">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold text-engaja mb-1">Link e QR Code</h1>
-        <p class="text-muted mb-0">{{ $avaliacao->descricao_universal ?: ($avaliacao->templateAvaliacao->nome ?? 'Avaliação universal') }}</p>
-      </div>
-      <a href="{{ route('avaliacoes-universais.index') }}" class="btn btn-outline-secondary">Voltar</a>
-    </div>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">

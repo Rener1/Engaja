@@ -1,17 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container py-4">
-        <div class="mb-4">
-            <a href="{{ route('atividades.show', $atividade) }}" class="btn btn-outline-secondary mb-2">
-                &larr; Voltar para o momento
+    <x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="journal-check" title="Diário de Presenças" class="mb-0">
+        <p class="mb-0">
+            Momento: <strong>{{ $atividade->descricao ?? 'Momento' }}</strong><br>
+            Ação: {{ $atividade->evento->nome }}
+        </p>
+        <x-slot:actions>
+            <a href="{{ route('atividades.show', $atividade) }}" class="eg-hero-btn">
+                <i class="bi bi-arrow-left me-1"></i> Voltar para o momento
             </a>
-            <h1 class="h3 fw-bold text-engaja mb-1">Diário de Presenças</h1>
-            <p class="text-muted">
-                Momento: <strong>{{ $atividade->descricao ?? 'Momento' }}</strong><br>
-                Ação: {{ $atividade->evento->nome }}
-            </p>
-        </div>
+        </x-slot:actions>
+    </x-ui.page-hero>
+
+    <div class="container py-4">
 
         <form action="{{ route('atividades.diario.salvar', $atividade) }}" method="POST">
             @csrf
@@ -67,9 +69,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-4 text-muted">
-                                    Nenhum participante inscrito nesta ação pedagógica.
-                                </td>
+                                <td colspan="4"><x-ui.empty-state compact muted icon="inbox" title="Nenhum participante inscrito nesta ação pedagógica." /></td>
                             </tr>
                         @endforelse
                         </tbody>

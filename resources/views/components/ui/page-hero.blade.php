@@ -11,6 +11,7 @@
     Slots:
       - actions: botões à direita (use .eg-hero-btn / .eg-hero-btn--solid)
       - heading: substitui o título simples
+      - media:   miniatura opcional à esquerda do texto (ex.: capa da ação)
       - default: linhas extras de metadados abaixo do subtítulo
 --}}
 @props([
@@ -24,6 +25,9 @@
 <div {{ $attributes->class(['eg-hero', 'eg-hero--plain' => ! $contained]) }}>
     <div @class(['container' => $contained])>
         <div class="eg-hero__inner">
+            @isset($media)
+                <div {{ $media->attributes->class(['eg-hero__media']) }}>{{ $media }}</div>
+            @endisset
             <div class="eg-hero__text">
                 @if ($eyebrow)
                     <span class="eg-hero__eyebrow">

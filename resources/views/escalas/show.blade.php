@@ -1,13 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="sliders" :title="$escala->descricao">
+    <x-slot:actions>
+        <a href="{{ route('escalas.edit', $escala) }}" class="eg-hero-btn">Editar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-lg-8 col-xl-6">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h3 fw-bold text-engaja mb-0">{{ $escala->descricao }}</h1>
-      <a href="{{ route('escalas.edit', $escala) }}" class="btn btn-outline-secondary">Editar</a>
-    </div>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <h2 class="h6 fw-semibold text-uppercase text-muted mb-3">Opções</h2>

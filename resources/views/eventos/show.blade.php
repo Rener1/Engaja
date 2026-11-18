@@ -139,161 +139,151 @@
   }
 </style>
 
-<div class="container">
+@php
+$participanteId = optional(auth()->user()?->participante)->id;
+$jaInscrito = false;
+if ($participanteId) {
+$jaInscrito = \Illuminate\Support\Facades\DB::table('inscricaos')
+->where('evento_id', $evento->id)
+->where('participante_id', $participanteId)
+->whereNull('deleted_at')
+->exists();
+}
+@endphp
+@php
+  $dataInicio = $evento->data_inicio ? \Carbon\Carbon::parse($evento->data_inicio) : null;
+  $dataFim = $evento->data_fim ? \Carbon\Carbon::parse($evento->data_fim) : null;
+  $mesmoDia = $dataInicio && $dataFim && $dataInicio->isSameDay($dataFim);
+@endphp
+@php
+  $mostrarMenuGerenciar = auth()->user()?->hasAnyRole(['administrador', 'gerente', 'eq_pedagogica', 'articulador'])
+    || auth()->user()?->can('update', $evento);
+@endphp
 
-  {{-- Cabeçalho --}}
-  <div class="row g-4 align-items-center mb-4">
-    <div class="col-md-5">
-      <div class="ev-card bg-light p-4 text-center">
-        <img src="{{ $evento->imagem ? asset('storage/' . $evento->imagem) : asset('images/logo-aeb.png') }}"
-          class="img-fluid rounded" alt="Capa do evento">
-      </div>
-    </div>
-    @php
-    $participanteId = optional(auth()->user()?->participante)->id;
-    $jaInscrito = false;
-    if ($participanteId) {
-    $jaInscrito = \Illuminate\Support\Facades\DB::table('inscricaos')
-    ->where('evento_id', $evento->id)
-    ->where('participante_id', $participanteId)
-    ->whereNull('deleted_at')
-    ->exists();
-    }
-    @endphp
-    <div class="col-md-7">
-      <h1 class="h3 fw-bold text-engaja mb-2">{{ $evento->nome }}</h1>
+<x-ui.page-hero contained eyebrow="Ação pedagógica" eyebrow-icon="calendar-event" :title="$evento->nome">
+  <x-slot:media>
+    <img src="{{ $evento->imagem ? asset('storage/' . $evento->imagem) : asset('images/logo-aeb.png') }}" alt="Capa do evento">
+  </x-slot:media>
+  <ul class="list-unstyled mb-0">
+    @if($dataInicio || $dataFim)
+    <li class="mb-1">
+      📅
+      {{ $dataInicio ? $dataInicio->locale('pt_BR')->translatedFormat('l, d \d\e F \d\e Y') : 'Início não informado' }}
+      @if($dataFim && !$mesmoDia)
+      <br><small class="text-muted">Até {{ $dataFim->locale('pt_BR')->translatedFormat('l, d \d\e F \d\e Y') }}</small>
+      @endif
+    </li>
+    @endif
 
-      @php
-        $dataInicio = $evento->data_inicio ? \Carbon\Carbon::parse($evento->data_inicio) : null;
-        $dataFim = $evento->data_fim ? \Carbon\Carbon::parse($evento->data_fim) : null;
-        $mesmoDia = $dataInicio && $dataFim && $dataInicio->isSameDay($dataFim);
-      @endphp
+    @if(!empty($evento->local))
+    <li class="mb-1">📍 {{ $evento->local }}</li>
+    @endif
 
-      <ul class="list-unstyled mb-3">
-        @if($dataInicio || $dataFim)
-        <li class="mb-1">
-          📅
-          {{ $dataInicio ? $dataInicio->locale('pt_BR')->translatedFormat('l, d \d\e F \d\e Y') : 'Início não informado' }}
-          @if($dataFim && !$mesmoDia)
-          <br><small class="text-muted">Até {{ $dataFim->locale('pt_BR')->translatedFormat('l, d \d\e F \d\e Y') }}</small>
-          @endif
-        </li>
-        @endif
+    @if($evento->modalidade)
+    <li class="mb-1">🛰️ {{ ucfirst($evento->modalidade) }}</li>
+    @endif
 
-        @if(!empty($evento->local))
-        <li class="mb-1">📍 {{ $evento->local }}</li>
-        @endif
+    @if($evento->user?->name)
+    <li class="mb-1">👤 Organizado por: {{ $evento->user->name }}</li>
+    @endif
+  </ul>
+  <x-slot:actions>
+    @if($evento->link)
+    <a href="{{ $evento->link }}" target="_blank" class="eg-hero-btn">Acessar link</a>
+    @endif
 
-        @if($evento->modalidade)
-        <li class="mb-1">🛰️ {{ ucfirst($evento->modalidade) }}</li>
-        @endif
+    <a href="{{ route('eventos.planejamento.pdf', $evento) }}" target="_blank" rel="noopener noreferrer" class="eg-hero-btn">
+      <i class="bi bi-file-earmark-pdf-fill me-1"></i> Ver planejamento da ação
+    </a>
 
-        @if($evento->user?->name)
-        <li class="mb-1">👤 Organizado por: {{ $evento->user->name }}</li>
-        @endif
-      </ul>
+    <a href="{{ route('eventos.planejamento.pdf', ['evento' => $evento, 'formato' => 'docx']) }}" class="eg-hero-btn">
+      <i class="bi bi-file-earmark-word me-1"></i> Planejamento (Word)
+    </a>
 
-      @php
-        $mostrarMenuGerenciar = auth()->user()?->hasAnyRole(['administrador', 'gerente', 'eq_pedagogica', 'articulador'])
-          || auth()->user()?->can('update', $evento);
-      @endphp
+    @hasanyrole('administrador|gerente|eq_pedagogica')
+      <a href="{{ route('inscricoes.selecionar', $evento)}}" class="eg-hero-btn eg-hero-btn--solid">Inscrever participantes</a>
+    @endhasanyrole
 
-      <div class="d-flex gap-2 flex-wrap">
-        @if($evento->link)
-        <a href="{{ $evento->link }}" target="_blank" class="btn btn-outline-secondary">Acessar link</a>
-        @endif
+    @can('participante.ver')
+      <a href="{{ route('inscricoes.inscritos', $evento) }}" class="eg-hero-btn">Ver inscritos</a>
+    @endcan
 
-        <a href="{{ route('eventos.planejamento.pdf', $evento) }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
-          <i class="fas fa-file-pdf"></i> Ver planejamento da ação
-        </a>
+      @if($mostrarMenuGerenciar)
+      <div class="dropdown">
+        <button class="eg-hero-btn dropdown-toggle" type="button" id="dropdownGerenciarEvento"
+          data-bs-toggle="dropdown" aria-expanded="false">
+          Gerenciar
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownGerenciarEvento">
+          @hasanyrole('administrador|gerente|eq_pedagogica')
+            <li>
+              <a class="dropdown-item" href="{{ route('inscricoes.import', $evento)}}">Importar participantes</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('inscricoes.moodle.import', $evento)}}">Importação Moodle</a>
+            </li>
+          @endhasanyrole
 
-        <a href="{{ route('eventos.planejamento.pdf', ['evento' => $evento, 'formato' => 'docx']) }}" class="btn btn-outline-secondary">
-          <i class="bi bi-file-earmark-word"></i> Planejamento (Word)
-        </a>
-
-        @hasanyrole('administrador|gerente|eq_pedagogica')
-          <a href="{{ route('inscricoes.selecionar', $evento)}}" class="btn btn-engaja">Inscrever participantes</a>
-        @endhasanyrole
-
-        @can('participante.ver')
-          <a href="{{ route('inscricoes.inscritos', $evento) }}" class="btn btn-outline-secondary">Ver inscritos</a>
-        @endcan
-
-          @if($mostrarMenuGerenciar)
-          <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownGerenciarEvento"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              Gerenciar
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownGerenciarEvento">
+          @role('administrador|gerente|eq_pedagogica|articulador')
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" href="{{ route('dashboards.presencas', ['evento_id' => $evento->id]) }}">
+                Relação de presentes/ausentes na ação
+              </a>
+            </li>
+            <li>
               @hasanyrole('administrador|gerente|eq_pedagogica')
-                <li>
-                  <a class="dropdown-item" href="{{ route('inscricoes.import', $evento)}}">Importar participantes</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="{{ route('inscricoes.moodle.import', $evento)}}">Importação Moodle</a>
-                </li>
-              @endhasanyrole
+              <a class="dropdown-item" href="{{ route('eventos.avaliacoes.consolidado', $evento) }}">
+                Consolidação de avaliações
+              </a>
+              @endhasrole
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                data-bs-target="#modalRelatoriosEvento">
+                Relatórios de participantes
+              </button>
+            </li>
 
-              @role('administrador|gerente|eq_pedagogica|articulador')
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item" href="{{ route('dashboards.presencas', ['evento_id' => $evento->id]) }}">
-                    Relação de presentes/ausentes na ação
-                  </a>
-                </li>
-                <li>
-                  @hasanyrole('administrador|gerente|eq_pedagogica')
-                  <a class="dropdown-item" href="{{ route('eventos.avaliacoes.consolidado', $evento) }}">
-                    Consolidação de avaliações
-                  </a>
-                  @endhasrole
-                </li>
-                <li>
-                  <button type="button" class="dropdown-item" data-bs-toggle="modal"
-                    data-bs-target="#modalRelatoriosEvento">
-                    Relatórios de participantes
-                  </button>
-                </li>
+          @hasanyrole('administrador|gerente')
+            <li>
+              <a class="dropdown-item" href="{{ route('certificados.emitidos', ['evento_id' => $evento->id, 'contexto' => 'evento']) }}">
+                Certificados
+              </a>
+            </li>
+          @endhasanyrole
 
-              @hasanyrole('administrador|gerente')
-                <li>
-                  <a class="dropdown-item" href="{{ route('certificados.emitidos', ['evento_id' => $evento->id, 'contexto' => 'evento']) }}">
-                    Certificados
-                  </a>
-                </li>
-              @endhasanyrole
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button type="button" class="dropdown-item"
+              data-bs-toggle="modal" data-bs-target="#modalCronogramaAgrupamento">
+              <i class="fas fa-file-pdf text-danger me-1"></i>Cronograma da ação
+            </button>
+          </li>
+          @endrole
 
-              <li><hr class="dropdown-divider"></li>
+          @can('update', $evento)
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" href="{{ route('eventos.edit', $evento) }}">Editar</a>
+            </li>
+            @role('administrador')
               <li>
-                <button type="button" class="dropdown-item"
-                  data-bs-toggle="modal" data-bs-target="#modalCronogramaAgrupamento">
-                  <i class="fas fa-file-pdf text-danger me-1"></i>Cronograma da ação
-                </button>
+                <form action="{{ route('eventos.destroy', $evento) }}" method="POST"
+                  class="m-0" data-confirm="Tem certeza que deseja excluir esta ação pedagógica?">
+                  @csrf @method('DELETE')
+                  <button type="submit" class="dropdown-item text-danger">Excluir</button>
+                </form>
               </li>
-              @endrole
-
-              @can('update', $evento)
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item" href="{{ route('eventos.edit', $evento) }}">Editar</a>
-                </li>
-                @role('administrador')
-                  <li>
-                    <form action="{{ route('eventos.destroy', $evento) }}" method="POST"
-                      class="m-0" data-confirm="Tem certeza que deseja excluir esta ação pedagógica?">
-                      @csrf @method('DELETE')
-                      <button type="submit" class="dropdown-item text-danger">Excluir</button>
-                    </form>
-                  </li>
-                @endrole
-              @endcan
-            </ul>
-          </div>
-        @endif
+            @endrole
+          @endcan
+        </ul>
       </div>
-    </div>
-  </div>
+    @endif
+  </x-slot:actions>
+</x-ui.page-hero>
+
+<div class="container">
 
   {{-- Chips (Modificado para Ação Geral e Sub-ação) --}}
   @php
@@ -569,10 +559,7 @@
   aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title fw-bold" id="modalRelatoriosEventoLabel">Relatórios da ação pedagógica</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-      </div>
+      <x-ui.modal-header title-id="modalRelatoriosEventoLabel" title="Relatórios da ação pedagógica" />
       <div class="modal-body">
         <p class="text-muted small mb-4">
           Apenas participantes com presença confirmada serão considerados.
@@ -635,12 +622,7 @@
   aria-labelledby="modalCronogramaAgrupamentoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title fw-bold" id="modalCronogramaAgrupamentoLabel">
-          <i class="fas fa-file-pdf text-danger me-2"></i>Cronograma da Ação
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-      </div>
+      <x-ui.modal-header icon="file-pdf" title-id="modalCronogramaAgrupamentoLabel" title="Cronograma da Ação" />
       <div class="modal-body">
         <p class="text-muted small mb-3">
           Escolha como os momentos devem ser organizados no cronograma:
@@ -693,9 +675,7 @@
 <div class="modal fade" id="modalReopenChecklist" tabindex="-1" data-bs-backdrop="static">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header bg-engaja text-white border-0">
-        <h5 class="modal-title fw-bold">⚠️ Checklist Incompleto</h5>
-      </div>
+      <x-ui.modal-header icon="exclamation-triangle" title="Checklist Incompleto" :dismissible="false" />
       <div class="modal-body" id="reopen-checklist-body">
         {{-- preenchido por JS --}}
       </div>

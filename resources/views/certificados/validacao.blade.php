@@ -27,6 +27,9 @@
   .label-valid { padding: 10px 12px; background: #ecfdf3; border: 1px solid #86efac; border-radius: 6px; color: #166534; font-weight: 700; display: inline-block; margin-bottom: 10px; }
 </style>
 
+<x-ui.page-hero eyebrow="Certificados" eyebrow-icon="patch-check" title="Validação de certificado"
+    subtitle="Confira abaixo os dados do certificado emitido pelo sistema Engaja." class="mb-0" />
+
 <div class="wrapper">
   <div class="label-valid">Certificado válido — Emitido pelo sistema Engaja</div>
   <div class="card">

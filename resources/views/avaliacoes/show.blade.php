@@ -11,21 +11,18 @@
     ? route('avaliacoes-universais.index')
     : ($isTranscricao ? route('avaliacoes-transcricoes.index') : route('avaliacoes.index'));
 @endphp
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="clipboard2-check" title="Avaliação">
+    <p class="text-muted mb-0">Registrada em {{ $avaliacao->created_at?->format('d/m/Y H:i') ?? '-' }}</p>
+    <x-slot:actions>
+        @if(!$avaliacao->anonima || $isTranscricao)
+          <a href="{{ route('avaliacoes.respostas', $avaliacao) }}" class="eg-hero-btn">Ver respostas</a>
+        @endif
+        <a href="{{ $editUrl }}" class="eg-hero-btn">Editar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-8">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold text-engaja mb-1">Avaliação</h1>
-        <p class="text-muted mb-0">Registrada em {{ $avaliacao->created_at?->format('d/m/Y H:i') ?? '-' }}</p>
-      </div>
-      <div class="d-flex gap-2">
-        @if(!$avaliacao->anonima || $isTranscricao)
-          <a href="{{ route('avaliacoes.respostas', $avaliacao) }}" class="btn btn-primary">Ver respostas</a>
-        @endif
-        <a href="{{ $editUrl }}" class="btn btn-outline-secondary">Editar</a>
-      </div>
-    </div>
-
     @php
       $inscricaoExibida = $avaliacao->inscricao ?? $avaliacao->respostas->first()?->inscricao;
       $participanteNome = $inscricaoExibida?->participante?->user?->name;

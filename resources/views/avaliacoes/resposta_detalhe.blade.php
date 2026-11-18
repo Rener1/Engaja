@@ -8,13 +8,14 @@
       ? 'resposta anonima'
       : ($submissao->presenca?->inscricao?->participante?->user?->name ?? 'N/A');
 @endphp
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="clipboard2-check" :title="'Respostas de '.$respondente">
+    <x-slot:actions>
+        <a href="{{ route('avaliacoes.respostas', $avaliacao) }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-9">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h4 fw-bold text-engaja mb-0">Respostas de {{ $respondente }}</h1>
-      <a href="{{ route('avaliacoes.respostas', $avaliacao) }}" class="btn btn-outline-secondary">Voltar</a>
-    </div>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <p class="mb-3">

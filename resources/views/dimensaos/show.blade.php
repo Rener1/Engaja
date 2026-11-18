@@ -1,13 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="diagram-3" :title="$dimensao->descricao">
+    <x-slot:actions>
+        <a href="{{ route('dimensaos.edit', $dimensao) }}" class="eg-hero-btn">Editar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-lg-6">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h3 fw-bold text-engaja mb-0">{{ $dimensao->descricao }}</h1>
-      <a href="{{ route('dimensaos.edit', $dimensao) }}" class="btn btn-outline-secondary">Editar</a>
-    </div>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <p class="mb-3">

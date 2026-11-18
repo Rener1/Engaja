@@ -1,13 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="file-earmark-check" title="Evidência">
+    <x-slot:actions>
+        <a href="{{ route('evidencias.edit', $evidencia) }}" class="eg-hero-btn">Editar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-lg-8">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h3 fw-bold text-engaja mb-0">Evidência</h1>
-      <a href="{{ route('evidencias.edit', $evidencia) }}" class="btn btn-outline-secondary">Editar</a>
-    </div>
-
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <h2 class="h5 fw-semibold">Descrição</h2>

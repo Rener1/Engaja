@@ -9,13 +9,14 @@
     ? route('avaliacoes-universais.index')
     : ($isTranscricao ? route('avaliacoes-transcricoes.index') : route('avaliacoes.show', $avaliacao));
 @endphp
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="clipboard2-check" title="Respostas da avaliação">
+    <x-slot:actions>
+        <a href="{{ $backUrl }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-10">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h3 fw-bold text-engaja mb-0">Respostas da avaliação</h1>
-      <a href="{{ $backUrl }}" class="btn btn-outline-secondary">Voltar</a>
-    </div>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <p class="mb-3">
@@ -33,7 +34,7 @@
         </p>
 
         @if($submissoes->isEmpty())
-          <div class="alert alert-info mb-0">Nenhuma resposta enviada ainda.</div>
+          <x-ui.empty-state icon="inbox" muted>Nenhuma resposta enviada ainda.</x-ui.empty-state>
         @else
           <div class="table-responsive">
             <table class="table align-middle">
