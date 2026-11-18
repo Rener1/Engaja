@@ -45,16 +45,16 @@
     }
     @endphp
 
-    <div class="row g-4">
+    <div class="row g-4 eg-form">
         {{-- PERFIL + PARTICIPANTE + DEMOGRÁFICOS (UM ÚNICO FORM) --}}
         <div class="col-12">
             <form method="POST" action="{{ route('profile.update') }}" class="needs-validation" novalidate enctype="multipart/form-data">
                 @csrf
                 @method('patch')
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <strong>Informações do perfil</strong>
+                <div class="card eg-form-card mb-4">
+                    <div class="card-header">
+                        <h2 class="eg-form-card__title"><i class="bi bi-person-circle"></i> Informações do perfil</h2>
                     </div>
                     <div class="card-body">
                         <div class="mb-4">
@@ -130,9 +130,9 @@
                     </div>
                 </div>
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <strong>Dados do participante</strong>
+                <div class="card eg-form-card mb-4">
+                    <div class="card-header">
+                        <h2 class="eg-form-card__title"><i class="bi bi-person-vcard"></i> Dados do participante</h2>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -255,13 +255,13 @@
                                 <style>
                                     /* div externa */
                                     .auth-image-container {
-                                        border: 1px solid #bbc1c1;
-                                        border-radius: 0.8rem;
-                                        padding: 1rem 1.25rem;
+                                        border: 1.5px solid #e5e7eb;
+                                        border-radius: .75rem;
+                                        padding: .5rem .95rem;
                                         transition: all 0.3s ease;
-                                        background-color: #fff;
+                                        background-color: #f9fafb;
                                         width: 100%;
-                                        height: 50px;
+                                        min-height: calc(1.6em + 1.2rem + 3px);
                                     }
                                     .auth-image-container.active {
                                         background-color: #f0fdf4;
@@ -281,7 +281,7 @@
                                     }
                                 </style>
 
-                                <div class="auth-image-container d-flex align-items-center justify-content-between shadow-sm" id="auth_container">
+                                <div class="auth-image-container d-flex align-items-center justify-content-between" id="auth_container">
 
                                     <div class="d-flex align-items-center gap-3">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-camera text-muted" id="camera_icon" viewBox="0 0 16 16">
@@ -289,7 +289,7 @@
                                             <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
                                         </svg>
 
-                                        <label class="form-check-label mb-0" for="autorizacao_imagem" style="cursor: pointer; font-size: 1rem;">
+                                        <label class="form-check-label mb-0" for="autorizacao_imagem" style="cursor: pointer; font-size: .9rem; font-weight: 500;">
                                             Autorização de imagem, voz e nome
                                         </label>
 
@@ -312,9 +312,9 @@
                 </div>
 
                 {{-- DADOS DEMOGRÁFICOS --}}
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <strong>Dados demográficos</strong>
+                <div class="card eg-form-card mb-4">
+                    <div class="card-header">
+                        <h2 class="eg-form-card__title"><i class="bi bi-people"></i> Dados demográficos</h2>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -496,16 +496,16 @@
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">
-                    <button class="btn btn-engaja" type="submit">Salvar tudo</button>
+                    <button class="btn btn-engaja px-4" type="submit"><i class="bi bi-check2-circle me-1"></i> Salvar tudo</button>
                 </div>
             </form>
         </div>
 
         {{-- ALTERAR SENHA (form separado) --}}
         <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100 mt-4">
-                <div class="card-header bg-white">
-                    <strong>Atualizar senha</strong>
+            <div class="card eg-form-card h-100 mt-4">
+                <div class="card-header">
+                    <h2 class="eg-form-card__title"><i class="bi bi-key"></i> Atualizar senha</h2>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('password.update') }}" class="needs-validation" novalidate>
@@ -544,7 +544,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end">
-                            <button class="btn btn-engaja" type="submit">Atualizar senha</button>
+                            <button class="btn btn-engaja" type="submit"><i class="bi bi-key me-1"></i> Atualizar senha</button>
                         </div>
                     </form>
                 </div>
@@ -553,9 +553,9 @@
 
         {{-- EXCLUIR CONTA (form separado) --}}
         <div class="col-12 col-lg-6">
-            <div class="card border-danger-subtle shadow-sm h-100 mt-4">
-                <div class="card-header bg-white text-danger">
-                    <strong>Excluir conta</strong>
+            <div class="card eg-form-card eg-form-card--danger h-100 mt-4">
+                <div class="card-header">
+                    <h2 class="eg-form-card__title"><i class="bi bi-exclamation-octagon"></i> Excluir conta</h2>
                 </div>
                 <div class="card-body">
                     <p class="mb-3">
@@ -567,7 +567,7 @@
                         @method('delete')
 
                         <div class="row g-3 align-items-end">
-                            <div class="col-md-7">
+                            <div class="col-12 col-sm">
                                 <label for="password_delete" class="form-label">Confirme sua senha</label>
                                 <input id="password_delete" type="password"
                                     name="password"
@@ -577,9 +577,9 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-5 d-flex justify-content-end">
-                                <button type="submit" class="btn btn-outline-danger">
-                                    Excluir minha conta
+                            <div class="col-12 col-sm-auto">
+                                <button type="submit" class="btn btn-outline-danger text-nowrap w-100">
+                                    <i class="bi bi-trash3 me-1"></i> Excluir minha conta
                                 </button>
                             </div>
                         </div>
