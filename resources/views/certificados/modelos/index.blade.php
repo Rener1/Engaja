@@ -1,17 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
-  <div>
-    <p class="text-uppercase text-muted small mb-1">Certificados</p>
-    <h1 class="h4 fw-bold text-engaja mb-0">Modelos de certificado</h1>
+<x-ui.page-hero eyebrow="Certificados" eyebrow-icon="award" title="Modelos de certificado">
     <div class="text-muted small">Configure textos e imagens para gerar certificados.</div>
-  </div>
-  <a href="{{ route('certificados.modelos.create') }}" class="btn btn-engaja">Novo modelo</a>
-</div>
+    <x-slot:actions>
+        <a href="{{ route('certificados.modelos.create') }}" class="eg-hero-btn eg-hero-btn--solid">Novo modelo</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
 @if ($modelos->isEmpty())
-  <div class="alert alert-info">Nenhum modelo cadastrado.</div>
+  <x-ui.empty-state icon="inbox" muted>Nenhum modelo cadastrado.</x-ui.empty-state>
 @else
   @php
       $columns = [

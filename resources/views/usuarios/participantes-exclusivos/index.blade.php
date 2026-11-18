@@ -2,16 +2,14 @@
 
 @section('content')
 <div class="mb-4">
-  <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
-    <div>
-      <p class="text-uppercase text-muted small mb-1">Pessoas</p>
-      <h1 class="h4 fw-bold text-engaja mb-2">Participantes exclusivos por ação</h1>
+  <x-ui.page-hero eyebrow="Pessoas" eyebrow-icon="people" title="Participantes exclusivos por ação">
       <p class="text-muted mb-0">
         Selecione as ações pedagógicas para listar pessoas que possuem inscrição ou presença confirmada somente nelas.
       </p>
-    </div>
-    <a href="{{ route('usuarios.index') }}" class="btn btn-light border">Voltar</a>
-  </div>
+      <x-slot:actions>
+          <a href="{{ route('usuarios.index') }}" class="eg-hero-btn border">Voltar</a>
+      </x-slot:actions>
+  </x-ui.page-hero>
 
   @if($errors->has('eventos'))
     <div class="alert alert-danger">{{ $errors->first('eventos') }}</div>

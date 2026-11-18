@@ -59,19 +59,17 @@
     }
 </style>
 <div class="mb-4">
-    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
-        <div>
-            <p class="text-uppercase text-muted small mb-1">Administração</p>
-            <h1 class="h4 fw-bold text-engaja mb-2">Notificações de Agendamento</h1>
-            <p class="text-muted small mb-0">Selecione quais usuários devem receber e-mail quando um novo agendamento for criado.</p>
-        </div>
-        <a href="{{ route('usuarios.index') }}" class="btn btn-light border">Voltar</a>
-    </div>
+    <x-ui.page-hero eyebrow="Administração" eyebrow-icon="people" title="Notificações de Agendamento">
+        <p class="text-muted small mb-0">Selecione quais usuários devem receber e-mail quando um novo agendamento for criado.</p>
+        <x-slot:actions>
+            <a href="{{ route('usuarios.index') }}" class="eg-hero-btn border">Voltar</a>
+        </x-slot:actions>
+    </x-ui.page-hero>
 
-    <div class="filter-bar shadow-sm">
-        <form action="{{ route('usuarios.notificacoes-agendamento.index') }}" method="GET" class="row g-2 align-items-center">
+    <div class="eg-filter-card">
+        <form action="{{ route('usuarios.notificacoes-agendamento.index') }}" method="GET" class="row g-3 align-items-center">
             <div class="col-12 col-md-4">
-                <input type="text" name="q" class="form-control" placeholder="Buscar nome ou e-mail..." value="{{ $search }}">
+                <x-ui.input type="text" name="q" placeholder="Buscar nome ou e-mail..." value="{{ $search }}" />
             </div>
             <div class="col-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-engaja w-100">Filtrar</button>
@@ -88,13 +86,13 @@
 @endif
 
 @if ($users->isEmpty())
-    <div class="alert alert-info">
+    <x-ui.empty-state icon="inbox" muted>
         @if (!empty($search))
             Nenhum usuário encontrado para "{{ $search }}".
         @else
             Não há usuários cadastrados.
         @endif
-    </div>
+    </x-ui.empty-state>
 @else
     @php
         $columns = [

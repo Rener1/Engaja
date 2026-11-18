@@ -1,46 +1,42 @@
 ﻿@extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero contained eyebrow="Certificados" eyebrow-icon="award" title="Certificados emitidos" class="mb-0">
+    <p class="text-muted mb-0">Lista de todos os certificados já emitidos no sistema.</p>
+    <x-slot:actions>
+        <a href="{{ route('certificados.emitidos.zip', request()->query()) }}" class="eg-hero-btn">
+          Baixar tudo (ZIP)
+        </a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <div>
-      <p class="text-uppercase text-muted small mb-1">Certificados</p>
-      <h1 class="h4 fw-bold mb-1">Certificados emitidos</h1>
-      <p class="text-muted mb-0">Lista de todos os certificados já emitidos no sistema.</p>
-    </div>
-    <a href="{{ route('certificados.emitidos.zip', request()->query()) }}" class="btn btn-engaja">
-      Baixar tudo (ZIP)
-    </a>
-  </div>
   <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
     <div></div>
-    <form method="GET" action="{{ route('certificados.emitidos') }}" class="d-flex gap-2 w-100 w-md-auto">
-      @if(!empty($contextoEvento) && !empty($filtroEventoId))
-        <input type="hidden" name="evento_id" value="{{ $filtroEventoId }}">
-        <input type="hidden" name="contexto" value="evento">
-      @endif
+    <x-ui.filter-card>
+        <form method="GET" action="{{ route('certificados.emitidos') }}" class="d-flex gap-2 w-100 w-md-auto">
+          @if(!empty($contextoEvento) && !empty($filtroEventoId))
+            <input type="hidden" name="evento_id" value="{{ $filtroEventoId }}">
+            <input type="hidden" name="contexto" value="evento">
+          @endif
 
-      <input type="text"
-             name="participante"
-             value="{{ $filtroParticipante ?? '' }}"
-             class="form-control"
-             placeholder="Filtrar por participante ou CPF"
-             aria-label="Filtrar por participante ou CPF">
+          <x-ui.input type="text" name="participante" value="{{ $filtroParticipante ?? '' }}" placeholder="Filtrar por participante ou CPF" aria-label="Filtrar por participante ou CPF" />
 
-      @if(empty($contextoEvento))
-        <select name="evento_id" class="form-select" aria-label="Filtrar por Ação pedagógica">
-          <option value="">Todas as ações pedagógicas</option>
-          @foreach($acoesCertificado as $acao)
-            <option value="{{ $acao->id }}" @selected((string) ($filtroEventoId ?? '') === (string) $acao->id)>
-              {{ $acao->nome }}
-            </option>
-          @endforeach
-        </select>
-      @endif
+          @if(empty($contextoEvento))
+            <x-ui.select name="evento_id" aria-label="Filtrar por Ação pedagógica">
+              <option value="">Todas as ações pedagógicas</option>
+              @foreach($acoesCertificado as $acao)
+                <option value="{{ $acao->id }}" @selected((string) ($filtroEventoId ?? '') === (string) $acao->id)>
+                  {{ $acao->nome }}
+                </option>
+              @endforeach
+            </x-ui.select>
+          @endif
 
-      <button class="btn btn-engaja" type="submit">Filtrar</button>
-      <a href="{{ !empty($contextoEvento) && !empty($filtroEventoId) ? route('certificados.emitidos', ['evento_id' => $filtroEventoId, 'contexto' => 'evento']) : route('certificados.emitidos') }}" class="btn btn-outline-secondary">Limpar</a>
-    </form>
+          <button class="btn btn-engaja" type="submit">Filtrar</button>
+          <a href="{{ !empty($contextoEvento) && !empty($filtroEventoId) ? route('certificados.emitidos', ['evento_id' => $filtroEventoId, 'contexto' => 'evento']) : route('certificados.emitidos') }}" class="btn btn-outline-secondary">Limpar</a>
+        </form>
+    </x-ui.filter-card>
   </div>
   @php
       $podeEditarCertificados = auth()->user()?->hasAnyRole(['administrador', 'gerente']) ?? false;
@@ -69,13 +65,13 @@
   <div class="shadow-sm rounded-3 bg-white">
       <x-data-table id="grid-certificados-emitidos" :columns="$columns" :rows="$rows" :pagination="false" />
       @if($certificados->isEmpty())
-        <div class="p-4 text-center text-muted">
+        <x-ui.empty-state icon="award" muted compact>
           @if(!empty($filtroParticipante) || !empty($filtroAcao) || (!empty($filtroEventoId) && empty($contextoEvento)))
             Nenhum certificado encontrado com esses filtros.
           @else
             Nenhum certificado emitido até o momento.
           @endif
-        </div>
+        </x-ui.empty-state>
       @endif
   </div>
   <div class="d-flex justify-content-center mt-3">
@@ -83,18 +79,4 @@
   </div>
 </div>
 
-@push('styles')
-<style>
-  .btn-engaja {
-    background-color: #4a0e4e;
-    color: #fff;
-    border: 1px solid #4a0e4e;
-  }
-  .btn-engaja:hover {
-    background-color: #3c0b3f;
-    color: #fff;
-    border-color: #3c0b3f;
-  }
-</style>
-@endpush
 @endsection

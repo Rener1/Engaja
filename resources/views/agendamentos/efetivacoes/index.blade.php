@@ -1,13 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h1 class="h3 fw-bold text-engaja mb-0">Efetuar agendamentos</h1>
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-check" title="Efetuar agendamentos">
     <div class="text-muted">Somente agendamentos ainda não efetivados aparecem aqui.</div>
-  </div>
-  <a href="{{ route('agendamentos.efetivados.index') }}" class="btn btn-outline-secondary">Ver agendamentos efetivados</a>
-</div>
+    <x-slot:actions>
+        <a href="{{ route('agendamentos.efetivados.index') }}" class="eg-hero-btn">Ver agendamentos efetivados</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
 @php
     $columns = [

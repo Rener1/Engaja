@@ -1,13 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h1 class="h3 fw-bold text-engaja mb-0">Agendamentos efetivados</h1>
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-check" title="Agendamentos efetivados">
     <div class="text-muted">Lista apenas os agendamentos já convertidos em momento.</div>
-  </div>
-  <a href="{{ route('agendamentos.efetivacoes.index') }}" class="btn btn-outline-secondary">Voltar para efetivação</a>
-</div>
+    <x-slot:actions>
+        <a href="{{ route('agendamentos.efetivacoes.index') }}" class="eg-hero-btn">Voltar para efetivação</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
 <div class="card shadow-sm">
   <div class="table-responsive">
@@ -50,7 +49,7 @@
           </tr>
         @empty
           <tr>
-            <td colspan="7" class="text-center text-muted py-4">Nenhum agendamento efetivado encontrado.</td>
+            <td colspan="7"><x-ui.empty-state compact muted icon="inbox" title="Nenhum agendamento efetivado encontrado." /></td>
           </tr>
         @endforelse
       </tbody>

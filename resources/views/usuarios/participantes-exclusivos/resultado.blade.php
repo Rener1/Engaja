@@ -2,20 +2,16 @@
 
 @section('content')
 <div class="mb-4">
-  <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
-    <div>
-      <p class="text-uppercase text-muted small mb-1">Pessoas</p>
-      <h1 class="h4 fw-bold text-engaja mb-2">Conferência de participantes exclusivos</h1>
+  <x-ui.page-hero eyebrow="Pessoas" eyebrow-icon="people" title="Conferência de participantes exclusivos">
       <p class="text-muted mb-0">
         Pessoas com inscrição ou presença confirmada apenas nas ações selecionadas.
       </p>
-    </div>
-    <div class="d-flex flex-wrap gap-2">
-      <a href="{{ route('usuarios.participantes-exclusivos.index', ['eventos' => $eventoIds]) }}" class="btn btn-light border">Alterar seleção</a>
-      <a href="{{ route('usuarios.participantes-exclusivos.exportar', ['eventos' => $eventoIds]) }}" class="btn btn-engaja">Exportar XLSX</a>
-      <a href="{{ route('usuarios.participantes-exclusivos.exportar', ['eventos' => $eventoIds, 'formato' => 'docx']) }}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-word"></i> Word</a>
-    </div>
-  </div>
+      <x-slot:actions>
+          <a href="{{ route('usuarios.participantes-exclusivos.index', ['eventos' => $eventoIds]) }}" class="eg-hero-btn border">Alterar seleção</a>
+          <a href="{{ route('usuarios.participantes-exclusivos.exportar', ['eventos' => $eventoIds]) }}" class="eg-hero-btn">Exportar XLSX</a>
+          <a href="{{ route('usuarios.participantes-exclusivos.exportar', ['eventos' => $eventoIds, 'formato' => 'docx']) }}" class="eg-hero-btn"><i class="bi bi-file-earmark-word"></i> Word</a>
+      </x-slot:actions>
+  </x-ui.page-hero>
 
   <div class="card shadow-sm mb-3">
     <div class="card-body">
@@ -86,9 +82,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="8" class="text-center text-muted py-4">
-                  Nenhuma pessoa atende aos critérios para as ações selecionadas.
-                </td>
+                <td colspan="8"><x-ui.empty-state compact muted icon="inbox" title="Nenhuma pessoa atende aos critérios para as ações selecionadas." /></td>
               </tr>
             @endforelse
           </tbody>

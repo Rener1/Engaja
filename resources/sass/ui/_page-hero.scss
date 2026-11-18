@@ -13,7 +13,7 @@
     color: rgba(255, 255, 255, .72) !important;
   }
 
-  a:not(.btn):not(.dropdown-item) {
+  a:not(.btn):not(.dropdown-item):not(.eg-hero-btn) {
     color: #fff;
   }
 
@@ -141,4 +141,10 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
+}
+
+/* Wrappers d-flex vindos das páginas dentro das ações também quebram linha */
+.eg-hero__actions > .d-flex {
+  flex-wrap: wrap;
+  gap: .5rem;
 }

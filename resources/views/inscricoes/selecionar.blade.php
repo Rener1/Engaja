@@ -7,21 +7,18 @@
   $momentosInscritosPorParticipante = $momentosInscritosPorParticipante ?? [];
   $modoTodosMomentos = ! $atividadeId && $totalMomentosEvento > 0;
 @endphp
-<div class="container py-4">
-  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-    <div>
-      <h1 class="h4 mb-1 fw-bold">Inscrever participantes existentes</h1>
-      <div class="text-muted small">
-        Ação pedagógica: <strong>{{ $evento->nome }}</strong>
-      </div>
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-plus" title="Inscrever participantes existentes" class="mb-0">
+    <div class="text-muted small">
+      Ação pedagógica: <strong>{{ $evento->nome }}</strong>
     </div>
-    <div class="d-flex gap-2">
-      <a href="{{ route('inscricoes.import', $evento) }}" class="btn btn-sm btn-outline-primary">Importar participantes</a>
-      <a href="{{ route('inscricoes.moodle.import', $evento) }}" class="btn btn-sm btn-warning fw-semibold">Importação Moodle</a>
-      <a href="{{ route('eventos.show', $evento) }}" class="btn btn-sm btn-outline-secondary">Voltar</a>
-    </div>
-  </div>
+    <x-slot:actions>
+        <a href="{{ route('inscricoes.import', $evento) }}" class="eg-hero-btn">Importar participantes</a>
+        <a href="{{ route('inscricoes.moodle.import', $evento) }}" class="eg-hero-btn fw-semibold">Importação Moodle</a>
+        <a href="{{ route('eventos.show', $evento) }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
   <div class="card shadow-sm mb-3">
     <div class="card-body">
       @if($atividadeSelecionada)
@@ -50,78 +47,80 @@
       @error('atividade_id')
         <div class="text-danger small mt-2">{{ $message }}</div>
       @enderror
-      <form method="GET" action="{{ route('inscricoes.selecionar', $evento) }}" id="selecionarFiltrosForm">
-        <div class="row g-3 mb-2">
-          <div class="col-12">
-            <label class="form-label mb-1">Momento</label>
-            <select name="atividade_id" id="atividadeIdSelect" class="form-select form-select-sm" data-total-momentos="{{ $totalMomentosEvento }}">
-              <option value="" @selected($atividadeId === null || $atividadeId === '')>Todos os momentos desta ação</option>
-              @foreach($atividades as $at)
-                @php
-                  $dia = Carbon::parse($at->dia)->format('d/m/Y');
-                  $hora = $at->hora_inicio ? Carbon::parse($at->hora_inicio)->format('H:i') : null;
-                  $label = trim(($at->descricao ?: 'Momento') . ' - ' . $dia . ($hora ? ' ' . $hora : ''));
-                @endphp
-                <option value="{{ $at->id }}" @selected((string) $atividadeId === (string) $at->id)>{{ $label }}</option>
-              @endforeach
-            </select>
-          </div>
-        </div>
-
-        <div class="row g-3 align-items-end">
-          <div class="col-xl-2 col-md-4">
-            <label class="form-label mb-1">Município</label>
-            <select name="municipio_id" class="form-select form-select-sm">
-              <option value="">Todos</option>
-              @foreach($municipios as $m)
-                <option value="{{ $m->id }}" @selected((string) $municipioId === (string) $m->id)>
-                  {{ $m->nome_com_estado ?? ($m->nome . ($m->estado?->sigla ? ' - '.$m->estado?->sigla : '')) }}
-                </option>
-              @endforeach
-            </select>
-          </div>
-
-          <div class="col-xl-2 col-md-4">
-            <label class="form-label mb-1">Tag</label>
-            <select name="tag" class="form-select form-select-sm">
-              <option value="">Todas</option>
-              @foreach($participanteTags as $tag)
-                <option value="{{ $tag }}" @selected($tagSelecionada === $tag)>{{ $tag }}</option>
-              @endforeach
-            </select>
-          </div>
-
-          <div class="col-xl-1 col-md-4">
-            <label class="form-label mb-1">Por página</label>
-            <select name="per_page" class="form-select form-select-sm">
-              @foreach([25, 50, 100, 200] as $pp)
-                <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-              @endforeach
-            </select>
-          </div>
-
-          <div class="col-xl-4 col-md-4">
-            <label class="form-label mb-1">Disponibilidade</label>
-            <div class="form-check form-switch">
-              <input type="hidden" name="apenas_disponiveis" value="0">
-              <input class="form-check-input" type="checkbox" role="switch" id="apenasDisponiveisSwitch"
-                name="apenas_disponiveis" value="1" @checked($apenasDisponiveis) @disabled($totalMomentosEvento === 0)>
-              <label class="form-check-label small" for="apenasDisponiveisSwitch">
-                @if($atividadeId)
-                  Mostrar apenas quem não está neste momento
-                @else
-                  Mostrar apenas quem não está em todos os momentos
-                @endif
-              </label>
+      <x-ui.filter-card>
+          <form method="GET" action="{{ route('inscricoes.selecionar', $evento) }}" id="selecionarFiltrosForm">
+            <div class="row g-3 mb-2">
+              <div class="col-12">
+                <label class="eg-filter-label">Momento</label>
+                <div class="eg-select-wrapper"><select name="atividade_id" id="atividadeIdSelect" class="eg-select" data-total-momentos="{{ $totalMomentosEvento }}">
+                  <option value="" @selected($atividadeId === null || $atividadeId === '')>Todos os momentos desta ação</option>
+                  @foreach($atividades as $at)
+                    @php
+                      $dia = Carbon::parse($at->dia)->format('d/m/Y');
+                      $hora = $at->hora_inicio ? Carbon::parse($at->hora_inicio)->format('H:i') : null;
+                      $label = trim(($at->descricao ?: 'Momento') . ' - ' . $dia . ($hora ? ' ' . $hora : ''));
+                    @endphp
+                    <option value="{{ $at->id }}" @selected((string) $atividadeId === (string) $at->id)>{{ $label }}</option>
+                  @endforeach
+                </select><i class="bi bi-chevron-down eg-select-chevron" aria-hidden="true"></i></div>
+              </div>
             </div>
-          </div>
 
-          <div class="col-12 d-flex gap-2">
-            <button class="btn btn-sm btn-primary">Filtrar</button>
-            <a href="{{ route('inscricoes.selecionar', $evento) }}" class="btn btn-sm btn-outline-secondary">Limpar</a>
-          </div>
-        </div>
-      </form>
+            <div class="row g-3 align-items-end">
+              <div class="col-xl-2 col-md-4">
+                <label class="eg-filter-label">Município</label>
+                <x-ui.select name="municipio_id">
+                  <option value="">Todos</option>
+                  @foreach($municipios as $m)
+                    <option value="{{ $m->id }}" @selected((string) $municipioId === (string) $m->id)>
+                      {{ $m->nome_com_estado ?? ($m->nome . ($m->estado?->sigla ? ' - '.$m->estado?->sigla : '')) }}
+                    </option>
+                  @endforeach
+                </x-ui.select>
+              </div>
+
+              <div class="col-xl-2 col-md-4">
+                <label class="eg-filter-label">Tag</label>
+                <x-ui.select name="tag">
+                  <option value="">Todas</option>
+                  @foreach($participanteTags as $tag)
+                    <option value="{{ $tag }}" @selected($tagSelecionada === $tag)>{{ $tag }}</option>
+                  @endforeach
+                </x-ui.select>
+              </div>
+
+              <div class="col-xl-1 col-md-4">
+                <label class="eg-filter-label">Por página</label>
+                <x-ui.select name="per_page">
+                  @foreach([25, 50, 100, 200] as $pp)
+                    <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
+                  @endforeach
+                </x-ui.select>
+              </div>
+
+              <div class="col-xl-4 col-md-4">
+                <label class="eg-filter-label">Disponibilidade</label>
+                <div class="form-check form-switch">
+                  <input type="hidden" name="apenas_disponiveis" value="0">
+                  <input class="form-check-input" type="checkbox" role="switch" id="apenasDisponiveisSwitch"
+                    name="apenas_disponiveis" value="1" @checked($apenasDisponiveis) @disabled($totalMomentosEvento === 0)>
+                  <label class="form-check-label small" for="apenasDisponiveisSwitch">
+                    @if($atividadeId)
+                      Mostrar apenas quem não está neste momento
+                    @else
+                      Mostrar apenas quem não está em todos os momentos
+                    @endif
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-12 d-flex gap-2">
+                <button class="btn btn-engaja">Filtrar</button>
+                <a href="{{ route('inscricoes.selecionar', $evento) }}" class="btn btn-outline-secondary">Limpar</a>
+              </div>
+            </div>
+          </form>
+      </x-ui.filter-card>
     </div>
   </div>
 
@@ -227,7 +226,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="7" class="text-center text-muted py-4">Nenhum participante encontrado com os filtros selecionados.</td>
+              <td colspan="7"><x-ui.empty-state compact muted icon="inbox" title="Nenhum participante encontrado com os filtros selecionados." /></td>
             </tr>
           @endforelse
         </tbody>

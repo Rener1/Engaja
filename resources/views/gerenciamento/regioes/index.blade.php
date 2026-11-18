@@ -1,16 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <div>
-      <p class="text-uppercase text-muted small mb-1">Administração</p>
-      <h1 class="h4 fw-bold mb-0">Regiões</h1>
-      <p class="text-muted mb-0">Gerencie as regiões cadastradas.</p>
-    </div>
-    <button class="btn btn-engaja" data-bs-toggle="modal" data-bs-target="#modalCreateRegiao">Nova região</button>
-  </div>
+<x-ui.page-hero contained eyebrow="Administração" eyebrow-icon="geo-alt" title="Regiões" class="mb-0">
+    <p class="text-muted mb-0">Gerencie as regiões cadastradas.</p>
+    <x-slot:actions>
+        <button class="eg-hero-btn eg-hero-btn--solid" data-bs-toggle="modal" data-bs-target="#modalCreateRegiao">Nova região</button>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
   @php
       $columns = [
           ['field' => 'nome', 'headerName' => 'Nome', 'flex' => 2],
@@ -34,10 +32,7 @@
     <div class="modal-content">
       <form method="POST" action="{{ route('regioes.store') }}">
         @csrf
-        <div class="modal-header">
-          <h5 class="modal-title">Nova região</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        <x-ui.modal-header title="Nova região" />
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Nome</label>
@@ -60,10 +55,7 @@
       <form method="POST" id="formEditRegiao">
         @csrf
         @method('PUT')
-        <div class="modal-header">
-          <h5 class="modal-title">Editar região</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        <x-ui.modal-header title="Editar região" />
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Nome</label>
@@ -86,12 +78,6 @@
   </div>
 </div>
 
-@push('styles')
-<style>
-  .btn-engaja { background:#4a0e4e; color:#fff; border:1px solid #4a0e4e; }
-  .btn-engaja:hover { background:#3c0b3f; color:#fff; border-color:#3c0b3f; }
-</style>
-@endpush
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {

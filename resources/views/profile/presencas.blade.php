@@ -1,39 +1,42 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero contained eyebrow="Minha conta" eyebrow-icon="person-check" title="Minhas Presenças" />
+
 <div class="container">
-    <h2 class="mb-4">Minhas Presenças</h2>
-        <form method="GET" class="mb-3">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">Ação pedagógica (evento)</label>
-                    <select name="evento_id" class="form-select">
-                        <option value="">Todas</option>
-                        @foreach($eventos as $evento)
-                           <option value="{{ $evento->id }}" {{ ($filtros['evento_id'] ?? '') == $evento->id ? 'selected' : '' }}>
-                                {{ $evento->nome }}
-                            </option>
-                        @endforeach
-                    </select>
+        <x-ui.filter-card>
+            <form method="GET">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="eg-filter-label">Ação pedagógica (evento)</label>
+                        <x-ui.select name="evento_id">
+                            <option value="">Todas</option>
+                            @foreach($eventos as $evento)
+                               <option value="{{ $evento->id }}" {{ ($filtros['evento_id'] ?? '') == $evento->id ? 'selected' : '' }}>
+                                    {{ $evento->nome }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="eg-filter-label">De</label>
+                        <x-ui.input type="date" name="data_de" value="{{ $filtros['data_de'] }}" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="eg-filter-label">Até</label>
+                        <x-ui.input type="date" name="data_ate" value="{{ $filtros['data_ate'] }}" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="eg-filter-label">Buscar (momento/ação)</label>
+                        <x-ui.input type="text" name="busca" value="{{ $filtros['busca'] }}" />
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                        <a href="{{ route('profile.presencas') }}" class="btn btn-secondary w-100">Limpar</a>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">De</label>
-                    <input type="date" name="data_de" class="form-control" value="{{ $filtros['data_de'] }}">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Até</label>
-                    <input type="date" name="data_ate" class="form-control" value="{{ $filtros['data_ate'] }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Buscar (momento/ação)</label>
-                    <input type="text" name="busca" class="form-control" value="{{ $filtros['busca'] }}">
-                </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                    <a href="{{ route('profile.presencas') }}" class="btn btn-secondary w-100">Limpar</a>
-                </div>
-            </div>
-        </form>
+            </form>
+        </x-ui.filter-card>
     <div class="card">
         <div class="card-body">
             <table class="table table-bordered table-striped">
@@ -65,7 +68,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center">Nenhuma presença encontrada.</td>
+                            <td colspan="5"><x-ui.empty-state compact muted icon="inbox" title="Nenhuma presença encontrada." /></td>
                         </tr>
                     @endforelse
                 </tbody>

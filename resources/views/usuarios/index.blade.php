@@ -2,74 +2,65 @@
 
 @section('content')
 <div class="mb-4">
-    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
-        <div>
-            <p class="text-uppercase text-muted small mb-1">Administração</p>
-            <h1 class="h4 fw-bold text-engaja mb-2">Gerenciar Usuários</h1>
-        </div>
-        @hasanyrole('administrador|gerente|eq_pedagogica|articulador')
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-engaja" data-bs-toggle="modal" data-bs-target="#modalExportarUsuarios">
-                Baixar planilha de usuários
-            </button>
-            <a href="{{ route('usuarios.autorizacoes.import') }}" class="btn btn-engaja">Importar Autorizações de Imagem</a>
-            @role('administrador')
-            <a href="{{ route('usuarios.notificacoes-agendamento.index') }}" class="btn btn-engaja">Notificações de Agendamento</a>
-            @endrole
-            <a href="{{ route('usuarios.create') }}" class="btn btn-engaja">Cadastrar Usuário</a>
-        </div>
-        @endhasanyrole
-    </div>
+    <x-ui.page-hero eyebrow="Administração" eyebrow-icon="people" title="Gerenciar Usuários">
+        <x-slot:actions>
+            @hasanyrole('administrador|gerente|eq_pedagogica|articulador')
+            <div class="d-flex gap-2">
+                <button type="button" class="eg-hero-btn" data-bs-toggle="modal" data-bs-target="#modalExportarUsuarios">
+                    Baixar planilha de usuários
+                </button>
+                <a href="{{ route('usuarios.autorizacoes.import') }}" class="eg-hero-btn">Importar Autorizações de Imagem</a>
+                @role('administrador')
+                <a href="{{ route('usuarios.notificacoes-agendamento.index') }}" class="eg-hero-btn">Notificações de Agendamento</a>
+                @endrole
+                <a href="{{ route('usuarios.create') }}" class="eg-hero-btn eg-hero-btn--solid">Cadastrar Usuário</a>
+            </div>
+            @endhasanyrole
+        </x-slot:actions>
+    </x-ui.page-hero>
 
-    <div class="filter-bar shadow-sm">
-        <form action="{{ route('usuarios.index') }}" method="GET" class="row g-2 align-items-center">
+    <div class="eg-filter-card">
+        <form action="{{ route('usuarios.index') }}" method="GET" class="row g-3 align-items-center">
 
             {{-- campo de busca --}}
             <div class="col-12 col-md-3">
-                <div class="input-group">
-              <span class="input-group-text bg-white border-end-0 text-muted">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                  </svg>
-              </span>
-                    <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Buscar nome, e-mail ou CPF..." value="{{ $search }}">
-                </div>
+                <x-ui.input type="text" name="q" placeholder="Buscar nome, e-mail ou CPF..." value="{{ $search }}" />
             </div>
 
             {{-- select de região --}}
             <div class="col-12 col-md-2">
-                <select name="regiao" id="filtro_regiao" class="form-select text-muted">
+                <x-ui.select name="regiao" id="filtro_regiao">
                     <option value="">Todas as Regiões</option>
                     @foreach($regioes as $regiao)
                         <option value="{{ $regiao->id }}" {{ $regiao_id == $regiao->id ? 'selected' : '' }}>
                             {{ $regiao->nome }}
                         </option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
 
             {{-- select de estado --}}
             <div class="col-12 col-md-2">
-                <select name="estado" id="filtro_estado" class="form-select text-muted" {{ empty($regiao_id) && empty($estado_id) ? 'disabled' : '' }}>
+                <x-ui.select name="estado" id="filtro_estado" :disabled="empty($regiao_id) && empty($estado_id)">
                     <option value="">Todos os Estados</option>
                     @foreach($estados as $estado)
                         <option value="{{ $estado->id }}" data-regiao="{{ $estado->regiao_id }}" {{ $estado_id == $estado->id ? 'selected' : '' }}>
                             {{ $estado->nome }}
                         </option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
 
             {{-- select de município --}}
             <div class="col-12 col-md-3">
-                <select name="municipio" id="filtro_municipio" class="form-select text-muted" {{ empty($estado_id) && empty($municipio_id) ? 'disabled' : '' }}>
+                <x-ui.select name="municipio" id="filtro_municipio" :disabled="empty($estado_id) && empty($municipio_id)">
                     <option value="">Todos os Municípios</option>
                     @foreach($municipios as $municipio)
                         <option value="{{ $municipio->id }}" data-estado="{{ $municipio->estado_id }}" {{ $municipio_id == $municipio->id ? 'selected' : '' }}>
                             {{ $municipio->nome }}
                         </option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
 
             <div class="col-12 col-md-2 d-flex gap-2">
@@ -83,13 +74,13 @@
 </div>
 
 @if ($users->isEmpty())
-  <div class="alert alert-info">
+  <x-ui.empty-state icon="inbox" muted>
     @if (!empty($search))
       Nenhum usuario encontrado para "{{ $search }}".
     @else
       Nao ha usuarios editaveis no momento.
     @endif
-  </div>
+  </x-ui.empty-state>
 @else
   <form method="POST" action="{{ route('usuarios.certificados.emitir') }}" id="form-emitir-certificados">
     @csrf
@@ -267,13 +258,9 @@
     <div class="modal fade" id="modalParticipacoesUsuario{{ $u->id }}" tabindex="-1" aria-labelledby="modalParticipacoesUsuario{{ $u->id }}Label" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
-          <div class="modal-header">
-            <div>
-              <h5 class="modal-title fw-bold" id="modalParticipacoesUsuario{{ $u->id }}Label">Participações de {{ $u->name }}</h5>
-              <div class="text-muted small">{{ $u->email }}</div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-          </div>
+          <x-ui.modal-header :title="'Participações de '.$u->name" :title-id="'modalParticipacoesUsuario'.$u->id.'Label'">
+            <x-slot:subtitle>{{ $u->email }}</x-slot:subtitle>
+          </x-ui.modal-header>
           <div class="modal-body">
             <div class="row g-3 mb-4">
               <div class="col-12 col-md-4">
@@ -359,7 +346,7 @@
                     </tr>
                   @empty
                     <tr>
-                      <td colspan="6" class="text-center text-muted py-4">Nenhuma participação encontrada para este usuário.</td>
+                      <td colspan="6"><x-ui.empty-state compact muted icon="inbox" title="Nenhuma participação encontrada para este usuário." /></td>
                     </tr>
                   @endforelse
                 </tbody>
@@ -381,10 +368,7 @@
   <div class="modal fade" id="modalModeloCertificado" tabindex="-1" aria-labelledby="modalModeloCertificadoLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalModeloCertificadoLabel">Emitir certificados</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
+        <x-ui.modal-header title-id="modalModeloCertificadoLabel" title="Emitir certificados" />
         <div class="modal-body">
           <div class="mb-3">
             <label for="select-modelo" class="form-label">Modelo de certificado</label>
@@ -409,10 +393,7 @@
   <div class="modal fade" id="modalExportarUsuarios" tabindex="-1" aria-labelledby="modalExportarUsuariosLabel" aria-hidden="true">
       <div class="modal-dialog">
           <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="modalExportarUsuariosLabel">Baixar Usuários Cadastrados</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-              </div>
+              <x-ui.modal-header title-id="modalExportarUsuariosLabel" title="Baixar Usuários Cadastrados" />
               <form action="{{ route('usuarios.export') }}" method="GET">
                   <div class="modal-body">
                       <p class="text-muted small mb-3">Selecione os filtros abaixo para baixar uma listagem específica ou deixe em branco para baixar toda a base de usuários.</p>
@@ -461,10 +442,7 @@
   <div class="modal fade" id="modalRedefinirSenha" tabindex="-1" aria-labelledby="modalRedefinirSenhaLabel" aria-hidden="true">
       <div class="modal-dialog">
           <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="modalRedefinirSenhaLabel">Redefinir senha</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-              </div>
+              <x-ui.modal-header title-id="modalRedefinirSenhaLabel" title="Redefinir senha" />
               <form method="POST" id="form-redefinir-senha" action="{{ session('reset_password_action', '') }}">
                   @csrf
                   <div class="modal-body">
@@ -510,10 +488,7 @@
   <div class="modal fade" id="modalExcluirUsuario" tabindex="-1" aria-labelledby="modalExcluirUsuarioLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="modalExcluirUsuarioLabel">Deletar usuário</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-              </div>
+              <x-ui.modal-header title-id="modalExcluirUsuarioLabel" title="Deletar usuário" />
               <form method="POST" id="form-excluir-usuario" action="">
                   @csrf
                   @method('DELETE')

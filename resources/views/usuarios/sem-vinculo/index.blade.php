@@ -2,20 +2,16 @@
 
 @section('content')
 <div class="mb-4">
-  <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
-    <div>
-      <p class="text-uppercase text-muted small mb-1">Pessoas</p>
-      <h1 class="h4 fw-bold text-engaja mb-2">Usuários sem vínculo</h1>
+  <x-ui.page-hero eyebrow="Pessoas" eyebrow-icon="people" title="Usuários sem vínculo">
       <p class="text-muted mb-0">
         Usuários sem vínculo com ações pedagógicas ou momentos ativos no sistema.
       </p>
-    </div>
-    <div class="d-flex flex-wrap gap-2">
-      <a href="{{ route('usuarios.index') }}" class="btn btn-light border">Voltar</a>
-      <a href="{{ route('usuarios.sem-vinculo.exportar') }}" class="btn btn-engaja">Exportar XLSX</a>
-      <a href="{{ route('usuarios.sem-vinculo.exportar', ['formato' => 'docx']) }}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-word"></i> Word</a>
-    </div>
-  </div>
+      <x-slot:actions>
+          <a href="{{ route('usuarios.index') }}" class="eg-hero-btn border">Voltar</a>
+          <a href="{{ route('usuarios.sem-vinculo.exportar') }}" class="eg-hero-btn">Exportar XLSX</a>
+          <a href="{{ route('usuarios.sem-vinculo.exportar', ['formato' => 'docx']) }}" class="eg-hero-btn"><i class="bi bi-file-earmark-word"></i> Word</a>
+      </x-slot:actions>
+  </x-ui.page-hero>
 
   <div class="card shadow-sm mb-3">
     <div class="card-body">

@@ -1,42 +1,41 @@
 @extends('layouts.app')
 
 @section('content')
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h4 fw-bold text-engaja mb-0">Momentos — {{ $evento->nome }}</h1>
-
-        @hasanyrole('administrador|formador')
-        <small class="text-muted">Gerencie a programação da ação pedagógica</small>
-        @endhasanyrole
-      </div>
-
+  <x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar3" :title="'Momentos — '.$evento->nome">
       @hasanyrole('administrador|formador')
-      <a href="{{ route('eventos.atividades.create', $evento) }}" class="btn btn-engaja">+ Novo momento</a>
+      <small class="text-muted">Gerencie a programação da ação pedagógica</small>
       @endhasanyrole
-    </div>
+      <x-slot:actions>
+          @hasanyrole('administrador|formador')
+          <a href="{{ route('eventos.atividades.create', $evento) }}" class="eg-hero-btn eg-hero-btn--solid">+ Novo momento</a>
+          @endhasanyrole
+      </x-slot:actions>
+  </x-ui.page-hero>
 
-    <form method="GET" action="{{ route('eventos.atividades.index', $evento) }}" class="row g-2 align-items-end mb-3">
-      <div class="col-auto">
-        <label for="municipio_id" class="form-label mb-0 small text-muted">Município</label>
-        <select name="municipio_id" id="municipio_id" class="form-select form-select-sm" onchange="this.form.submit()">
-          <option value="">Todos</option>
-          @if($temAbrangenciaNacional ?? false)
-            <option value="brasil" @selected(request('municipio_id') === 'brasil')>Brasil</option>
+  <div class="container">
+    <x-ui.filter-card>
+        <form method="GET" action="{{ route('eventos.atividades.index', $evento) }}" class="row g-3 align-items-end">
+          <div class="col-auto">
+            <label for="municipio_id" class="eg-filter-label">Município</label>
+            <x-ui.select name="municipio_id" id="municipio_id" onchange="this.form.submit()">
+              <option value="">Todos</option>
+              @if($temAbrangenciaNacional ?? false)
+                <option value="brasil" @selected(request('municipio_id') === 'brasil')>Brasil</option>
+              @endif
+              @foreach($municipiosDisponiveis as $m)
+                <option value="{{ $m->id }}" @selected(request('municipio_id') == $m->id)>
+                  {{ $m->nome_com_estado ?? $m->nome }}
+                </option>
+              @endforeach
+            </x-ui.select>
+          </div>
+          @if(request('municipio_id'))
+            <div class="col-auto">
+              <a href="{{ route('eventos.atividades.index', $evento) }}" class="btn btn-outline-secondary">Limpar filtro</a>
+            </div>
           @endif
-          @foreach($municipiosDisponiveis as $m)
-            <option value="{{ $m->id }}" @selected(request('municipio_id') == $m->id)>
-              {{ $m->nome_com_estado ?? $m->nome }}
-            </option>
-          @endforeach
-        </select>
-      </div>
-      @if(request('municipio_id'))
-        <div class="col-auto">
-          <a href="{{ route('eventos.atividades.index', $evento) }}" class="btn btn-sm btn-outline-secondary">Limpar filtro</a>
-        </div>
-      @endif
-    </form>
+        </form>
+    </x-ui.filter-card>
 
     @php
         $columns = [
@@ -126,9 +125,7 @@
   <div class="modal fade" id="modalReopenChecklist" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
-        <div class="modal-header bg-engaja text-white border-0">
-          <h5 class="modal-title fw-bold">⚠️ Checklist Incompleto</h5>
-        </div>
+        <x-ui.modal-header icon="exclamation-triangle" title="Checklist Incompleto" :dismissible="false" />
         <div class="modal-body" id="reopen-checklist-body">
         </div>
         <div class="modal-footer border-0">

@@ -1,42 +1,42 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-            <h1 class="h3 fw-bold text-engaja mb-0">Ações pedagógicas</h1>
+    <x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-event" title="Ações pedagógicas">
+        <x-slot:actions>
+            @hasanyrole('administrador|gerente')
+            <button type="button" class="eg-hero-btn" id="btn-emitir-certificados" data-bs-toggle="modal" data-bs-target="#modalEmitirCertificados" disabled>Emitir certificados</button>
+            @endhasanyrole
+            @hasanyrole('administrador|gerente|eq_pedagogica')
+            <a href="{{ route('eventos.create') }}" class="eg-hero-btn eg-hero-btn--solid">Nova ação pedagógica</a>
+            @endhasanyrole
+        </x-slot:actions>
+    </x-ui.page-hero>
 
-            <div class="d-flex align-items-center gap-2">
-                @hasanyrole('administrador|gerente')
-                <button type="button" class="btn btn-outline-primary" id="btn-emitir-certificados" data-bs-toggle="modal" data-bs-target="#modalEmitirCertificados" disabled>Emitir certificados</button>
-                @endhasanyrole
-                @hasanyrole('administrador|gerente|eq_pedagogica')
-                <a href="{{ route('eventos.create') }}" class="btn btn-engaja">Nova ação pedagógica</a>
-                @endhasanyrole
-            </div>
-        </div>
+    <div class="container">
         {{-- Filtros / busca --}}
-        <form method="GET" class="row g-2 mb-3">
-            <div class="col-md-4">
-                <input type="text" name="q" value="{{ request('q') }}" class="form-control"
-                    placeholder="Buscar por nome, tipo, objetivo">
-            </div>
-            <div class="col-md-3">
-                <select name="acao_geral" class="form-select">
-                    <option value="">Todas as Ações Gerais</option>
-                    @foreach(\App\Models\Evento::ACOES_GERAIS as $key => $label)
-                    <option value="{{ $key }}" @selected(request('acao_geral') == $key)>
-                        Ação Geral {{ $key }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <input type="date" name="de" value="{{ request('de') }}" class="form-control" placeholder="de">
-            </div>
-            <div class="col-md-2 d-grid">
-                <button class="btn btn-engaja">Filtrar</button>
-            </div>
-        </form>
+        <x-ui.filter-card>
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <x-ui.input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar por nome, tipo, objetivo" />
+                </div>
+                <div class="col-md-3">
+                    <x-ui.select name="acao_geral">
+                        <option value="">Todas as Ações Gerais</option>
+                        @foreach(\App\Models\Evento::ACOES_GERAIS as $key => $label)
+                        <option value="{{ $key }}" @selected(request('acao_geral') == $key)>
+                            Ação Geral {{ $key }}
+                        </option>
+                        @endforeach
+                    </x-ui.select>
+                </div>
+                <div class="col-md-3">
+                    <x-ui.input type="date" name="de" value="{{ request('de') }}" placeholder="de" />
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-engaja">Filtrar</button>
+                </div>
+            </form>
+        </x-ui.filter-card>
 
         @php
             if (!function_exists('evento_sort_link')) {
@@ -145,10 +145,7 @@
         <div class="modal fade" id="modalEmitirCertificados" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Emitir certificados</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+                    <x-ui.modal-header title="Emitir certificados" />
                     <div class="modal-body">
                         <p class="text-muted mb-2">Selecione o modelo que será usado para emitir os certificados das ações selecionadas.</p>
                         <div class="mb-3">

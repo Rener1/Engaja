@@ -1,16 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <div>
-      <p class="text-uppercase text-muted small mb-1">Administração</p>
-      <h1 class="h4 fw-bold mb-0">Estados</h1>
-      <p class="text-muted mb-0">Gerencie os estados cadastrados.</p>
-    </div>
-    <button class="btn btn-engaja btn-sm" data-bs-toggle="modal" data-bs-target="#modalCreateEstado">Novo estado</button>
-  </div>
+<x-ui.page-hero contained eyebrow="Administração" eyebrow-icon="geo-alt" title="Estados" class="mb-0">
+    <p class="text-muted mb-0">Gerencie os estados cadastrados.</p>
+    <x-slot:actions>
+        <button class="eg-hero-btn eg-hero-btn--solid" data-bs-toggle="modal" data-bs-target="#modalCreateEstado">Novo estado</button>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
   @php
       $columns = [
           ['field' => 'nome', 'headerName' => 'Nome', 'flex' => 2],
@@ -50,10 +48,7 @@
     <div class="modal-content">
       <form method="POST" action="{{ route('estados.store') }}">
         @csrf
-        <div class="modal-header">
-          <h5 class="modal-title">Novo estado</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        <x-ui.modal-header title="Novo estado" />
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Região</label>
@@ -89,10 +84,7 @@
       <form method="POST" id="formEditEstado">
         @csrf
         @method('PUT')
-        <div class="modal-header">
-          <h5 class="modal-title">Editar estado</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        <x-ui.modal-header title="Editar estado" />
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Região</label>
@@ -126,12 +118,6 @@
   </div>
 </div>
 
-@push('styles')
-<style>
-  .btn-engaja { background:#4a0e4e; color:#fff; border:1px solid #4a0e4e; }
-  .btn-engaja:hover { background:#3c0b3f; color:#fff; border-color:#3c0b3f; }
-</style>
-@endpush
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {

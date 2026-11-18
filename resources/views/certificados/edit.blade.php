@@ -50,18 +50,4 @@
   </div>
 </div>
 
-@push('styles')
-<style>
-  .btn-engaja {
-    background-color: #4a0e4e;
-    color: #fff;
-    border: 1px solid #4a0e4e;
-  }
-  .btn-engaja:hover {
-    background-color: #3c0b3f;
-    color: #fff;
-    border-color: #3c0b3f;
-  }
-</style>
-@endpush
 @endsection
