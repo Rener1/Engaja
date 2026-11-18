@@ -1,40 +1,38 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h1 class="h3 fw-bold text-engaja mb-0">Avaliações universais</h1>
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="globe" title="Avaliações universais">
     <p class="text-muted mb-0">Avaliações anônimas, sem vínculo com momento.</p>
-  </div>
-  <a href="{{ route('avaliacoes-universais.create') }}" class="btn btn-engaja">Nova avaliação universal</a>
-</div>
+    <x-slot:actions>
+        <a href="{{ route('avaliacoes-universais.create') }}" class="eg-hero-btn eg-hero-btn--solid">Nova avaliação universal</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
-<form method="GET" action="{{ route('avaliacoes-universais.index') }}" class="card shadow-sm mb-4">
-  <div class="card-body">
-    <div class="row g-1 align-items-end">
+<x-ui.filter-card>
+<form method="GET" action="{{ route('avaliacoes-universais.index') }}">
+    <div class="row g-3 align-items-end">
       <div class="col-lg-3 col-md-6">
-        <label for="search" class="form-label">Buscar por modelo ou descrição</label>
-        <input type="text" class="form-control" id="search" name="search"
-          value="{{ request('search') }}" placeholder="Digite para filtrar...">
+        <label for="search" class="eg-filter-label">Buscar por modelo ou descrição</label>
+        <x-ui.input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Digite para filtrar..." />
       </div>
       <div class="col-lg-3 col-md-6">
-        <label for="template_id" class="form-label">Modelo</label>
-        <select id="template_id" name="template_id" class="form-select">
+        <label for="template_id" class="eg-filter-label">Modelo</label>
+        <x-ui.select id="template_id" name="template_id">
           <option value="">Todos</option>
           @foreach ($templatesDisponiveis as $id => $nome)
           <option value="{{ $id }}" @selected((string) request('template_id') === (string) $id)>{{ $nome }}</option>
           @endforeach
-        </select>
+        </x-ui.select>
       </div>
       <div class="col-lg-2 col-md-6">
-        <label for="de" class="form-label">Registrada de</label>
-        <input type="date" id="de" name="de" class="form-control" value="{{ request('de') }}">
+        <label for="de" class="eg-filter-label">Registrada de</label>
+        <x-ui.input type="date" id="de" name="de" value="{{ request('de') }}" />
       </div>
       <div class="col-lg-2 col-md-6">
-        <label for="ate" class="form-label">Registrada até</label>
-        <input type="date" id="ate" name="ate" class="form-control" value="{{ request('ate') }}">
+        <label for="ate" class="eg-filter-label">Registrada até</label>
+        <x-ui.input type="date" id="ate" name="ate" value="{{ request('ate') }}" />
       </div>
-      <div class="col-2 d-flex gap-1">
+      <div class="col-2 d-flex gap-1 eg-filter-actions">
         <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
         <input type="hidden" name="dir"
           value="{{ strtolower(request('dir', request('direction', 'desc'))) === 'asc' ? 'asc' : 'desc' }}">
@@ -42,8 +40,8 @@
         <a href="{{ route('avaliacoes-universais.index') }}" class="btn btn-outline-secondary">Limpar</a>
       </div>
     </div>
-  </div>
 </form>
+</x-ui.filter-card>
 
 @php
     $sortLink = function ($label, $key) {
@@ -127,13 +125,9 @@
 <div class="modal fade" id="modalLinkQrCode{{ $avaliacao->id }}" tabindex="-1" aria-labelledby="modalLinkQrCodeLabel{{ $avaliacao->id }}" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title h5 fw-bold text-engaja mb-1" id="modalLinkQrCodeLabel{{ $avaliacao->id }}">Link e QR Code</h2>
-          <p class="text-muted mb-0">{{ $avaliacao->descricao_universal ?: ($avaliacao->templateAvaliacao->nome ?? 'Avaliação universal') }}</p>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-      </div>
+      <x-ui.modal-header icon="qr-code" title="Link e QR Code" :title-id="'modalLinkQrCodeLabel'.$avaliacao->id">
+        <x-slot:subtitle>{{ $avaliacao->descricao_universal ?: ($avaliacao->templateAvaliacao->nome ?? 'Avaliação universal') }}</x-slot:subtitle>
+      </x-ui.modal-header>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
           <div>

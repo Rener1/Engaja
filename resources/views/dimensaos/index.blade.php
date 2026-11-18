@@ -1,34 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 fw-bold text-engaja mb-0">Dimensões</h1>
-  <a href="{{ route('dimensaos.create') }}" class="btn btn-engaja">Nova dimensão</a>
-</div>
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="diagram-3" title="Dimensões">
+    <x-slot:actions>
+        <a href="{{ route('dimensaos.create') }}" class="eg-hero-btn eg-hero-btn--solid">Nova dimensão</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
-<form method="GET" action="{{ route('dimensaos.index') }}" class="card shadow-sm mb-4">
-  <div class="card-body">
+<x-ui.filter-card>
+<form method="GET" action="{{ route('dimensaos.index') }}">
     <div class="row g-3 align-items-end">
       <div class="col-md-5 col-lg-4">
-        <label for="search" class="form-label">Buscar por descrição</label>
-        <input type="text" class="form-control" id="search" name="search"
-          value="{{ request('search') }}" placeholder="Digite parte da descrição">
+        <label for="search" class="eg-filter-label">Buscar por descrição</label>
+        <x-ui.input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Digite parte da descrição" />
       </div>
       <div class="col-md-4 col-lg-3">
-        <label for="has_indicators" class="form-label">Filtro por indicador</label>
-        <select id="has_indicators" name="has_indicators" class="form-select">
+        <label for="has_indicators" class="eg-filter-label">Filtro por indicador</label>
+        <x-ui.select id="has_indicators" name="has_indicators">
           <option value="">Todas</option>
           <option value="with" @selected(request('has_indicators') === 'with')>Com indicadores</option>
           <option value="without" @selected(request('has_indicators') === 'without')>Sem indicadores</option>
-        </select>
+        </x-ui.select>
       </div>
-      <div class="col-3 d-flex gap-2">
+      <div class="col-3 d-flex gap-2 eg-filter-actions">
         <button type="submit" class="btn btn-engaja">Aplicar</button>
         <a href="{{ route('dimensaos.index') }}" class="btn btn-outline-secondary">Limpar</a>
       </div>
     </div>
-  </div>
 </form>
+</x-ui.filter-card>
 
 @php
     $columns = [

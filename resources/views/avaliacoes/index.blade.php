@@ -1,37 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 fw-bold text-engaja mb-0">Avaliações</h1>
-  <a href="{{ route('avaliacoes.create') }}" class="btn btn-engaja">Nova avaliação</a>
-</div>
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="clipboard2-check" title="Avaliações">
+    <x-slot:actions>
+        <a href="{{ route('avaliacoes.create') }}" class="eg-hero-btn eg-hero-btn--solid">Nova avaliação</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
-<form method="GET" action="{{ route('avaliacoes.index') }}" class="card shadow-sm mb-4">
-  <div class="card-body">
-    <div class="row g-1 align-items-end">
+<x-ui.filter-card>
+<form method="GET" action="{{ route('avaliacoes.index') }}">
+    <div class="row g-3 align-items-end">
       <div class="col-lg-3 col-md-6">
-        <label for="search" class="form-label">Buscar (momento, modelo ou descrição)</label>
-        <input type="text" class="form-control" id="search" name="search"
-          value="{{ request('search') }}" placeholder="Digite para filtrar...">
+        <label for="search" class="eg-filter-label">Buscar (momento, modelo ou descrição)</label>
+        <x-ui.input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Digite para filtrar..." />
       </div>
       <div class="col-lg-3 col-md-6">
-        <label for="template_id" class="form-label">Modelo</label>
-        <select id="template_id" name="template_id" class="form-select">
+        <label for="template_id" class="eg-filter-label">Modelo</label>
+        <x-ui.select id="template_id" name="template_id">
           <option value="">Todos</option>
           @foreach ($templatesDisponiveis as $id => $nome)
           <option value="{{ $id }}" @selected((string) request('template_id') === (string) $id)>{{ $nome }}</option>
           @endforeach
-        </select>
+        </x-ui.select>
       </div>
       <div class="col-lg-2 col-md-6">
-        <label for="de" class="form-label">Registrada de</label>
-        <input type="date" id="de" name="de" class="form-control" value="{{ request('de') }}">
+        <label for="de" class="eg-filter-label">Registrada de</label>
+        <x-ui.input type="date" id="de" name="de" value="{{ request('de') }}" />
       </div>
       <div class="col-lg-2 col-md-6">
-        <label for="ate" class="form-label">Registrada até</label>
-        <input type="date" id="ate" name="ate" class="form-control" value="{{ request('ate') }}">
+        <label for="ate" class="eg-filter-label">Registrada até</label>
+        <x-ui.input type="date" id="ate" name="ate" value="{{ request('ate') }}" />
       </div>
-      <div class="col-2 d-flex gap-1">
+      <div class="col-2 d-flex gap-1 eg-filter-actions">
         <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
         <input type="hidden" name="dir"
           value="{{ strtolower(request('dir', request('direction', 'desc'))) === 'asc' ? 'asc' : 'desc' }}">
@@ -39,8 +39,8 @@
         <a href="{{ route('avaliacoes.index') }}" class="btn btn-outline-secondary">Limpar</a>
       </div>
     </div>
-  </div>
 </form>
+</x-ui.filter-card>
 
 @php
     function avaliacao_sort_link($label, $key) {

@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 fw-bold text-engaja mb-0">Atividades/Ações</h1>
-  <a href="{{ route('atividade-acoes.create') }}" class="btn btn-engaja">Nova atividade/ação</a>
-</div>
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="diagram-2" title="Atividades/Ações">
+    <x-slot:actions>
+        <a href="{{ route('atividade-acoes.create') }}" class="eg-hero-btn eg-hero-btn--solid">Nova atividade/ação</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
 @php
     $columns = [

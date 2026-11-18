@@ -1,34 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 fw-bold text-engaja mb-0">Escalas</h1>
-  <a href="{{ route('escalas.create') }}" class="btn btn-engaja">Nova escala</a>
-</div>
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="sliders" title="Escalas">
+    <x-slot:actions>
+        <a href="{{ route('escalas.create') }}" class="eg-hero-btn eg-hero-btn--solid">Nova escala</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
-<form method="GET" action="{{ route('escalas.index') }}" class="card shadow-sm mb-4">
-  <div class="card-body">
+<x-ui.filter-card>
+<form method="GET" action="{{ route('escalas.index') }}">
     <div class="row g-3 align-items-end">
       <div class="col-md-4">
-        <label for="search" class="form-label">Buscar por descrição</label>
-        <input type="text" class="form-control" id="search" name="search"
-          value="{{ request('search') }}" placeholder="Digite parte da descrição">
+        <label for="search" class="eg-filter-label">Buscar por descrição</label>
+        <x-ui.input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Digite parte da descrição" />
       </div>
       <div class="col-md-3">
-        <label for="has_options" class="form-label">Filtro de opções</label>
-        <select id="has_options" name="has_options" class="form-select">
+        <label for="has_options" class="eg-filter-label">Filtro de opções</label>
+        <x-ui.select id="has_options" name="has_options">
           <option value="">Todas</option>
           <option value="with" @selected(request('has_options') === 'with')>Com opções</option>
           <option value="without" @selected(request('has_options') === 'without')>Sem opções</option>
-        </select>
+        </x-ui.select>
       </div>
-      <div class="col-4 d-flex gap-2">
+      <div class="col-4 d-flex gap-2 eg-filter-actions">
         <button type="submit" class="btn btn-engaja">Aplicar</button>
         <a href="{{ route('escalas.index') }}" class="btn btn-outline-secondary">Limpar</a>
       </div>
     </div>
-  </div>
 </form>
+</x-ui.filter-card>
 
 @php
     $columns = [
