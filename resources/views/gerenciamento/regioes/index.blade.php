@@ -12,7 +12,7 @@
   @php
       $columns = [
           ['field' => 'nome', 'headerName' => 'Nome', 'flex' => 2],
-          ['field' => 'acoes', 'headerName' => 'Ações', 'flex' => 1, 'html' => true, 'align' => 'end'],
+          ['field' => 'acoes', 'headerName' => 'Ações', 'flex' => 1, 'html' => true],
       ];
 
       $rows = $regioes->map(fn ($regiao) => [
