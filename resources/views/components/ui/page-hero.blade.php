@@ -6,7 +6,6 @@
       - eyebrowIcon: ícone Bootstrap Icons do eyebrow, sem o prefixo "bi-"
       - title:       título da página (h1); use o slot "heading" quando precisar de HTML
       - subtitle:    linha de apoio abaixo do título
-      - contained:   envolve o conteúdo em .container (páginas cujo corpo também usa .container)
 
     Slots:
       - actions: botões à direita (use .eg-hero-btn / .eg-hero-btn--solid)
@@ -19,11 +18,10 @@
     'eyebrowIcon' => null,
     'title' => null,
     'subtitle' => null,
-    'contained' => false,
 ])
 
-<div {{ $attributes->class(['eg-hero', 'eg-hero--plain' => ! $contained]) }}>
-    <div @class(['container' => $contained])>
+<div {{ $attributes->class(['eg-hero']) }}>
+    <div>
         <div class="eg-hero__inner">
             @isset($media)
                 <div {{ $media->attributes->class(['eg-hero__media']) }}>{{ $media }}</div>

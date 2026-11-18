@@ -1,4 +1,4 @@
-<div class="container py-4">
+<div class="py-4">
     <x-ui.filter-card>
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">

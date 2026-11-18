@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Minha conta" eyebrow-icon="person-check" title="Minhas Presenças" />
+<x-ui.page-hero eyebrow="Minha conta" eyebrow-icon="person-check" title="Minhas Presenças" />
 
-<div class="container">
+<div>
         <x-ui.filter-card>
             <form method="GET">
                 <div class="row g-3 align-items-end">

@@ -7,7 +7,7 @@
   $momentosInscritosPorParticipante = $momentosInscritosPorParticipante ?? [];
   $modoTodosMomentos = ! $atividadeId && $totalMomentosEvento > 0;
 @endphp
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-plus" title="Inscrever participantes existentes" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="person-plus" title="Inscrever participantes existentes" class="mb-0">
     <div class="text-muted small">
       Ação pedagógica: <strong>{{ $evento->nome }}</strong>
     </div>
@@ -18,7 +18,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   <div class="card shadow-sm mb-3">
     <div class="card-body">
       @if($atividadeSelecionada)
@@ -241,7 +241,7 @@
         <div class="text-danger small">{{ $message }}</div>
       @enderror
       <div>
-        {{ $participantes->links() }}
+        <x-ui.pagination :paginator="$participantes" />
       </div>
     </div>
   </form>

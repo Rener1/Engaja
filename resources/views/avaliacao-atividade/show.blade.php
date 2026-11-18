@@ -17,7 +17,7 @@
     $checklistSalvo = $relatorio->checklist_pos_acao ?? [];
 @endphp
 
-<x-ui.page-hero contained eyebrow="Relatórios" eyebrow-icon="journal-text" title="Visualização do Relatório do Momento" class="mb-0">
+<x-ui.page-hero eyebrow="Relatórios" eyebrow-icon="journal-text" title="Visualização do Relatório do Momento" class="mb-0">
     <p class="text-muted mb-0">
         Relatório preenchido por {{ $nomeResponsavel }}
     </p>
@@ -31,7 +31,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="row g-3">

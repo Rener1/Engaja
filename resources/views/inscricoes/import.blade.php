@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Importar inscrições">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Importar inscrições">
     <div class="text-muted small">
       Ação pedagógica: <strong>{{ $evento->nome }}</strong>
       @php
@@ -20,7 +20,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
   @php $disableImport = $atividades->isEmpty(); @endphp
   {{-- Cabeçalho --}}
   {{-- Aviso: campos obrigatórios --}}

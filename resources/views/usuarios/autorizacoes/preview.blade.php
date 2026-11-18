@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-ui.page-hero contained eyebrow="Pessoas" eyebrow-icon="people" title="Pré-visualização da Importação">
+    <x-ui.page-hero eyebrow="Pessoas" eyebrow-icon="people" title="Pré-visualização da Importação">
         <p class="text-muted">Confira os dados abaixo antes de confirmar a atualização das autorizações de imagem.</p>
     </x-ui.page-hero>
 
-    <div class="container">
+    <div>
         <div class="mb-4">
         </div>
 
@@ -54,21 +54,8 @@
                     </div>
 
                     {{--links da paginação --}}
-                    <div class="col-12 col-xl-4 d-flex justify-content-center mb-3 mb-xl-0 overflow-auto paginacao-custom">
-                        {{--estilização da paginação--}}
-                        <style>
-                            .paginacao-custom .d-sm-flex {
-                                flex-direction: column;
-                                align-items: center;
-                                gap: 11px;
-                            }
-                            .paginacao-custom p {
-                                margin-bottom: 0 !important;
-                            }
-                        </style>
-                        <div class="m-0">
-                            {{ $paginator->links() }}
-                        </div>
+                    <div class="col-12 col-xl-4 d-flex justify-content-center mb-3 mb-xl-0">
+                    <x-ui.pagination :paginator="$paginator" stacked class="mt-0" />
                     </div>
 
                     {{-- botões de ação--}}

@@ -18,7 +18,7 @@
         color: #fff;
     }
 </style>
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Dashboards" eyebrow-icon="people"
     title="Inscrições, Presenças e Ausências"
     subtitle="Visual completo das ações pedagógicas com expansão de presenças e exportação em PDF."
@@ -30,7 +30,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
     <x-ui.filter-card>
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-3">
@@ -168,11 +168,8 @@
         </div>
 
         @if($atividades->hasPages())
-        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
-                Exibindo {{ $atividades->count() }} de {{ $atividades->total() }}
-            </div>
-            {{ $atividades->appends(request()->query())->links() }}
+        <div class="card-footer bg-white py-3 px-4">
+            <x-ui.pagination :paginator="$atividades->appends(request()->query())" />
         </div>
         @endif
     </div>

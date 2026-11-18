@@ -169,9 +169,7 @@
 </div>
 @endforeach
 
-<div class="mt-3">
-  {{ $avaliacoes->links() }}
-</div>
+<x-ui.pagination :paginator="$avaliacoes" />
 @endsection
 
 @push('scripts')

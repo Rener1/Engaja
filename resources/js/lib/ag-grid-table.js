@@ -277,10 +277,18 @@ const initTable = (el) => {
             : emptyStateTemplate("Nenhum registro encontrado."),
         tooltipShowMode: "whenTruncated",
         tooltipShowDelay: 300,
+        // Paginação no mesmo padrão do <x-ui.pagination> (estilos em sass/ui/_pagination.scss):
+        // contador à esquerda, navegação à direita, números no formato pt-BR.
+        paginationPanels: ["rowSummary", "pageSummary"],
+        paginationNumberFormatter: (params) => Number(params.value).toLocaleString("pt-BR"),
         localeText: {
             page: "Página",
-            to: "até",
+            to: "–",
             of: "de",
+            firstPage: "Primeira página",
+            previousPage: "Página anterior",
+            nextPage: "Próxima página",
+            lastPage: "Última página",
             noRowsToShow: "Nenhum registro encontrado.",
             first: "Primeira",
             previous: "Anterior",

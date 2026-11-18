@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-event" title="Ações pedagógicas">
+    <x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-event" title="Ações pedagógicas">
         <x-slot:actions>
             @hasanyrole('administrador|gerente')
             <button type="button" class="eg-hero-btn" id="btn-emitir-certificados" data-bs-toggle="modal" data-bs-target="#modalEmitirCertificados" disabled>Emitir certificados</button>
@@ -12,7 +12,7 @@
         </x-slot:actions>
     </x-ui.page-hero>
 
-    <div class="container">
+    <div>
         {{-- Filtros / busca --}}
         <x-ui.filter-card>
             <form method="GET" class="row g-3">
@@ -133,9 +133,7 @@
             />
         </div>
 
-        <div class="mt-3">
-            {{ $eventos->withQueryString()->links() }}
-        </div>
+        <x-ui.pagination :paginator="$eventos->withQueryString()" />
     </div>
 
     @hasanyrole('administrador|gerente')

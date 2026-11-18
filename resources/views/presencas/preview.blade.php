@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar2-check" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar2-check" class="mb-0">
     <x-slot:heading>Pré-visualização de presenças — {{ $evento->nome }}<br> <small class="text-muted"> Momento: {{ \Carbon\Carbon::parse($atividade->dia)->format('d/m/Y') }} • {{ \Illuminate\Support\Str::of($atividade->hora_inicio)->substr(0,5) }} • {{ $atividade->descricao ?? 'Momento' }} </small></x-slot:heading>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   @if($errors->any())
   <div class="alert alert-danger" role="alert">
     <strong>Importação bloqueada. Corrija os problemas abaixo e salve cada página antes de continuar.</strong>
@@ -148,7 +148,7 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center">
-      <div>{{ $rows->links() }}</div>
+      <div><x-ui.pagination :paginator="$rows" /></div>
       <div class="d-flex gap-2">
         <a href="{{ route('atividades.presencas.preview', ['atividade'=>$atividade, 'session_key'=>$sessionKey]) }}" class="btn btn-outline-secondary btn-sm">Recarregar</a>
         <button class="btn btn-primary btn-sm">Salvar esta página</button>

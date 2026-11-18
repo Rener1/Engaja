@@ -1,0 +1,268 @@
+/* ──────────────────────────────────────────────────────
+   PAGINAÇÃO — view padrão (vendor/pagination/engaja) + <x-ui.pagination>
+────────────────────────────────────────────────────── */
+.eg-pagination-wrap {
+  margin-top: 1rem;
+}
+
+.eg-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem 1.25rem;
+  width: 100%;
+}
+
+.eg-pagination__info {
+  margin: 0;
+  font-size: .82rem;
+  color: #6b7280;
+
+  strong {
+    color: #1f2937;
+    font-weight: 700;
+  }
+}
+
+.eg-pagination__list {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  margin: 0;
+  padding: .3rem;
+  list-style: none;
+  background: #f3f4f6;
+  border-radius: .9rem;
+}
+
+.eg-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 .65rem;
+  border-radius: .65rem;
+  font-size: .85rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #4b5563;
+  text-decoration: none;
+  transition: background-color .15s, color .15s, box-shadow .15s, transform .1s;
+  user-select: none;
+}
+
+a.eg-page:hover {
+  background: #fff;
+  color: $engaja-purple;
+  box-shadow: 0 2px 8px rgba(66, 25, 68, .12);
+}
+
+a.eg-page:active {
+  transform: translateY(1px);
+}
+
+a.eg-page:focus-visible {
+  outline: 2px solid rgba(66, 25, 68, .45);
+  outline-offset: 1px;
+}
+
+.eg-page--nav {
+  color: $engaja-purple;
+  font-size: 1rem;
+}
+
+.eg-page--text {
+  padding: 0 .9rem;
+}
+
+/* "Página [n] de N" — mesmo visual do campo de página do AG Grid */
+.eg-pagination__page {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin: 0 .35rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.eg-pagination__total {
+  font-weight: 400;
+}
+
+.eg-pagination__input {
+  width: 2.75rem;
+  height: 2.25rem;
+  padding: 0 .35rem;
+  border: 0;
+  border-radius: .65rem;
+  background: linear-gradient(135deg, $engaja-purple 0%, #7a3a72 100%);
+  box-shadow: 0 4px 12px rgba(66, 25, 68, .28);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &:focus {
+    outline: 2px solid rgba(66, 25, 68, .45);
+    outline-offset: 1px;
+  }
+}
+
+.eg-page.is-disabled {
+  color: #c4c8cf;
+  cursor: not-allowed;
+}
+
+
+/* Empilhado: contador acima, páginas abaixo (colunas estreitas) */
+.eg-pagination-wrap--stacked .eg-pagination {
+  flex-direction: column;
+  justify-content: center;
+  gap: .6rem;
+}
+
+/* Em rodapé de card (ex.: abaixo do AG Grid) o próprio rodapé dá o respiro */
+.card-footer .eg-pagination-wrap {
+  margin-top: 0;
+}
+
+/* Telas pequenas: centralizado */
+@media (max-width: 576px) {
+  .eg-pagination {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* ──────────────────────────────────────────────────────
+   PAGINAÇÃO DO AG GRID (<x-data-table> com :pagination="true")
+   Mesmo visual da paginação do servidor: contador à esquerda e grupo em
+   "pílula" à direita; o campo da página atual faz o papel da página ativa.
+────────────────────────────────────────────────────── */
+[data-ag-grid] {
+  .ag-paging-panel {
+    height: auto;
+    min-height: 0;
+    padding: .75rem 1.25rem;
+    border-top: 1px solid #eef0f3;
+    font-family: var(--bs-body-font-family);
+  }
+
+  .ag-paging-panel-content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem 1.25rem;
+  }
+
+  .ag-paging-row-summary-panel {
+    margin: 0;
+    font-size: .82rem;
+    color: #6b7280;
+  }
+
+  /* o ::before do próprio painel é usado pelo AG Grid para reservar largura */
+  .ag-paging-row-summary-content {
+    white-space: nowrap;
+
+    &::before { content: "Mostrando "; }
+    &::after { content: " resultados"; }
+  }
+
+  .ag-paging-row-summary-panel-number {
+    color: #1f2937;
+    font-weight: 700;
+  }
+
+  .ag-paging-page-summary-panel {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    margin: 0;
+    padding: .3rem;
+    background: #f3f4f6;
+    border-radius: .9rem;
+  }
+
+  .ag-paging-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    border-radius: .65rem;
+    color: $engaja-purple;
+    cursor: pointer;
+    transition: background-color .15s, box-shadow .15s;
+
+    .ag-icon {
+      color: inherit;
+    }
+
+    &:hover:not(.ag-disabled) {
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(66, 25, 68, .12);
+    }
+
+    &.ag-disabled {
+      color: #c4c8cf;
+      opacity: 1;
+      cursor: not-allowed;
+    }
+  }
+
+  .ag-paging-description {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin: 0 .35rem;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #4b5563;
+  }
+
+  .ag-paging-number .ag-input-field-input {
+    height: 2.25rem;
+    min-width: 2.75rem;
+    padding: 0 .35rem;
+    border: 0;
+    border-radius: .65rem;
+    background: linear-gradient(135deg, $engaja-purple 0%, #7a3a72 100%);
+    box-shadow: 0 4px 12px rgba(66, 25, 68, .28);
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &:focus {
+      outline: 2px solid rgba(66, 25, 68, .45);
+      outline-offset: 1px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .ag-paging-panel-content {
+      justify-content: center;
+      text-align: center;
+    }
+  }
+}

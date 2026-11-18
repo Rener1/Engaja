@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Tests\TestCase;
 
 /**
@@ -19,7 +21,7 @@ class UiComponentsTest extends TestCase
             </x-ui.page-hero>'
         );
 
-        $view->assertSee('class="eg-hero eg-hero--plain"', false)
+        $view->assertSee('class="eg-hero"', false)
             ->assertSee('<i class="bi bi-bar-chart me-1"></i>Relatórios', false)
             ->assertSee('<h1 class="eg-hero__title">Painel</h1>', false)
             ->assertSee('<p class="eg-hero__subtitle">Resumo geral</p>', false)
@@ -27,12 +29,12 @@ class UiComponentsTest extends TestCase
             ->assertSee('Exportar');
     }
 
-    public function test_page_hero_contained_usa_container_e_omite_blocos_vazios(): void
+    public function test_page_hero_omite_blocos_vazios(): void
     {
-        $view = $this->blade('<x-ui.page-hero contained title="Só título" />');
+        $view = $this->blade('<x-ui.page-hero title="Só título" />');
 
-        $view->assertSee('<div class="container">', false)
-            ->assertDontSee('eg-hero--plain', false)
+        $view->assertSee('<h1 class="eg-hero__title">Só título</h1>', false)
+            ->assertDontSee('container', false)
             ->assertDontSee('eg-hero__eyebrow', false)
             ->assertDontSee('eg-hero__subtitle', false)
             ->assertDontSee('eg-hero__actions', false)
@@ -162,6 +164,59 @@ class UiComponentsTest extends TestCase
         );
 
         $view->assertSee('class="eg-modal-header__subtitle" id="modal-momento-titulo"', false);
+    }
+
+    public function test_paginacao_padrao_renderiza_contador_pagina_ativa_e_navegacao(): void
+    {
+        $paginator = new LengthAwarePaginator(range(1, 12), 39, 12, 2, ['path' => '/usuarios']);
+
+        $view = $this->blade('<x-ui.pagination :paginator="$paginator" />', ['paginator' => $paginator]);
+
+        $view->assertSee('class="eg-pagination-wrap"', false)
+            ->assertSee('class="eg-pagination"', false)
+            ->assertSeeInOrder(['<strong>13</strong>', '<strong>24</strong>', '<strong>39</strong>'], false)
+            ->assertDontSee('container', false)
+            ->assertSee('data-eg-page-input', false)
+            ->assertSee('value="2" min="1" max="4"', false)
+            ->assertSee('data-base-url="/usuarios?page=1" data-page-name="page"', false)
+            ->assertSee('<span class="eg-pagination__total">4</span>', false)
+            ->assertSee('href="/usuarios?page=1" rel="prev"', false)
+            ->assertSee('href="/usuarios?page=3" rel="next"', false)
+            ->assertSee('href="/usuarios?page=1" aria-label="Primeira página"', false)
+            ->assertSee('href="/usuarios?page=4" aria-label="Última página"', false);
+    }
+
+    public function test_paginacao_desabilita_anterior_na_primeira_pagina_e_aceita_variante_empilhada(): void
+    {
+        $paginator = new LengthAwarePaginator(range(1, 10), 25, 10, 1, ['path' => '/x']);
+
+        $view = $this->blade('<x-ui.pagination :paginator="$paginator" stacked />', ['paginator' => $paginator]);
+
+        $view->assertSee('eg-pagination-wrap eg-pagination-wrap--stacked', false)
+            ->assertSee('class="eg-page eg-page--nav is-disabled" aria-disabled="true" aria-label="Primeira página"', false)
+            ->assertSee('class="eg-page eg-page--nav is-disabled" aria-disabled="true" aria-label="Página anterior"', false)
+            ->assertDontSee('rel="prev"', false);
+    }
+
+    public function test_paginacao_nao_renderiza_com_pagina_unica(): void
+    {
+        $paginator = new LengthAwarePaginator(range(1, 5), 5, 10, 1, ['path' => '/x']);
+
+        $view = $this->blade('<x-ui.pagination :paginator="$paginator" />', ['paginator' => $paginator]);
+
+        $view->assertDontSee('eg-pagination', false);
+    }
+
+    public function test_paginacao_simples_usa_view_padrao_do_engaja(): void
+    {
+        $paginator = new Paginator(range(1, 10), 10, 2, ['path' => '/x']);
+        $paginator->hasMorePagesWhen(true);
+
+        $html = (string) $paginator->links();
+
+        $this->assertStringContainsString('eg-pagination eg-pagination--simple', $html);
+        $this->assertStringContainsString('href="/x?page=1" rel="prev"', $html);
+        $this->assertStringContainsString('href="/x?page=3" rel="next"', $html);
     }
 
     public function test_empty_state_renderiza_icone_titulo_e_texto(): void

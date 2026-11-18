@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-check" title="Importar participantes do agendamento" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-check" title="Importar participantes do agendamento" class="mb-0">
     <x-slot:actions>
         <a href="{{ route('agendamentos.participantes.index', $agendamento) }}" class="eg-hero-btn">Voltar</a>
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   <div class="card shadow-sm">
     <div class="card-body">
       <form method="POST" action="{{ route('agendamentos.participantes.upload', $agendamento) }}" enctype="multipart/form-data" class="row g-3">

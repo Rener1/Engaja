@@ -1,8 +1,8 @@
 @extends('layouts.app')
 @section('content')
-<x-ui.page-hero contained eyebrow="Pessoas" eyebrow-icon="people" title="Atualização de dados cadastrais" class="mb-0" />
+<x-ui.page-hero eyebrow="Pessoas" eyebrow-icon="people" title="Atualização de dados cadastrais" class="mb-0" />
 
-<div class="container py-4">
+<div class="py-4">
     <p>Envie a planilha, confira os cadastros encontrados e confirme. Pessoas sem CPF nem e-mail encontrados no Engaja serão cadastradas. Não são criadas inscrições.</p>
     <p>Para novos cadastros, informe nome e pelo menos CPF ou e-mail. Quando houver apenas CPF, será gerado um e-mail fictício, seguindo o padrão das importações. Linhas da mesma pessoa geram um único cadastro; havendo mais de um e-mail novo para o mesmo CPF, será usado o primeiro informado na planilha.</p>
     <div class="alert alert-info">Informe CPF ou e-mail para identificar cada pessoa. Valores preenchidos substituem os atuais; campos vazios preservam os dados existentes. Os e-mails das contas são preservados. Um CPF informado pode preencher um cadastro sem CPF localizado por e-mail; CPFs conflitantes exigem revisão.</div>

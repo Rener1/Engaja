@@ -51,6 +51,7 @@ $theme-colors: map.merge(
 @import "ui/stat-card";
 @import "ui/empty-state";
 @import "ui/modal";
+@import "ui/pagination";
 
 /* Custom utilities */
 .text-engaja     { color: $engaja-purple !important; }

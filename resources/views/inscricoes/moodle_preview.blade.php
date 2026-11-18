@@ -85,7 +85,7 @@
   }
 </style>
 
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Pré-visualização da Importação Moodle" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Pré-visualização da Importação Moodle" class="mb-0">
     <div class="text-muted small">Ação pedagógica: <strong>{{ $evento->nome }}</strong></div>
     <x-slot:actions>
         <a href="{{ route('inscricoes.moodle.import', $evento) }}" class="eg-hero-btn">Voltar</a>
@@ -103,7 +103,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   <div class="row g-3 mb-3">
     <div class="col-md-3">
       <div class="card border-0 shadow-sm">
@@ -294,9 +294,7 @@
     </table>
   </div>
 
-  <div class="d-flex justify-content-end mt-3">
-    {{ $rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])->links() }}
-  </div>
+  <x-ui.pagination :paginator="$rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])" />
 </div>
 
 {{-- Modal de confirmação quando existem pessoas não encontradas --}}

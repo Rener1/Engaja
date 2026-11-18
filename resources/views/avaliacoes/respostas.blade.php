@@ -16,7 +16,7 @@
 </x-ui.page-hero>
 
 <div class="row justify-content-center">
-  <div class="col-xl-10">
+  <div class="col-12">
     <div class="card shadow-sm">
       <div class="card-body">
         <p class="mb-3">

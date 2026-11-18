@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" :title="'Inscritos — '.$evento->nome" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="person-lines-fill" :title="'Inscritos — '.$evento->nome" class="mb-0">
     <x-slot:actions>
         @hasanyrole('administrador|gerente|eq_pedagogica')
         <div class="d-flex gap-2">
@@ -12,7 +12,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   {{-- Filtros --}}
   <x-ui.filter-card>
       <form method="GET" action="{{ route('inscricoes.inscritos', $evento) }}" class="row g-3 align-items-end">
@@ -110,9 +110,6 @@
       :pagination="false"
   />
 
-  <div class="d-flex justify-content-between align-items-center mt-3">
-    <div class="small text-muted">Exibindo {{ $inscricoes->count() }} de {{ $inscricoes->total() }}</div>
-    {{ $inscricoes->links() }}
-  </div>
+  <x-ui.pagination :paginator="$inscricoes" />
 </div>
 @endsection

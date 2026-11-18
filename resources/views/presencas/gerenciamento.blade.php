@@ -284,8 +284,8 @@
                 />
             </div>
             @if($atividades->hasPages())
-                <div class="card-footer bg-white d-flex justify-content-center py-3 border-top-0">
-                    {{ $atividades->links() }}
+                <div class="card-footer bg-white py-3 px-4">
+                    <x-ui.pagination :paginator="$atividades" />
                 </div>
             @endif
         </div>

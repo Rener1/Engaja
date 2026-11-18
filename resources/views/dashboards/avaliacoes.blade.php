@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Dashboards" eyebrow-icon="chat-square-text"
     title="Respostas dos formulários"
     class="mb-0">
@@ -15,7 +15,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4" id="avaliacoes-dashboard" data-endpoint="{{ route('dashboards.avaliacoes.data', request()->only(['fonte', 'survey_id'])) }}">
+<div class="py-4" id="avaliacoes-dashboard" data-endpoint="{{ route('dashboards.avaliacoes.data', request()->only(['fonte', 'survey_id'])) }}">
 
   @if(request('fonte') === 'limesurvey')
     <div class="alert alert-info border-0 shadow-sm py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">

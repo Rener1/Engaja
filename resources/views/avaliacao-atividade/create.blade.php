@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Relatórios" eyebrow-icon="journal-text" title="Relatório do Momento">
+<x-ui.page-hero eyebrow="Relatórios" eyebrow-icon="journal-text" title="Relatório do Momento">
     <small class="text-muted">Seu relatório individual para {{ $atividade->evento->nome ?? '' }} — {{ $atividade->descricao }}</small>
     <x-slot:actions>
         <a href="{{ route('eventos.show', $atividade->evento_id) }}"
@@ -9,7 +9,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
     @if($errors->any())
     <div class="alert alert-danger">
         <strong>Ops!</strong> Verifique os campos abaixo.

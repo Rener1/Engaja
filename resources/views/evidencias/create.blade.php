@@ -4,7 +4,7 @@
 <x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="file-earmark-check" title="Nova evidência" />
 
 <div class="row justify-content-center">
-  <div class="col-lg-8">
+  <div class="col-12">
     <div class="card shadow-sm">
       <div class="card-body">
         <form method="POST" action="{{ route('evidencias.store') }}">

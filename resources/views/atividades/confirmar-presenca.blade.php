@@ -2,11 +2,11 @@
 
 @section('content')
 
-  <x-header-atividade hero contained :atividade="$atividade" class="mb-0" />
+  <x-header-atividade hero :atividade="$atividade" class="mb-0" />
 
-  <div class="container py-4">
+  <div class="py-4">
     <div class="row justify-content-center">
-      <div class="col-md-8">
+      <div class="col-12">
         <div class="card ev-card">
           <div class="card-body">
             {{-- Erro genérico / retorno de bloqueio --}}

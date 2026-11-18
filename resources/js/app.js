@@ -4,6 +4,7 @@ import "./graficos-ranking-municipios";
 import "./graficos-distribuicao-dimensoes";
 import "./lib/ag-grid-table";
 import "./lib/segmented-control";
+import "./lib/pagination";
 import "tom-select/dist/css/tom-select.bootstrap5.min.css";
 import TomSelect from "tom-select";
 

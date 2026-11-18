@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Meu perfil" eyebrow-icon="person-circle" title="Meus certificados">
+<x-ui.page-hero eyebrow="Meu perfil" eyebrow-icon="person-circle" title="Meus certificados">
     <x-slot:actions>
         <a href="{{ route('profile.edit') }}" class="eg-hero-btn">Voltar para o perfil</a>
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
   @if ($certificados->isEmpty())
     <x-ui.empty-state icon="inbox" muted>Você ainda não possui certificados emitidos.</x-ui.empty-state>
   @else

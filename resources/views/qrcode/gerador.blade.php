@@ -21,7 +21,7 @@
 @endphp
 
 <div class="row justify-content-center">
-  <div class="col-xl-8">
+  <div class="col-12">
     <div class="mb-4">
       <x-ui.page-hero eyebrow="Ferramentas" eyebrow-icon="qr-code" title="Gerador de QR Code">
           <p class="text-muted mb-0">Informe um link para criar um QR Code no padrão visual do Engaja.</p>

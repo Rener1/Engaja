@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Pessoas" eyebrow-icon="person-check" title="Verificar usuário por planilha" class="mb-0" />
+<x-ui.page-hero eyebrow="Pessoas" eyebrow-icon="person-check" title="Verificar usuário por planilha" class="mb-0" />
 
-<div class="container py-4">
+<div class="py-4">
   <div class="card mb-4">
     <div class="card-body">
       <form method="POST" action="{{ route('usuarios.verificar.processar') }}" enctype="multipart/form-data" class="row g-3 align-items-end">
@@ -122,7 +122,7 @@
 
     @if($rows)
       <div>
-        {{ $rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])->links() }}
+        <x-ui.pagination :paginator="$rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])" />
       </div>
     @endif
   @endif

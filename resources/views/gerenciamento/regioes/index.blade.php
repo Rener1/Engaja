@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Administração" eyebrow-icon="geo-alt" title="Regiões" class="mb-0">
+<x-ui.page-hero eyebrow="Administração" eyebrow-icon="geo-alt" title="Regiões" class="mb-0">
     <p class="text-muted mb-0">Gerencie as regiões cadastradas.</p>
     <x-slot:actions>
         <button class="eg-hero-btn eg-hero-btn--solid" data-bs-toggle="modal" data-bs-target="#modalCreateRegiao">Nova região</button>
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   @php
       $columns = [
           ['field' => 'nome', 'headerName' => 'Nome', 'flex' => 2],

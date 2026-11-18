@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Relatório anónimo" eyebrow-icon="shield-lock"
     :title="'Avaliação — '.$atividade->descricao"
     class="mb-0">
@@ -27,7 +27,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
 
     <div class="alert alert-info d-flex align-items-center gap-2 mb-4" role="alert">
         <span style="font-size:1.2rem;">🔒</span>

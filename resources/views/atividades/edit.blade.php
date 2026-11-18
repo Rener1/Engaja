@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar3" :title="'Editar momento — '.$evento->nome">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar3" :title="'Editar momento — '.$evento->nome">
     <x-slot:actions>
         <a href="{{ route('eventos.show', $evento) }}" class="eg-hero-btn">Voltar à ação pedagógica</a>
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
   @if ($errors->any())
     <div class="alert alert-danger"><strong>Ops!</strong> Verifique os campos abaixo.</div>
   @endif

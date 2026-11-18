@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar2-check" :title="'Importar presenças — '.$evento->nome" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar2-check" :title="'Importar presenças — '.$evento->nome" class="mb-0">
     <p class="text-muted mb-3">
       Momento: {{ \Carbon\Carbon::parse($atividade->dia)->format('d/m/Y') }}
       • {{ \Illuminate\Support\Str::of($atividade->hora_inicio)->substr(0,5) }}
@@ -9,7 +9,7 @@
     </p>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   @if($errors->any())
   <div class="alert alert-danger" role="alert">
     <strong>Importação interrompida. Corrija os problemas abaixo antes de continuar.</strong>

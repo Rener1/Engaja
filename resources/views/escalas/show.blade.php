@@ -8,7 +8,7 @@
 </x-ui.page-hero>
 
 <div class="row justify-content-center">
-  <div class="col-lg-8 col-xl-6">
+  <div class="col-12">
     <div class="card shadow-sm">
       <div class="card-body">
         <h2 class="h6 fw-semibold text-uppercase text-muted mb-3">Opções</h2>

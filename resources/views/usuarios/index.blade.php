@@ -167,10 +167,8 @@
         />
       </div>
         @if($users->hasPages())
-            <div class="card-footer bg-white d-flex justify-content-center overflow-auto py-3 border-top-0">
-                <div class="m-0">
-                    {{ $users->links() }}
-                </div>
+            <div class="card-footer bg-white py-3 px-4">
+                <x-ui.pagination :paginator="$users" />
             </div>
         @endif
     </div>

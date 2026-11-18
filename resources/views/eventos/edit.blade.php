@@ -50,7 +50,7 @@
         border-radius: 50%;
     }
 </style>
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-event" title="Editar ação pedagógica">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-event" title="Editar ação pedagógica">
     <x-slot:actions>
         <a href="{{ route('eventos.planejamento.pdf', $evento) }}"
            class="eg-hero-btn" target="_blank" rel="noopener noreferrer">Ver Planejamento da Ação</a>
@@ -58,7 +58,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
     @if ($errors->any())
     <div class="alert alert-danger">
         <strong>Ops!</strong> Verifique os campos abaixo.

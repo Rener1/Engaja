@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Minha conta" eyebrow-icon="person-circle" title="Meu perfil">
+<x-ui.page-hero eyebrow="Minha conta" eyebrow-icon="person-circle" title="Meu perfil">
     <x-slot:actions>
         <a href="{{ route('profile.certificados') }}" class="eg-hero-btn">Meus certificados</a>
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
     {{-- Mensagens globais --}}
     @if (session('status') === 'profile-updated')
     <div class="alert alert-success">Dados do perfil atualizados com sucesso.</div>

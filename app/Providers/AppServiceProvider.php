@@ -29,7 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useBootstrapFive();
+        Paginator::defaultView('vendor.pagination.engaja');
+        Paginator::defaultSimpleView('vendor.pagination.engaja-simple');
 
         Event::listen(Verified::class, function (Verified $event) {
             if ($event->user instanceof User && $event->user->isCartasUser()) {

@@ -4,12 +4,11 @@
     Props:
       - atividade: a Atividade exibida
       - hero:      renderiza dentro da barra roxa (<x-ui.page-hero>) em vez do bloco simples
-      - contained: repassado ao hero (páginas cujo corpo usa .container)
 
     Slots (modo hero): default = conteúdo extra abaixo dos metadados (ex.: badge de status);
                        actions = botões à direita.
 --}}
-@props(['atividade', 'hero' => false, 'contained' => false])
+@props(['atividade', 'hero' => false])
 
 @php
         $dia = \Carbon\Carbon::parse($atividade->dia)
@@ -41,7 +40,7 @@
 @endphp
 
 @if ($hero)
-    <x-ui.page-hero :contained="$contained" eyebrow="Momento" eyebrow-icon="calendar3"
+    <x-ui.page-hero eyebrow="Momento" eyebrow-icon="calendar3"
         :title="$atividade->descricao ?? 'Momento'" {{ $attributes }}>
 
         <p class="text-muted mb-1">

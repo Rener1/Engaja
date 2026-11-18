@@ -57,7 +57,7 @@
         border-radius: 50%;
     }
 </style>
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-event" title="Nova ação pedagógica">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-event" title="Nova ação pedagógica">
     <x-slot:actions>
         <button type="button" class="eg-hero-btn" disabled
             title="Guarde a ação primeiro para gerar o PDF">
@@ -67,7 +67,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
     @if ($errors->any())
     <div class="alert alert-danger">
         <strong>Ops!</strong> Verifique os campos abaixo.

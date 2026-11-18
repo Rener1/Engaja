@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Importação Moodle (2 planilhas)" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Importação Moodle (2 planilhas)" class="mb-0">
     <div class="text-muted small">Ação pedagógica: <strong>{{ $evento->nome }}</strong></div>
     <x-slot:actions>
         <a href="{{ route('eventos.show', $evento) }}" class="eg-hero-btn">Voltar à ação</a>
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   @if ($errors->any())
   <div class="alert alert-danger">
     <strong>Ops!</strong> Revise as planilhas enviadas.

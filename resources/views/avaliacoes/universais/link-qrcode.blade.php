@@ -28,7 +28,7 @@
 </x-ui.page-hero>
 
 <div class="row justify-content-center">
-  <div class="col-xl-8">
+  <div class="col-12">
     <div class="card shadow-sm">
       <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">

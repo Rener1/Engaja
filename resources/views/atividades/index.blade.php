@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar3" :title="'Momentos — '.$evento->nome">
+  <x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar3" :title="'Momentos — '.$evento->nome">
       @hasanyrole('administrador|formador')
       <small class="text-muted">Gerencie a programação da ação pedagógica</small>
       @endhasanyrole
@@ -12,7 +12,7 @@
       </x-slot:actions>
   </x-ui.page-hero>
 
-  <div class="container">
+  <div>
     <x-ui.filter-card>
         <form method="GET" action="{{ route('eventos.atividades.index', $evento) }}" class="row g-3 align-items-end">
           <div class="col-auto">
@@ -114,7 +114,7 @@
         <x-data-table id="grid-atividades" :columns="$columns" :rows="$rows" :pagination="false" />
     </div>
 
-    {{ $atividades->links() }}
+    <x-ui.pagination :paginator="$atividades" />
 
     <div class="mt-3">
       <a href="{{ route('eventos.show', $evento) }}" class="btn btn-outline-secondary">Voltar à ação pedagógica</a>

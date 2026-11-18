@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Dashboards" eyebrow-icon="grid" title="Escolha o painel" class="mb-0">
+<x-ui.page-hero eyebrow="Dashboards" eyebrow-icon="grid" title="Escolha o painel" class="mb-0">
   <x-slot:actions>
     <a class="eg-hero-btn" href="{{ route('dashboards.bi') }}"><i class="bi bi-bar-chart-line me-1"></i> BI Educacional</a>
     <a class="eg-hero-btn" href="{{ route('dashboards.avaliacoes') }}"><i class="bi bi-chat-square-text me-1"></i> Respostas de formulários</a>
@@ -10,7 +10,7 @@
   </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   <div class="row g-3 mb-4">
     <div class="col-lg-3">
       <div class="card h-100 shadow-sm border-0">

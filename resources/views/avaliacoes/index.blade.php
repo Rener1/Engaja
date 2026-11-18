@@ -112,7 +112,5 @@
     <x-data-table id="grid-avaliacoes" :columns="$columns" :rows="$rows" :pagination="false" />
 </div>
 
-<div class="mt-3">
-  {{ $avaliacoes->links() }}
-</div>
+<x-ui.pagination :paginator="$avaliacoes" />
 @endsection

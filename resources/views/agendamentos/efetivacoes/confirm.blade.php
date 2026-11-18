@@ -9,7 +9,7 @@
 </x-ui.page-hero>
 
 <div class="row justify-content-center">
-  <div class="col-xl-9">
+  <div class="col-12">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <div class="row g-4">

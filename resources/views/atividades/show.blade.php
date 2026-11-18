@@ -47,7 +47,7 @@
         ->locale('pt_BR')->translatedFormat('l, d \\d\\e F \\d\\e Y');
         $presencaAberta = $atividade->presencaEstaAberta();
     @endphp
-    <x-header-atividade hero contained :atividade="$atividade" class="mb-0">
+    <x-header-atividade hero :atividade="$atividade" class="mb-0">
         <div class="mt-2">
             <span class="badge {{ $presencaAberta ? 'bg-success' : 'bg-secondary' }} d-inline-flex align-items-center gap-1">
                 <i class="bi {{ $presencaAberta ? 'bi-check-circle-fill' : 'bi-lock-fill' }}"></i>
@@ -130,7 +130,7 @@
         </x-slot:actions>
     </x-header-atividade>
 
-    <div class="container py-4">
+    <div class="py-4">
 
         {{-- Alerta de dados demográficos pendentes --}}
         @if (session('erro_demograficos'))

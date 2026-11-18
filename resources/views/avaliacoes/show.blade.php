@@ -22,7 +22,7 @@
 </x-ui.page-hero>
 
 <div class="row justify-content-center">
-  <div class="col-xl-8">
+  <div class="col-12">
     @php
       $inscricaoExibida = $avaliacao->inscricao ?? $avaliacao->respostas->first()?->inscricao;
       $participanteNome = $inscricaoExibida?->participante?->user?->name;

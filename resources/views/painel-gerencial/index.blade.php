@@ -2,7 +2,7 @@
 
 @section('content')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Relatórios" eyebrow-icon="speedometer2"
     title="Painel Gerencial de Quantitativos"
     subtitle="Quadro de referência: público esperado × inscritos × presentes × avaliações, por Ação Pedagógica."
@@ -20,7 +20,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
 
     {{-- Filtros --}}
     <x-ui.filter-card>

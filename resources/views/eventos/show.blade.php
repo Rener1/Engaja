@@ -160,7 +160,7 @@ $jaInscrito = \Illuminate\Support\Facades\DB::table('inscricaos')
     || auth()->user()?->can('update', $evento);
 @endphp
 
-<x-ui.page-hero contained eyebrow="Ação pedagógica" eyebrow-icon="calendar-event" :title="$evento->nome">
+<x-ui.page-hero eyebrow="Ação pedagógica" eyebrow-icon="calendar-event" :title="$evento->nome">
   <x-slot:media>
     <img src="{{ $evento->imagem ? asset('storage/' . $evento->imagem) : asset('images/logo-aeb.png') }}" alt="Capa do evento">
   </x-slot:media>
@@ -283,7 +283,7 @@ $jaInscrito = \Illuminate\Support\Facades\DB::table('inscricaos')
   </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
 
   {{-- Chips (Modificado para Ação Geral e Sub-ação) --}}
   @php

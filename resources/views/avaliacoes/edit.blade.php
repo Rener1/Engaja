@@ -17,7 +17,7 @@
 </x-ui.page-hero>
 
 <div class="row justify-content-center">
-  <div class="col-xl-10">
+  <div class="col-12">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <form method="POST" action="{{ $formAction }}">

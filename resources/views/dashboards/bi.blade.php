@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-ui.page-hero contained
+    <x-ui.page-hero
         eyebrow="Dashboards" eyebrow-icon="bar-chart-line"
         title="BI Educacional"
         subtitle="Painel de indicadores educacionais para análise territorial e acompanhamento anual."

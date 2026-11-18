@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-check" title="Participantes do agendamento" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-check" title="Participantes do agendamento" class="mb-0">
     <div class="text-muted small">
       {{ optional($agendamento->data_horario)->format('d/m/Y H:i') }} · {{ $agendamento->atividadeAcao?->nome ?? 'Atividade/Ação' }}
     </div>
@@ -15,7 +15,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   <div class="alert alert-light border mb-3">
     <strong>Agendamento selecionado:</strong>
     {{ optional($agendamento->data_horario)->format('d/m/Y H:i') }} ·
@@ -93,7 +93,7 @@
 
   <div class="d-flex justify-content-between align-items-center mt-2">
     <div class="small text-muted">Total: {{ $participantes->total() }}</div>
-    {{ $participantes->links() }}
+    <x-ui.pagination :paginator="$participantes" />
   </div>
 </div>
 @endsection

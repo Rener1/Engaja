@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="journal-check" title="Diário de Presenças" class="mb-0">
+    <x-ui.page-hero eyebrow="Operações" eyebrow-icon="journal-check" title="Diário de Presenças" class="mb-0">
         <p class="mb-0">
             Momento: <strong>{{ $atividade->descricao ?? 'Momento' }}</strong><br>
             Ação: {{ $atividade->evento->nome }}
@@ -13,7 +13,7 @@
         </x-slot:actions>
     </x-ui.page-hero>
 
-    <div class="container py-4">
+    <div class="py-4">
 
         <form action="{{ route('atividades.diario.salvar', $atividade) }}" method="POST">
             @csrf

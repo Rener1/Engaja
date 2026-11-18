@@ -15,7 +15,7 @@
     $tgExportQuery = array_intersect_key(request()->query(), array_flip(['evento_id', 'regiao_id', 'de', 'ate', 'sort', 'dir', 'dimensoes']));
 @endphp
 
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Relatórios" eyebrow-icon="table"
     title="Quantidade de participação e avaliação por encontro"
     subtitle="Presenças e avaliações por encontro, com totais por ação pedagógica."
@@ -45,7 +45,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
 
     {{-- Abas --}}
     <x-ui.segmented auto class="mb-4"

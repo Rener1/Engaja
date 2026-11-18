@@ -10,7 +10,7 @@
       : ($atividade?->descricao ?? $avaliacao->templateAvaliacao->nome ?? 'Avaliação');
 @endphp
 <div class="row justify-content-center">
-  <div class="col-xl-8">
+  <div class="col-12">
     <div class="text-center mb-4">
       <h1 class="h3 fw-bold text-engaja mb-1">
         Avaliação - {{ $tituloAvaliacao }}

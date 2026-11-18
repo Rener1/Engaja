@@ -5,7 +5,7 @@
 {{-- ══════════════════════════════════════════════════
      HERO HEADER
 ══════════════════════════════════════════════════ --}}
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Relatórios" eyebrow-icon="bar-chart-line-fill"
     title="Consolidação de Avaliações"
     subtitle="Médias, distribuições e respostas consolidadas por modelo de avaliação."
@@ -29,7 +29,7 @@
     @endif
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
 
     {{-- ══════════════════════════════════════════════════
          FILTROS

@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Administração" eyebrow-icon="award" title="Editar certificado emitido" class="mb-0" />
+<x-ui.page-hero eyebrow="Administração" eyebrow-icon="award" title="Editar certificado emitido" class="mb-0" />
 
-<div class="container py-4">
+<div class="py-4">
   <div class="row">
     <div class="col-lg-8 mx-auto">
       <div class="card shadow-sm">

@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Certificados" eyebrow-icon="award" title="Certificados emitidos" class="mb-0">
+<x-ui.page-hero eyebrow="Certificados" eyebrow-icon="award" title="Certificados emitidos" class="mb-0">
     <p class="text-muted mb-0">Lista de todos os certificados já emitidos no sistema.</p>
     <x-slot:actions>
         <a href="{{ route('certificados.emitidos.zip', request()->query()) }}" class="eg-hero-btn">
@@ -10,7 +10,7 @@
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
     <div></div>
     <x-ui.filter-card>
@@ -74,9 +74,7 @@
         </x-ui.empty-state>
       @endif
   </div>
-  <div class="d-flex justify-content-center mt-3">
-    {{ $certificados->links() }}
-  </div>
+  <x-ui.pagination :paginator="$certificados" />
 </div>
 
 @endsection

@@ -58,6 +58,6 @@
 </div>
 
 <div class="mt-3">
-  {{ $agendamentos->links() }}
+  <x-ui.pagination :paginator="$agendamentos" />
 </div>
 @endsection

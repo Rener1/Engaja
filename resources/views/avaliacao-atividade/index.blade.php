@@ -45,7 +45,7 @@
     }
 </style>
 
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Relatórios" eyebrow-icon="journal-text"
     title="Relatórios dos Momentos"
     :subtitle="auth()->user()?->hasAnyRole(['administrador', 'gerente', 'eq_pedagogica'])
@@ -53,7 +53,7 @@
         : 'Os seus relatórios individuais pós-ação'"
     class="mb-0" />
 
-<div class="container py-4">
+<div class="py-4">
 
     {{-- Filtro --}}
     <x-ui.filter-card>

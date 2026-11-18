@@ -4,7 +4,7 @@
 <x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="files" title="Novo modelo de avaliação" />
 
 <div class="row justify-content-center">
-  <div class="col-xl-10">
+  <div class="col-12">
     <div class="card shadow-sm">
       <div class="card-body">
         @include('templates-avaliacao.partials.form', [

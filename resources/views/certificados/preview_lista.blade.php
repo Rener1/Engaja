@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Certificados" eyebrow-icon="award" title="Pré-visualização da Certificação">
+<x-ui.page-hero eyebrow="Certificados" eyebrow-icon="award" title="Pré-visualização da Certificação">
     <p class="text-muted">Confira abaixo todos os usuários que receberão o certificado antes de confirmar a emissão.</p>
 </x-ui.page-hero>
 
-<div class="container">
+<div>
     <div class="mb-4">
     </div>
 
@@ -82,20 +82,8 @@
                 </div>
 
                 {{-- paginação --}}
-                <div class="col-12 col-xl-4 d-flex justify-content-center mb-3 mb-xl-0 overflow-auto paginacao-custom">
-                    <style>
-                        .paginacao-custom .d-sm-flex {
-                            flex-direction: column;
-                            align-items: center;
-                            gap: 12px;
-                        }
-                        .paginacao-custom p {
-                            margin-bottom: 0 !important;
-                        }
-                    </style>
-                    <div class="m-0">
-                        {{ $paginator->links() }}
-                    </div>
+                <div class="col-12 col-xl-4 d-flex justify-content-center mb-3 mb-xl-0">
+                    <x-ui.pagination :paginator="$paginator" stacked class="mt-0" />
                 </div>
 
                 <div class="col-12 col-xl-4">

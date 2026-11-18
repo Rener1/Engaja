@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-check" title="Pré-visualização da importação" class="mb-0">
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-check" title="Pré-visualização da importação" class="mb-0">
     <div class="text-muted small">Agendamento: {{ optional($agendamento->data_horario)->format('d/m/Y H:i') }} · {{ $agendamento->atividadeAcao?->nome ?? 'Atividade/Ação' }}</div>
     <x-slot:actions>
         <a href="{{ route('agendamentos.participantes.import', $agendamento) }}" class="eg-hero-btn">Voltar</a>
     </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   @if($observacoes)
     <div class="alert alert-info mb-3"><strong>Observações do envio:</strong> {{ $observacoes }}</div>
   @endif
@@ -50,7 +50,7 @@
   </div>
 
   <div class="mt-2">
-    {{ $rows->links() }}
+    <x-ui.pagination :paginator="$rows" />
   </div>
 </div>
 @endsection

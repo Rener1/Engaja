@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page-hero contained
+<x-ui.page-hero
     eyebrow="Dashboards" eyebrow-icon="globe2"
     title="Leitura do mundo"
     subtitle="Selecione uma leitura para abrir o dashboard de respostas."
@@ -12,7 +12,7 @@
   </x-slot:actions>
 </x-ui.page-hero>
 
-<div class="container py-4">
+<div class="py-4">
   @if($erro)
     <div class="alert alert-danger border-0 shadow-sm">
       Não foi possível carregar as leituras do LimeSurvey: {{ $erro }}

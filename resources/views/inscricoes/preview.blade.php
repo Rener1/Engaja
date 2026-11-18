@@ -7,9 +7,9 @@
   $atividadesEscopo = $atividadesEscopo ?? collect();
   $identityErrors = $identityErrors ?? [];
 @endphp
-<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" :title="'Pré-visualização da Importação - '.$evento->nome" class="mb-0" />
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="person-lines-fill" :title="'Pré-visualização da Importação - '.$evento->nome" class="mb-0" />
 
-<div class="container py-4">
+<div class="py-4">
   @if($modoTodosMomentos)
     <div class="text-muted mb-3">
       Escopo: <strong>todos os {{ $atividadesEscopo->count() }} momento(s)</strong> desta ação.
@@ -291,7 +291,7 @@
     <div class="d-flex align-items-center justify-content-between">
       <div>
         {{-- mantém session_key e per_page definidos pelo controller --}}
-        {{ $rows->appends(array_filter(['session_key' => $sessionKey, 'per_page' => $rows->perPage(), 'atividade_id' => $modoTodosMomentos ? null : $atividade->id]))->links() }}
+        <x-ui.pagination :paginator="$rows->appends(array_filter(['session_key' => $sessionKey, 'per_page' => $rows->perPage(), 'atividade_id' => $modoTodosMomentos ? null : $atividade->id]))" />
       </div>
       <div class="d-flex gap-2">
         <button class="btn btn-outline-primary btn-sm">Salvar alterações desta página</button>
