@@ -37,4 +37,27 @@ class CertificadoEmitidosControllerTest extends TestCase
             ->assertSee('Participante Certificado')
             ->assertSee('Formação Alfa-EJA');
     }
+
+    public function test_lista_vazia_mostra_um_unico_aviso_dentro_do_grid(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('administrador');
+
+        $response = $this->actingAs($admin)->get(route('certificados.emitidos'));
+
+        $response->assertOk()
+            ->assertSee('data-empty-text="Nenhum certificado emitido até o momento."', false)
+            ->assertDontSee('eg-empty-state', false);
+    }
+
+    public function test_lista_vazia_com_filtro_usa_mensagem_de_filtro(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('administrador');
+
+        $this->actingAs($admin)
+            ->get(route('certificados.emitidos', ['participante' => 'Ninguém Com Esse Nome']))
+            ->assertOk()
+            ->assertSee('data-empty-text="Nenhum certificado encontrado com esses filtros."', false);
+    }
 }

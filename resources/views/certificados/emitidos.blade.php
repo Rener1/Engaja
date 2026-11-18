@@ -11,19 +11,20 @@
 </x-ui.page-hero>
 
 <div class="py-4">
-  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-    <div></div>
-    <x-ui.filter-card>
-        <form method="GET" action="{{ route('certificados.emitidos') }}" class="d-flex gap-2 w-100 w-md-auto">
-          @if(!empty($contextoEvento) && !empty($filtroEventoId))
-            <input type="hidden" name="evento_id" value="{{ $filtroEventoId }}">
-            <input type="hidden" name="contexto" value="evento">
-          @endif
+  <x-ui.filter-card>
+      <form method="GET" action="{{ route('certificados.emitidos') }}" class="row g-3 align-items-end">
+        @if(!empty($contextoEvento) && !empty($filtroEventoId))
+          <input type="hidden" name="evento_id" value="{{ $filtroEventoId }}">
+          <input type="hidden" name="contexto" value="evento">
+        @endif
 
-          <x-ui.input type="text" name="participante" value="{{ $filtroParticipante ?? '' }}" placeholder="Filtrar por participante ou CPF" aria-label="Filtrar por participante ou CPF" />
+        <x-ui.filter-field @class(['col-md-6' => empty($contextoEvento), 'col-md-9' => ! empty($contextoEvento)]) label="Participante" icon="person" for="filtro-participante">
+          <x-ui.input type="text" id="filtro-participante" name="participante" value="{{ $filtroParticipante ?? '' }}" placeholder="Nome ou CPF" />
+        </x-ui.filter-field>
 
-          @if(empty($contextoEvento))
-            <x-ui.select name="evento_id" aria-label="Filtrar por Ação pedagógica">
+        @if(empty($contextoEvento))
+          <x-ui.filter-field class="col-md-3" label="Ação pedagógica" icon="calendar-event" for="filtro-acao">
+            <x-ui.select name="evento_id" id="filtro-acao">
               <option value="">Todas as ações pedagógicas</option>
               @foreach($acoesCertificado as $acao)
                 <option value="{{ $acao->id }}" @selected((string) ($filtroEventoId ?? '') === (string) $acao->id)>
@@ -31,13 +32,15 @@
                 </option>
               @endforeach
             </x-ui.select>
-          @endif
+          </x-ui.filter-field>
+        @endif
 
-          <button class="btn btn-engaja" type="submit">Filtrar</button>
+        <div class="col-md-3 eg-filter-actions">
+          <button class="btn btn-engaja" type="submit"><i class="bi bi-funnel me-1"></i>Filtrar</button>
           <a href="{{ !empty($contextoEvento) && !empty($filtroEventoId) ? route('certificados.emitidos', ['evento_id' => $filtroEventoId, 'contexto' => 'evento']) : route('certificados.emitidos') }}" class="btn btn-outline-secondary">Limpar</a>
-        </form>
-    </x-ui.filter-card>
-  </div>
+        </div>
+      </form>
+  </x-ui.filter-card>
   @php
       $podeEditarCertificados = auth()->user()?->hasAnyRole(['administrador', 'gerente']) ?? false;
       $columns = [
@@ -60,21 +63,17 @@
               . ($podeEditarCertificados ? '<li><a class="dropdown-item" href="' . route('certificados.edit', $cert) . '">Editar</a></li>' : '')
               . '</ul></div>',
       ])->values();
+
+      $temFiltroAtivo = ! empty($filtroParticipante) || ! empty($filtroAcao) || (! empty($filtroEventoId) && empty($contextoEvento));
+      $mensagemVazia = $temFiltroAtivo
+          ? 'Nenhum certificado encontrado com esses filtros.'
+          : 'Nenhum certificado emitido até o momento.';
   @endphp
 
+  {{-- Sem registros, o próprio grid mostra o aviso (empty-text) — não duplicar com outro empty state. --}}
   <div class="shadow-sm rounded-3 bg-white">
-      <x-data-table id="grid-certificados-emitidos" :columns="$columns" :rows="$rows" :pagination="false" />
-      @if($certificados->isEmpty())
-        <x-ui.empty-state icon="award" muted compact>
-          @if(!empty($filtroParticipante) || !empty($filtroAcao) || (!empty($filtroEventoId) && empty($contextoEvento)))
-            Nenhum certificado encontrado com esses filtros.
-          @else
-            Nenhum certificado emitido até o momento.
-          @endif
-        </x-ui.empty-state>
-      @endif
+      <x-data-table id="grid-certificados-emitidos" :columns="$columns" :rows="$rows" :pagination="false" :empty-text="$mensagemVazia" :paginator="$certificados" />
   </div>
-  <x-ui.pagination :paginator="$certificados" />
 </div>
 
 @endsection
