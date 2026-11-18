@@ -233,17 +233,14 @@
       </table>
     </div>
 
-    <div class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div class="small text-muted">
-        Exibindo {{ $participantes->count() }} registros nesta página
-      </div>
-      @error('participantes')
-        <div class="text-danger small">{{ $message }}</div>
-      @enderror
-      <div>
+    @error('participantes')
+      <div class="dt-footer text-danger small">{{ $message }}</div>
+    @enderror
+    @if($participantes->hasPages())
+      <div class="dt-footer">
         <x-ui.pagination :paginator="$participantes" />
       </div>
-    </div>
+    @endif
   </form>
 </div>
 

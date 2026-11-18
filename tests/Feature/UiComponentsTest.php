@@ -219,6 +219,42 @@ class UiComponentsTest extends TestCase
         $this->assertStringContainsString('href="/x?page=3" rel="next"', $html);
     }
 
+    public function test_data_table_com_paginator_desenha_rodape_dentro_da_moldura(): void
+    {
+        $paginator = new LengthAwarePaginator(range(1, 12), 39, 12, 1, ['path' => '/usuarios']);
+
+        $view = $this->blade(
+            '<x-data-table id="grid-x" :columns="[]" :rows="[]" :pagination="false" :paginator="$paginator" />',
+            ['paginator' => $paginator]
+        );
+
+        $view->assertSee('class="dt-frame dt-frame--bordered"', false)
+            ->assertSee('class="ag-theme-quartz w-100 dt-no-border"', false)
+            ->assertSeeInOrder(['id="grid-x"', 'class="dt-footer"', 'eg-pagination'], false);
+    }
+
+    public function test_data_table_sem_paginator_nao_cria_moldura(): void
+    {
+        $view = $this->blade('<x-data-table id="grid-y" :columns="[]" :rows="[]" />');
+
+        $view->assertDontSee('dt-frame', false)
+            ->assertDontSee('dt-footer', false);
+    }
+
+    public function test_table_frame_omite_rodape_com_pagina_unica_e_aceita_sem_borda(): void
+    {
+        $paginator = new LengthAwarePaginator(range(1, 3), 3, 10, 1, ['path' => '/x']);
+
+        $view = $this->blade(
+            '<x-ui.table-frame :paginator="$paginator" :bordered="false"><table class="table"></table></x-ui.table-frame>',
+            ['paginator' => $paginator]
+        );
+
+        $view->assertSee('<div class="dt-frame">', false)
+            ->assertSee('<table class="table"></table>', false)
+            ->assertDontSee('dt-footer', false);
+    }
+
     public function test_empty_state_renderiza_icone_titulo_e_texto(): void
     {
         $view = $this->blade('<x-ui.empty-state icon="search" muted compact title="Nada encontrado">Ajuste os filtros.</x-ui.empty-state>');

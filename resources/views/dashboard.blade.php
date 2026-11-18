@@ -164,14 +164,9 @@
                 :pagination="false"
                 detail-row-field="_isDetailRow"
                 :detail-row-height="420"
-            />
+            :paginator="$atividades->appends(request()->query())"
+        />
         </div>
-
-        @if($atividades->hasPages())
-        <div class="card-footer bg-white py-3 px-4">
-            <x-ui.pagination :paginator="$atividades->appends(request()->query())" />
-        </div>
-        @endif
     </div>
 </div>
 

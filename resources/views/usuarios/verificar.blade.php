@@ -85,46 +85,43 @@
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-sm align-middle table-bordered bg-white">
-        <thead class="table-light">
-          <tr>
-            <th style="min-width:220px;">Nome</th>
-            <th style="min-width:240px;">Email</th>
-            <th style="min-width:140px;">CPF</th>
-            <th style="min-width:140px;">Telefone</th>
-            <th style="min-width:260px;">Municipio</th>
-            <th style="min-width:220px;">Tipo de Organizacao</th>
-            <th style="min-width:220px;">Organizacao</th>
-            <th style="min-width:200px;">Tag</th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse($rows as $r)
-            <tr>
-              <td>{{ $r['nome'] ?? '-' }}</td>
-              <td>{{ $r['email'] ?? '-' }}</td>
-              <td>{{ $r['cpf'] ?? '-' }}</td>
-              <td>{{ $r['telefone'] ?? '-' }}</td>
-              <td>{{ $r['municipio'] ?? '-' }}</td>
-              <td>{{ $r['tipo_organizacao'] ?? '-' }}</td>
-              <td>{{ $r['escola_unidade'] ?? '-' }}</td>
-              <td>{{ $r['tag'] ?? '-' }}</td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="8" class="text-center text-muted">Todos os usuários da planilha já estão cadastrados.</td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
+    <x-ui.table-frame :paginator="$rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle table-bordered bg-white">
+            <thead class="table-light">
+              <tr>
+                <th style="min-width:220px;">Nome</th>
+                <th style="min-width:240px;">Email</th>
+                <th style="min-width:140px;">CPF</th>
+                <th style="min-width:140px;">Telefone</th>
+                <th style="min-width:260px;">Municipio</th>
+                <th style="min-width:220px;">Tipo de Organizacao</th>
+                <th style="min-width:220px;">Organizacao</th>
+                <th style="min-width:200px;">Tag</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($rows as $r)
+                <tr>
+                  <td>{{ $r['nome'] ?? '-' }}</td>
+                  <td>{{ $r['email'] ?? '-' }}</td>
+                  <td>{{ $r['cpf'] ?? '-' }}</td>
+                  <td>{{ $r['telefone'] ?? '-' }}</td>
+                  <td>{{ $r['municipio'] ?? '-' }}</td>
+                  <td>{{ $r['tipo_organizacao'] ?? '-' }}</td>
+                  <td>{{ $r['escola_unidade'] ?? '-' }}</td>
+                  <td>{{ $r['tag'] ?? '-' }}</td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="8" class="text-center text-muted">Todos os usuários da planilha já estão cadastrados.</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+    </x-ui.table-frame>
 
-    @if($rows)
-      <div>
-        <x-ui.pagination :paginator="$rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])" />
-      </div>
-    @endif
   @endif
 </div>
 <script>

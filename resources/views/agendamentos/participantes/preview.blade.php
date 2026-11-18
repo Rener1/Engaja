@@ -22,35 +22,34 @@
     </form>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-sm table-bordered align-middle bg-white">
-      <thead class="table-light">
-        <tr>
-          <th>Nome</th>
-          <th>CPF</th>
-          <th>E-mail</th>
-          <th>Data nascimento</th>
-          <th>Telefone</th>
-          <th>Vínculo</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($rows as $row)
-          <tr>
-            <td>{{ $row['nome'] }}</td>
-            <td>{{ $row['cpf'] ?? '—' }}</td>
-            <td>{{ $row['email'] ?? '—' }}</td>
-            <td>{{ !empty($row['data_nascimento']) ? \Illuminate\Support\Carbon::parse($row['data_nascimento'])->format('d/m/Y') : '—' }}</td>
-            <td>{{ $row['telefone'] ?? '—' }}</td>
-            <td>{{ $row['vinculo'] ?? '—' }}</td>
-          </tr>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
+  <x-ui.table-frame :paginator="$rows">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle bg-white">
+          <thead class="table-light">
+            <tr>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>E-mail</th>
+              <th>Data nascimento</th>
+              <th>Telefone</th>
+              <th>Vínculo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($rows as $row)
+              <tr>
+                <td>{{ $row['nome'] }}</td>
+                <td>{{ $row['cpf'] ?? '—' }}</td>
+                <td>{{ $row['email'] ?? '—' }}</td>
+                <td>{{ !empty($row['data_nascimento']) ? \Illuminate\Support\Carbon::parse($row['data_nascimento'])->format('d/m/Y') : '—' }}</td>
+                <td>{{ $row['telefone'] ?? '—' }}</td>
+                <td>{{ $row['vinculo'] ?? '—' }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+  </x-ui.table-frame>
 
-  <div class="mt-2">
-    <x-ui.pagination :paginator="$rows" />
-  </div>
 </div>
 @endsection

@@ -109,8 +109,6 @@
 @endphp
 
 <div class="card shadow-sm">
-    <x-data-table id="grid-avaliacoes" :columns="$columns" :rows="$rows" :pagination="false" />
+    <x-data-table id="grid-avaliacoes" :columns="$columns" :rows="$rows" :pagination="false" :paginator="$avaliacoes" />
 </div>
-
-<x-ui.pagination :paginator="$avaliacoes" />
 @endsection

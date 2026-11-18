@@ -130,10 +130,9 @@
                 :rows="$rows"
                 :pagination="false"
                 row-selection="multiple"
-            />
+            :paginator="$eventos->withQueryString()"
+        />
         </div>
-
-        <x-ui.pagination :paginator="$eventos->withQueryString()" />
     </div>
 
     @hasanyrole('administrador|gerente')

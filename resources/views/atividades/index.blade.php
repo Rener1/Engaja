@@ -111,10 +111,8 @@
     @endphp
 
     <div class="card shadow-sm">
-        <x-data-table id="grid-atividades" :columns="$columns" :rows="$rows" :pagination="false" />
+        <x-data-table id="grid-atividades" :columns="$columns" :rows="$rows" :pagination="false" :paginator="$atividades" />
     </div>
-
-    <x-ui.pagination :paginator="$atividades" />
 
     <div class="mt-3">
       <a href="{{ route('eventos.show', $evento) }}" class="btn btn-outline-secondary">Voltar à ação pedagógica</a>

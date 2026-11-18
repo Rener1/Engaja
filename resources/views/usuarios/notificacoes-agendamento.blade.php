@@ -127,13 +127,9 @@
                 :columns="$columns"
                 :rows="$rows"
                 :pagination="false"
-            />
+            :paginator="$users"
+        />
         </div>
-        @if($users->hasPages())
-            <div class="card-footer bg-white py-3 px-4">
-                <x-ui.pagination :paginator="$users" />
-            </div>
-        @endif
     </div>
 @endif
 @endsection

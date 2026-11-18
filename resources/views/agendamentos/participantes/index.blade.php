@@ -89,11 +89,7 @@
       })->values();
   @endphp
 
-  <x-data-table id="grid-agendamento-participantes" :columns="$columns" :rows="$rows" :pagination="false" class="bg-white" />
+  <x-data-table id="grid-agendamento-participantes" :columns="$columns" :rows="$rows" :pagination="false" class="bg-white" :paginator="$participantes" />
 
-  <div class="d-flex justify-content-between align-items-center mt-2">
-    <div class="small text-muted">Total: {{ $participantes->total() }}</div>
-    <x-ui.pagination :paginator="$participantes" />
-  </div>
 </div>
 @endsection

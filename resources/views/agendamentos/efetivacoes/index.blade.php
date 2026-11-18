@@ -36,10 +36,7 @@
 @endphp
 
 <div class="card shadow-sm">
-    <x-data-table id="grid-agendamentos-efetivacoes" :columns="$columns" :rows="$rows" :pagination="false" />
+    <x-data-table id="grid-agendamentos-efetivacoes" :columns="$columns" :rows="$rows" :pagination="false" :paginator="$agendamentos" />
 </div>
 
-<div class="mt-3">
-  <x-ui.pagination :paginator="$agendamentos" />
-</div>
 @endsection

@@ -164,13 +164,9 @@
             :pagination="false"
             row-selection="multiple"
             row-selectable-field="_selectable"
+            :paginator="$users"
         />
       </div>
-        @if($users->hasPages())
-            <div class="card-footer bg-white py-3 px-4">
-                <x-ui.pagination :paginator="$users" />
-            </div>
-        @endif
     </div>
 
       <div class="mt-3 text-end d-flex flex-wrap justify-content-end gap-2">

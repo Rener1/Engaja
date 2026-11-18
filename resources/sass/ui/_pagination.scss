@@ -150,6 +150,11 @@ a.eg-page:focus-visible {
    "pílula" à direita; o campo da página atual faz o papel da página ativa.
 ────────────────────────────────────────────────────── */
 [data-ag-grid] {
+  /* sem registros ou só uma página: esconde o painel (ver onPaginationChanged em ag-grid-table.js) */
+  &.dt-single-page .ag-paging-panel {
+    display: none;
+  }
+
   .ag-paging-panel {
     height: auto;
     min-height: 0;
@@ -159,6 +164,7 @@ a.eg-page:focus-visible {
   }
 
   .ag-paging-panel-content {
+    padding: 0;                       // o tema adiciona 16px laterais; o painel já tem o respiro
     display: flex;
     flex: 1 1 auto;
     flex-wrap: wrap;
@@ -264,5 +270,18 @@ a.eg-page:focus-visible {
       justify-content: center;
       text-align: center;
     }
+  }
+}
+
+/* ──────────────────────────────────────────────────────
+   RODAPÉ DE TABELA (<x-data-table :paginator="$x">)
+   Paginação do servidor presa à tabela, igual ao painel do AG Grid.
+────────────────────────────────────────────────────── */
+.dt-footer {
+  padding: .75rem 1.25rem;
+  border-top: 1px solid #eef0f3;
+
+  .eg-pagination-wrap {
+    margin-top: 0;
   }
 }

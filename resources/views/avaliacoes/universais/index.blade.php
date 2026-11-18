@@ -98,7 +98,7 @@
 @endphp
 
 <div class="card shadow-sm">
-    <x-data-table id="grid-avaliacoes-universais" :columns="$columns" :rows="$rows" :pagination="false" />
+    <x-data-table id="grid-avaliacoes-universais" :columns="$columns" :rows="$rows" :pagination="false" :paginator="$avaliacoes" />
 </div>
 
 @foreach ($avaliacoes as $avaliacao)
@@ -168,8 +168,6 @@
   </div>
 </div>
 @endforeach
-
-<x-ui.pagination :paginator="$avaliacoes" />
 @endsection
 
 @push('scripts')

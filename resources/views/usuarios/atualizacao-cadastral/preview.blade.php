@@ -64,10 +64,9 @@
                 $gridRows[] = $item;
             }
         @endphp
-        <x-data-table id="atualizacao-cadastral-grid" :columns="$gridColumns" :rows="$gridRows" :pagination="false" :row-height="100" dom-layout="normal" data-suppress-row-virtualisation="true" style="height: 60vh; min-height: 280px;" />
+        <x-data-table id="atualizacao-cadastral-grid" :columns="$gridColumns" :rows="$gridRows" :pagination="false" :row-height="100" dom-layout="normal" data-suppress-row-virtualisation="true" style="height: 60vh; min-height: 280px;" :paginator="$rows" />
         <button class="btn btn-success my-3">Salvar alterações desta página</button>
     </form>
-    <x-ui.pagination :paginator="$rows" />
 </div>
 <template id="opcoes-municipios-cadastro">
     @foreach($municipios as $municipio)

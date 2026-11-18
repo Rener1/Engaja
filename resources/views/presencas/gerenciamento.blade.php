@@ -281,13 +281,9 @@
                     :rows="$rows"
                     :pagination="false"
                     :row-height="72"
-                />
+            :paginator="$atividades"
+        />
             </div>
-            @if($atividades->hasPages())
-                <div class="card-footer bg-white py-3 px-4">
-                    <x-ui.pagination :paginator="$atividades" />
-                </div>
-            @endif
         </div>
     @endif
 

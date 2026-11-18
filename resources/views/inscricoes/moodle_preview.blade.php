@@ -262,39 +262,40 @@
     </div>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-sm table-bordered align-middle bg-white moodle-preview-table">
-      <thead class="table-light">
-        <tr>
-          <th class="sticky-col">Linha</th>
-          <th class="sticky-col-2">Nome</th>
-          <th class="sticky-col-3">Email</th>
-          @foreach($momentos as $momento)
-          <th class="moment-col-header" title="{{ $momento['nome'] }}">{{ $momento['nome'] }}</th>
-          @endforeach
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($rows as $row)
-        <tr>
-          <td class="sticky-col">{{ $row['line'] ?? '—' }}</td>
-          <td class="sticky-col-2">{{ $row['nome'] }}</td>
-          <td class="sticky-col-3">{{ $row['email'] }}</td>
-          @foreach($momentos as $momento)
-            @php $status = $row['status_por_momento'][$momento['nome']] ?? null; @endphp
-            <td>
-              @if($status === true)
-                <span class="status-chip status-chip-success">Concluiu</span>
-              @endif
-            </td>
-          @endforeach
-        </tr>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
+  <x-ui.table-frame :paginator="$rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle bg-white moodle-preview-table">
+          <thead class="table-light">
+            <tr>
+              <th class="sticky-col">Linha</th>
+              <th class="sticky-col-2">Nome</th>
+              <th class="sticky-col-3">Email</th>
+              @foreach($momentos as $momento)
+              <th class="moment-col-header" title="{{ $momento['nome'] }}">{{ $momento['nome'] }}</th>
+              @endforeach
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($rows as $row)
+            <tr>
+              <td class="sticky-col">{{ $row['line'] ?? '—' }}</td>
+              <td class="sticky-col-2">{{ $row['nome'] }}</td>
+              <td class="sticky-col-3">{{ $row['email'] }}</td>
+              @foreach($momentos as $momento)
+                @php $status = $row['status_por_momento'][$momento['nome']] ?? null; @endphp
+                <td>
+                  @if($status === true)
+                    <span class="status-chip status-chip-success">Concluiu</span>
+                  @endif
+                </td>
+              @endforeach
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+  </x-ui.table-frame>
 
-  <x-ui.pagination :paginator="$rows->appends(['session_key' => $sessionKey, 'per_page' => $rows->perPage()])" />
 </div>
 
 {{-- Modal de confirmação quando existem pessoas não encontradas --}}

@@ -90,7 +90,7 @@
       </div>
     </div>
     @if($participantes->hasPages())
-      <div class="card-footer bg-white py-3 px-4">
+      <div class="dt-footer">
         <x-ui.pagination :paginator="$participantes" />
       </div>
     @endif

@@ -295,6 +295,18 @@ const initTable = (el) => {
             next: "Próxima",
             last: "Última",
         },
+        // Mesmo comportamento do <x-ui.pagination>: sem registros ou com uma única
+        // página, o painel de paginação não aparece. Recalculado a cada mudança
+        // (novos dados, filtro, troca de página).
+        // Sem linhas visíveis: marca a tabela para manter a altura do aviso "sem registros"
+        // (ver .dt-empty em sass/ui/_table.scss).
+        onModelUpdated: (event) => {
+            el.classList.toggle("dt-empty", event.api.getDisplayedRowCount() === 0);
+        },
+        onPaginationChanged: (event) => {
+            const totalPages = event.api.paginationGetTotalPages?.() ?? 0;
+            el.classList.toggle("dt-single-page", totalPages <= 1);
+        },
         onFirstDataRendered: (event) => {
             try {
                 event.api?.sizeColumnsToFit();

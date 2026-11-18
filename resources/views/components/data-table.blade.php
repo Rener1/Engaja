@@ -14,14 +14,26 @@
     'detailRowHeight' => 420,
     'rowHeight' => null,
     'emptyText' => null,
+    'paginator' => null,
     'class' => '',
 ])
 
+{{--
+    paginator: paginação do servidor (LengthAwarePaginator) desenhada como rodapé da
+    tabela, com o mesmo visual do painel de paginação do AG Grid. Use com :pagination="false".
+--}}
+@php
+    $comRodape = $paginator !== null;
+    $gridClass = $comRodape ? trim($class.' dt-no-border') : $class;
+@endphp
+@if ($comRodape)
+<div @class(['dt-frame', 'dt-frame--bordered' => ! str_contains($class, 'dt-no-border')])>
+@endif
 <div
     {{ $attributes->except('class') }}
     id="{{ $id }}"
     data-ag-grid
-    class="ag-theme-quartz w-100 {{ $class }}"
+    class="ag-theme-quartz w-100 {{ $gridClass }}"
     data-columns="{{ json_encode($columns, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) }}"
     data-rows="{{ json_encode($rows, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) }}"
     data-pagination="{{ $pagination ? 'true' : 'false' }}"
@@ -36,3 +48,11 @@
     @if ($rowSelection && $rowSelectableField) data-row-selectable-field="{{ $rowSelectableField }}" @endif
     @if ($detailRowField) data-detail-row-field="{{ $detailRowField }}" data-detail-row-height="{{ $detailRowHeight }}" @endif
 ></div>
+@if ($comRodape)
+    @if ($paginator->hasPages())
+        <div class="dt-footer">
+            <x-ui.pagination :paginator="$paginator" />
+        </div>
+    @endif
+</div>
+@endif

@@ -227,7 +227,7 @@
                 @endphp
 
                 @if($lista->isEmpty())
-                    <div class="ev-card p-3 text-muted">Nenhuma presença registrada para este momento.</div>
+                    <x-ui.empty-state icon="person-x" muted compact class="ev-card">Nenhuma presença registrada para este momento.</x-ui.empty-state>
                 @else
                     <div class="card shadow-sm">
                         <div class="card-body p-0">

@@ -108,8 +108,7 @@
       :columns="$columns"
       :rows="$rows"
       :pagination="false"
-  />
-
-  <x-ui.pagination :paginator="$inscricoes" />
+            :paginator="$inscricoes"
+        />
 </div>
 @endsection

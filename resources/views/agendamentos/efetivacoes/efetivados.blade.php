@@ -9,55 +9,54 @@
 </x-ui.page-hero>
 
 <div class="card shadow-sm">
-  <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-      <thead class="table-light">
-        <tr>
-          <th>Efetivado em</th>
-          <th>Data do agendamento</th>
-          <th>Município</th>
-          <th>Atividade/Ação</th>
-          <th>Participantes</th>
-          <th>Momento criado</th>
-          <th class="text-end">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse ($agendamentos as $agendamento)
-          <tr>
-            <td>{{ optional($agendamento->efetivado_em)->format('d/m/Y H:i') ?? '—' }}</td>
-            <td>{{ optional($agendamento->data_horario)->format('d/m/Y H:i') }}</td>
-            <td>{{ $agendamento->municipio?->nome_com_estado ?? '—' }}</td>
-            <td>{{ $agendamento->atividadeAcao?->nome ?? '—' }}</td>
-            <td>{{ $agendamento->participantes_clonados_count ?? 0 }}</td>
-            <td>
-              @if($agendamento->atividade)
-                <div>{{ $agendamento->atividade->descricao }}</div>
-                @if($agendamento->atividade->evento)
-                  <div class="small text-muted">{{ $agendamento->atividade->evento->nome }}</div>
-                @endif
-              @else
-                —
-              @endif
-            </td>
-            <td class="text-end">
-              <a href="{{ route('agendamentos.show', $agendamento) }}" class="btn btn-sm btn-outline-primary">Ver</a>
-              @if($agendamento->atividade)
-                <a href="{{ route('atividades.show', $agendamento->atividade) }}" class="btn btn-sm btn-outline-success">Momento</a>
-              @endif
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="7"><x-ui.empty-state compact muted icon="inbox" title="Nenhum agendamento efetivado encontrado." /></td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
+  <x-ui.table-frame :paginator="$agendamentos" :bordered="false">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Efetivado em</th>
+              <th>Data do agendamento</th>
+              <th>Município</th>
+              <th>Atividade/Ação</th>
+              <th>Participantes</th>
+              <th>Momento criado</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse ($agendamentos as $agendamento)
+              <tr>
+                <td>{{ optional($agendamento->efetivado_em)->format('d/m/Y H:i') ?? '—' }}</td>
+                <td>{{ optional($agendamento->data_horario)->format('d/m/Y H:i') }}</td>
+                <td>{{ $agendamento->municipio?->nome_com_estado ?? '—' }}</td>
+                <td>{{ $agendamento->atividadeAcao?->nome ?? '—' }}</td>
+                <td>{{ $agendamento->participantes_clonados_count ?? 0 }}</td>
+                <td>
+                  @if($agendamento->atividade)
+                    <div>{{ $agendamento->atividade->descricao }}</div>
+                    @if($agendamento->atividade->evento)
+                      <div class="small text-muted">{{ $agendamento->atividade->evento->nome }}</div>
+                    @endif
+                  @else
+                    —
+                  @endif
+                </td>
+                <td class="text-end">
+                  <a href="{{ route('agendamentos.show', $agendamento) }}" class="btn btn-sm btn-outline-primary">Ver</a>
+                  @if($agendamento->atividade)
+                    <a href="{{ route('atividades.show', $agendamento->atividade) }}" class="btn btn-sm btn-outline-success">Momento</a>
+                  @endif
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="7"><x-ui.empty-state compact muted icon="inbox" title="Nenhum agendamento efetivado encontrado." /></td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+  </x-ui.table-frame>
 </div>
 
-<div class="mt-3">
-  <x-ui.pagination :paginator="$agendamentos" />
-</div>
 @endsection
