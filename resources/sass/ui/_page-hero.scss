@@ -1,0 +1,144 @@
+/* ──────────────────────────────────────────────────────
+   PAGE HERO — barra roxa com gradiente no topo das páginas
+   Uso: <x-ui.page-hero eyebrow="..." title="..." subtitle="...">
+────────────────────────────────────────────────────── */
+.eg-hero {
+  background: linear-gradient(135deg, $engaja-purple 0%, #62305f 60%, #7a3a72 100%);
+  color: #fff;
+  margin-bottom: 1.5rem;
+  border-bottom: 3px solid rgba(255, 255, 255, .08);
+
+  .text-muted,
+  .text-secondary {
+    color: rgba(255, 255, 255, .72) !important;
+  }
+
+  a:not(.btn):not(.dropdown-item) {
+    color: #fff;
+  }
+
+  .dropdown-menu {
+    color: $body-color;
+  }
+}
+
+.eg-hero__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.eg-hero--plain .eg-hero__inner {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.eg-hero__text {
+  min-width: 0;
+  flex: 1 1 320px;
+}
+
+.eg-hero__eyebrow {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(255, 255, 255, .6);
+  font-weight: 600;
+}
+
+.eg-hero__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #fff;
+  margin: .25rem 0 .3rem;
+  letter-spacing: -.3px;
+  overflow-wrap: anywhere;
+}
+
+.eg-hero__subtitle {
+  font-size: .875rem;
+  color: rgba(255, 255, 255, .72);
+  margin: 0;
+}
+
+.eg-hero__meta {
+  font-size: .85rem;
+  color: rgba(255, 255, 255, .72);
+  margin-top: .5rem;
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.eg-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* Botão translúcido ("glass") para ações dentro do hero */
+.eg-hero-btn,
+.eg-hero-btn:visited {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, .3);
+  border-radius: .75rem;
+  padding: .55rem 1.1rem;
+  font-size: .875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.5;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background .2s;
+}
+
+.eg-hero-btn:hover,
+.eg-hero-btn:focus,
+.eg-hero-btn:active,
+.eg-hero-btn.show {
+  background: rgba(255, 255, 255, .22) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, .5) !important;
+}
+
+/* Variante sólida (ação primária, ex.: "Novo ...") */
+.eg-hero-btn--solid,
+.eg-hero-btn--solid:visited {
+  background: #fff;
+  color: $engaja-purple;
+  border-color: #fff;
+}
+
+.eg-hero-btn--solid:hover,
+.eg-hero-btn--solid:focus,
+.eg-hero-btn--solid:active {
+  background: #f3eaf4 !important;
+  color: $engaja-purple !important;
+  border-color: #f3eaf4 !important;
+}
+
+.eg-hero-btn:disabled,
+.eg-hero-btn.disabled {
+  opacity: .55;
+}
+
+@media (max-width: 576px) {
+  .eg-hero__title {
+    font-size: 1.4rem;
+  }
+
+  .eg-hero--plain .eg-hero__inner {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

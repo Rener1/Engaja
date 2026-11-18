@@ -1,0 +1,23 @@
+/* ──────────────────────────────────────────────────────
+   MODAL — cabeçalho roxo com botão fechar branco
+   Uso: <x-ui.modal-header title="..." icon="..." /> dentro de .modal-content
+────────────────────────────────────────────────────── */
+.modal-content:has(> .eg-modal-header) {
+  border: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.eg-modal-header {
+  background: $engaja-purple;
+  color: #fff;
+  border: none;
+
+  .modal-title {
+    font-weight: 700;
+  }
+}
+
+.eg-modal-header--danger {
+  background: $engaja-pink;
+}

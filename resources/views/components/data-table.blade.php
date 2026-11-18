@@ -13,6 +13,7 @@
     'detailRowField' => null,
     'detailRowHeight' => 420,
     'rowHeight' => null,
+    'emptyText' => null,
     'class' => '',
 ])
 
@@ -27,6 +28,7 @@
     data-page-size="{{ $pageSize }}"
     @if ($rowSelection) data-row-selection="{{ $rowSelection }}" @endif
     data-dom-layout="{{ $domLayout }}"
+    @if ($emptyText) data-empty-text="{{ $emptyText }}" @endif
     @if ($rowHeight) data-row-height="{{ $rowHeight }}" @endif
     @if ($rowClassField) data-row-class-field="{{ $rowClassField }}" @endif
     @if ($rowSelection || $detailRowField) data-id-field="{{ $idField }}" @endif

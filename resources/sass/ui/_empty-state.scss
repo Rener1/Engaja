@@ -1,0 +1,60 @@
+/* ──────────────────────────────────────────────────────
+   EMPTY STATE — "nenhum resultado" / "selecione um filtro"
+   Uso: <x-ui.empty-state icon="inbox" title="...">texto</x-ui.empty-state>
+────────────────────────────────────────────────────── */
+.eg-empty-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: #fff;
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .04);
+
+  h5 {
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: .5rem;
+  }
+
+  p {
+    color: #6b7280;
+    font-size: .9rem;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+}
+
+.eg-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f3eaf4, #e8d5f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  font-size: 1.8rem;
+  color: $engaja-purple;
+}
+
+.eg-empty-icon--muted {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+/* Variante compacta: dentro de cards, tabelas e do overlay do AG Grid */
+.eg-empty-state--compact {
+  padding: 1.75rem 1rem;
+  box-shadow: none;
+  background: transparent;
+
+  .eg-empty-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 1.35rem;
+    margin-bottom: .75rem;
+  }
+
+  h5 {
+    font-size: 1rem;
+  }
+}

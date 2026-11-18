@@ -1,0 +1,52 @@
+/* ──────────────────────────────────────────────────────
+   SEGMENTED CONTROL — alternância em "pílula" (substitui nav-tabs/btn-group)
+   Uso: <x-ui.segmented name="..." :options="[...]" value="..." />
+────────────────────────────────────────────────────── */
+.eg-segmented {
+  display: inline-flex;
+  background: #f3f4f6;
+  border-radius: .75rem;
+  padding: .25rem;
+  gap: .2rem;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.eg-segmented--auto {
+  width: auto;
+  max-width: 100%;
+}
+
+.eg-seg-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  border-radius: .55rem;
+  padding: .5rem .75rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: inherit;
+  white-space: nowrap;
+  text-align: center;
+  text-decoration: none;
+}
+
+.eg-seg-btn:hover {
+  color: $engaja-purple;
+}
+
+.eg-seg-btn.active {
+  background: #fff;
+  color: $engaja-purple;
+  box-shadow: 0 2px 8px rgba(66, 25, 68, .14), 0 1px 3px rgba(0, 0, 0, .08);
+  font-weight: 700;
+}
+
+/* Feedback de carregamento ao submeter filtros */
+body.eg-loading * {
+  cursor: wait !important;
+}

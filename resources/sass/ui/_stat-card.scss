@@ -1,0 +1,123 @@
+/* ──────────────────────────────────────────────────────
+   STAT CARDS — indicadores numéricos (KPIs)
+   Uso: <div class="eg-stats-row"><x-ui.stat-card ... /></div>
+   Colunas: padrão 4; ajuste com style="--eg-stat-cols: 3" ou use .eg-stats-row--auto.
+────────────────────────────────────────────────────── */
+.eg-stats-row {
+  display: grid;
+  grid-template-columns: repeat(var(--eg-stat-cols, 4), minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.eg-stat-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fff 0%, #fbfbfc 100%);
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(66, 25, 68, .07), 0 1px 3px rgba(0, 0, 0, .04);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #ece7ee;
+  transition: box-shadow .2s ease, transform .15s ease, border-color .2s ease;
+  min-width: 0;
+}
+
+.eg-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 3px;
+  background: var(--stat-accent, $engaja-purple);
+  opacity: .95;
+}
+
+.eg-stat-card:hover {
+  box-shadow: 0 8px 28px rgba(66, 25, 68, .12);
+  transform: translateY(-2px);
+  border-color: rgba(66, 25, 68, .12);
+}
+
+.eg-stat-card--purple { --stat-accent: #7b2d6f; --stat-soft: #f5e9f4; }
+.eg-stat-card--blue   { --stat-accent: #0369a1; --stat-soft: #e0f2fe; }
+.eg-stat-card--green  { --stat-accent: #0f766e; --stat-soft: #d7f3ef; }
+.eg-stat-card--orange { --stat-accent: #b45309; --stat-soft: #fef3c7; }
+.eg-stat-card--pink   { --stat-accent: #be185d; --stat-soft: #fce7f3; }
+.eg-stat-card--gray   { --stat-accent: #4b5563; --stat-soft: #f3f4f6; }
+
+.eg-stat-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+  background: var(--stat-soft, #f3f4f6);
+  color: var(--stat-accent, $engaja-purple);
+  border-radius: .75rem;
+}
+
+.eg-stat-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.eg-stat-value {
+  font-size: clamp(1.35rem, 1.1vw + 1rem, 1.7rem);
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eg-stat-value--sm {
+  font-size: 1rem;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.eg-stat-label {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #9ca3af;
+  font-weight: 600;
+  margin-top: .25rem;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.eg-stat-hint {
+  font-size: .72rem;
+  color: #6b7280;
+  margin-top: .2rem;
+}
+
+/* Muitos indicadores (5+): colunas automáticas com largura mínima */
+.eg-stats-row--auto {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+@media (max-width: 900px) {
+  .eg-stats-row:not(.eg-stats-row--auto) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .eg-stats-row { grid-template-columns: 1fr; }
+
+  .eg-stat-card {
+    padding: 1rem 1.25rem;
+  }
+
+  .eg-stat-value {
+    font-size: 1.35rem;
+  }
+}

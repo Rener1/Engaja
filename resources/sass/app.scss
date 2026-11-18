@@ -44,6 +44,14 @@ $theme-colors: map.merge(
 );
 
 
+/* Componentes de UI compartilhados (padrão visual das páginas internas) */
+@import "ui/page-hero";
+@import "ui/filter-card";
+@import "ui/segmented";
+@import "ui/stat-card";
+@import "ui/empty-state";
+@import "ui/modal";
+
 /* Custom utilities */
 .text-engaja     { color: $engaja-purple !important; }
 .bg-engaja       { background-color: $engaja-purple !important; }

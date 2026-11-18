@@ -1,0 +1,122 @@
+/* ──────────────────────────────────────────────────────
+   FILTROS — card branco com labels em caixa alta e selects arredondados
+   Uso: <x-ui.filter-card>, <x-ui.filter-field>, <x-ui.select>, <x-ui.input>
+────────────────────────────────────────────────────── */
+.eg-filter-card,
+.filter-bar {
+  background: #fff;
+  border-radius: 1.1rem;
+  box-shadow: 0 4px 24px rgba(66, 25, 68, .08), 0 1px 4px rgba(0, 0, 0, .04);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.eg-filter-label {
+  display: block;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #6b7280;
+  margin-bottom: .5rem;
+}
+
+.eg-select-wrapper {
+  position: relative;
+}
+
+.eg-select,
+.eg-input {
+  width: 100%;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: .75rem;
+  padding: .65rem 1rem;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #1f2937;
+  background-color: #f9fafb;
+  transition: border-color .2s, box-shadow .2s;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.eg-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.5rem;
+  cursor: pointer;
+  background-image: none;
+}
+
+.eg-select[multiple] {
+  padding-right: 1rem;
+}
+
+.eg-input::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.eg-select:focus,
+.eg-input:focus {
+  outline: none;
+  border-color: $engaja-purple !important;
+  box-shadow: 0 0 0 3px rgba(66, 25, 68, .12);
+  background-color: #fff;
+}
+
+.eg-select:disabled,
+.eg-input:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.eg-select-chevron {
+  position: absolute;
+  right: .9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: .8rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+/* Botões de ação do filtro (Aplicar / Limpar) alinhados com os campos */
+.eg-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+
+  .btn {
+    border-radius: .75rem;
+    padding: .65rem 1.1rem;
+    font-size: .875rem;
+    font-weight: 600;
+  }
+}
+
+/* TomSelect (multi-selects) dentro do card de filtro */
+.eg-filter-card .ts-wrapper .ts-control {
+  border: 1.5px solid #e5e7eb;
+  border-radius: .75rem;
+  background: #f9fafb;
+  min-height: calc(1.5em + 1.3rem + 3px);
+  padding: .45rem .75rem;
+  font-size: .9rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.eg-filter-card .ts-wrapper.focus .ts-control {
+  border-color: $engaja-purple;
+  box-shadow: 0 0 0 3px rgba(66, 25, 68, .12);
+  background: #fff;
+}
+
+.eg-filter-card .ts-wrapper.multi .ts-control > .item {
+  border-radius: .5rem;
+  background: #f3eaf4;
+  color: $engaja-purple;
+  border-color: #d9bfdc;
+  font-weight: 600;
+}

@@ -112,6 +112,20 @@ class FullWidthHtmlRenderer {
     }
 }
 
+const escapeOverlayText = (text) =>
+    String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+/** Overlay "sem linhas" no padrão visual do empty state (.eg-empty-state). */
+const emptyStateTemplate = (text) =>
+    `<div class="eg-empty-state eg-empty-state--compact" role="status">` +
+    `<div class="eg-empty-icon eg-empty-icon--muted"><i class="bi bi-inbox"></i></div>` +
+    `<p>${escapeOverlayText(text)}</p>` +
+    `</div>`;
+
 const ALIGN_TO_JUSTIFY = { start: "flex-start", end: "flex-end", center: "center" };
 const ALIGN_TO_TEXT_CLASS = { start: "text-start", end: "text-end", center: "text-center" };
 
@@ -258,6 +272,9 @@ const initTable = (el) => {
             type: "fitGridWidth",
             defaultMinWidth: 90,
         },
+        overlayNoRowsTemplate: el.dataset.emptyText
+            ? emptyStateTemplate(el.dataset.emptyText)
+            : emptyStateTemplate("Nenhum registro encontrado."),
         tooltipShowMode: "whenTruncated",
         tooltipShowDelay: 300,
         localeText: {
