@@ -23,8 +23,9 @@
 <div class="row justify-content-center">
   <div class="col-xl-8">
     <div class="mb-4">
-      <h1 class="h3 fw-bold text-engaja mb-1">Gerador de QR Code</h1>
-      <p class="text-muted mb-0">Informe um link para criar um QR Code no padrão visual do Engaja.</p>
+      <x-ui.page-hero eyebrow="Ferramentas" eyebrow-icon="qr-code" title="Gerador de QR Code">
+          <p class="text-muted mb-0">Informe um link para criar um QR Code no padrão visual do Engaja.</p>
+      </x-ui.page-hero>
     </div>
 
     <div class="card shadow-sm">

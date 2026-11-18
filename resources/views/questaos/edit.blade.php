@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="question-circle" title="Editar questão" />
+
 <div class="row justify-content-center">
   <div class="col-lg-8">
-    <h1 class="h3 fw-bold text-engaja mb-4">Editar questão</h1>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <form method="POST" action="{{ route('questaos.update', $questao) }}">

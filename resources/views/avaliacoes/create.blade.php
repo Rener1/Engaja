@@ -7,16 +7,12 @@
   $formAction = $formAction ?? route('avaliacoes.store');
   $cancelUrl = $cancelUrl ?? route('avaliacoes.index');
 @endphp
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="clipboard2-check">
+    <x-slot:heading>@if($universal) Nova avaliação universal @else Nova avaliação @endif</x-slot:heading>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-10">
-    <h1 class="h3 fw-bold text-engaja mb-4">
-      @if($universal)
-        Nova avaliação universal
-      @else
-        Nova avaliação
-      @endif
-    </h1>
-
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <form method="POST" action="{{ $formAction }}">

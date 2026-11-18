@@ -1,15 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h1 class="h4 mb-1">Pré-visualização da importação</h1>
-      <div class="text-muted small">Agendamento: {{ optional($agendamento->data_horario)->format('d/m/Y H:i') }} · {{ $agendamento->atividadeAcao?->nome ?? 'Atividade/Ação' }}</div>
-    </div>
-    <a href="{{ route('agendamentos.participantes.import', $agendamento) }}" class="btn btn-outline-secondary">Voltar</a>
-  </div>
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-check" title="Pré-visualização da importação" class="mb-0">
+    <div class="text-muted small">Agendamento: {{ optional($agendamento->data_horario)->format('d/m/Y H:i') }} · {{ $agendamento->atividadeAcao?->nome ?? 'Atividade/Ação' }}</div>
+    <x-slot:actions>
+        <a href="{{ route('agendamentos.participantes.import', $agendamento) }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
   @if($observacoes)
     <div class="alert alert-info mb-3"><strong>Observações do envio:</strong> {{ $observacoes }}</div>
   @endif

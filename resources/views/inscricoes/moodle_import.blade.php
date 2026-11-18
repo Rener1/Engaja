@@ -1,16 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Importação Moodle (2 planilhas)" class="mb-0">
+    <div class="text-muted small">Ação pedagógica: <strong>{{ $evento->nome }}</strong></div>
+    <x-slot:actions>
+        <a href="{{ route('eventos.show', $evento) }}" class="eg-hero-btn">Voltar à ação</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-      <h1 class="h4 fw-bold text-engaja mb-1">Importação Moodle (2 planilhas)</h1>
-      <div class="text-muted small">Ação pedagógica: <strong>{{ $evento->nome }}</strong></div>
-    </div>
-
-    <a href="{{ route('eventos.show', $evento) }}" class="btn btn-outline-secondary">Voltar à ação</a>
-  </div>
-
   @if ($errors->any())
   <div class="alert alert-danger">
     <strong>Ops!</strong> Revise as planilhas enviadas.

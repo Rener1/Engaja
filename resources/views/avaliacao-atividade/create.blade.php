@@ -1,18 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h4 fw-bold text-engaja mb-0">
-                Relatório do Momento
-            </h1>
-            <small class="text-muted">Seu relatório individual para {{ $atividade->evento->nome ?? '' }} — {{ $atividade->descricao }}</small>
-        </div>
+<x-ui.page-hero contained eyebrow="Relatórios" eyebrow-icon="journal-text" title="Relatório do Momento">
+    <small class="text-muted">Seu relatório individual para {{ $atividade->evento->nome ?? '' }} — {{ $atividade->descricao }}</small>
+    <x-slot:actions>
         <a href="{{ route('eventos.show', $atividade->evento_id) }}"
-           class="btn btn-outline-secondary">Voltar à ação pedagógica</a>
-    </div>
+           class="eg-hero-btn">Voltar à ação pedagógica</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container">
     @if($errors->any())
     <div class="alert alert-danger">
         <strong>Ops!</strong> Verifique os campos abaixo.

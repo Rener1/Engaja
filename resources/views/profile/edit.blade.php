@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 fw-bold text-engaja mb-0">Meu perfil</h1>
-        <a href="{{ route('profile.certificados') }}" class="btn btn-outline-secondary btn-sm">Meus certificados</a>
-    </div>
+<x-ui.page-hero contained eyebrow="Minha conta" eyebrow-icon="person-circle" title="Meu perfil">
+    <x-slot:actions>
+        <a href="{{ route('profile.certificados') }}" class="eg-hero-btn">Meus certificados</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container">
     {{-- Mensagens globais --}}
     @if (session('status') === 'profile-updated')
     <div class="alert alert-success">Dados do perfil atualizados com sucesso.</div>
@@ -593,10 +594,7 @@
 <div class="modal fade" id="modalTermosImagem" tabindex="-1" aria-labelledby="modalTermosImagemLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title text-engaja fw-bold" id="modalTermosImagemLabel">Autorização de Imagem, Voz e Nome</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
+            <x-ui.modal-header title-id="modalTermosImagemLabel" title="Autorização de Imagem, Voz e Nome" />
             <div class="modal-body text-muted" style="font-size: 0.95rem;">
                 <p>Ao marcar este campo você confirma e possui a ciência da destinação do uso do conteúdo descrito abaixo:</p>
                 <ol type="a" class="ps-3 mb-3" style="line-height: 1.2;">

@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h4 fw-bold text-engaja mb-0">Editar momento — {{ $evento->nome }}</h1>
-    <a href="{{ route('eventos.show', $evento) }}" class="btn btn-outline-secondary">Voltar à ação pedagógica</a>
-  </div>
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar3" :title="'Editar momento — '.$evento->nome">
+    <x-slot:actions>
+        <a href="{{ route('eventos.show', $evento) }}" class="eg-hero-btn">Voltar à ação pedagógica</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container">
   @if ($errors->any())
     <div class="alert alert-danger"><strong>Ops!</strong> Verifique os campos abaixo.</div>
   @endif

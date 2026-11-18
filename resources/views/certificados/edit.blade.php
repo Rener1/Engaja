@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero contained eyebrow="Administração" eyebrow-icon="award" title="Editar certificado emitido" class="mb-0" />
+
 <div class="container py-4">
   <div class="row">
     <div class="col-lg-8 mx-auto">
-      <p class="text-uppercase text-muted small mb-1">Administração</p>
-      <h1 class="h4 fw-bold mb-3">Editar certificado emitido</h1>
       <div class="card shadow-sm">
         <div class="card-body">
           <form method="POST" action="{{ route('certificados.update', $certificado) }}">

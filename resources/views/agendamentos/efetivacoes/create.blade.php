@@ -1,16 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Operações" eyebrow-icon="calendar-check" title="Efetivar agendamento">
+    <div class="text-muted">{{ optional($agendamento->data_horario)->format('d/m/Y H:i') }} · {{ $agendamento->atividadeAcao?->nome ?? 'Atividade/Ação' }}</div>
+    <x-slot:actions>
+        <a href="{{ route('agendamentos.efetivacoes.index') }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-10">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold text-engaja mb-0">Efetivar agendamento</h1>
-        <div class="text-muted">{{ optional($agendamento->data_horario)->format('d/m/Y H:i') }} · {{ $agendamento->atividadeAcao?->nome ?? 'Atividade/Ação' }}</div>
-      </div>
-      <a href="{{ route('agendamentos.efetivacoes.index') }}" class="btn btn-outline-secondary">Voltar</a>
-    </div>
-
     <div class="row g-4">
       <div class="col-lg-7">
         <div class="card shadow-sm">

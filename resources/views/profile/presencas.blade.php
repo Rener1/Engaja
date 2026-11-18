@@ -30,7 +30,7 @@
                         <label class="eg-filter-label">Buscar (momento/ação)</label>
                         <x-ui.input type="text" name="busca" value="{{ $filtros['busca'] }}" />
                     </div>
-                    <div class="col-md-2 d-flex gap-2">
+                    <div class="col-md-2 d-flex gap-2 eg-filter-actions">
                         <button type="submit" class="btn btn-primary w-100">Filtrar</button>
                         <a href="{{ route('profile.presencas') }}" class="btn btn-secondary w-100">Limpar</a>
                     </div>

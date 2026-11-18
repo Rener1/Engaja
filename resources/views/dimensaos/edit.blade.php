@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="diagram-3" title="Editar dimensão" />
+
 <div class="row justify-content-center">
   <div class="col-lg-6">
-    <h1 class="h3 fw-bold text-engaja mb-4">Editar dimensão</h1>
-
     <div class="card shadow-sm">
       <div class="card-body">
         <form method="POST" action="{{ route('dimensaos.update', $dimensao) }}">

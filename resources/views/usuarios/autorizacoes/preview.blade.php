@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+    <x-ui.page-hero contained eyebrow="Pessoas" eyebrow-icon="people" title="Pré-visualização da Importação">
+        <p class="text-muted">Confira os dados abaixo antes de confirmar a atualização das autorizações de imagem.</p>
+    </x-ui.page-hero>
+
     <div class="container">
         <div class="mb-4">
-            <h1 class="h4 fw-bold text-engaja mb-1">Pré-visualização da Importação</h1>
-            <p class="text-muted">Confira os dados abaixo antes de confirmar a atualização das autorizações de imagem.</p>
         </div>
 
         <div class="card shadow-sm">

@@ -57,18 +57,17 @@
         border-radius: 50%;
     }
 </style>
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 fw-bold text-engaja mb-0">Nova ação pedagógica</h1>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary" disabled
-                title="Guarde a ação primeiro para gerar o PDF">
-                Gerar PDF
-            </button>
-            <a href="{{ route('eventos.index') }}" class="btn btn-outline-secondary">Voltar</a>
-        </div>
-    </div>
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-event" title="Nova ação pedagógica">
+    <x-slot:actions>
+        <button type="button" class="eg-hero-btn" disabled
+            title="Guarde a ação primeiro para gerar o PDF">
+            Gerar PDF
+        </button>
+        <a href="{{ route('eventos.index') }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container">
     @if ($errors->any())
     <div class="alert alert-danger">
         <strong>Ops!</strong> Verifique os campos abaixo.
@@ -352,9 +351,7 @@
 <div class="modal fade" id="modalChecklistPlanejamento" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header border-0" style="background-color: #421944;">
-                <h5 class="modal-title fw-bold text-white">Checklist do Planejamento</h5>
-            </div>
+            <x-ui.modal-header icon="list-check" title="Checklist do Planejamento" :dismissible="false" />
             <div class="modal-body">
                 <div class="form-text mb-3">(Antes de concluir este planejamento, faça a seguinte verificação, marcando os tópicos realizados)</div>
 

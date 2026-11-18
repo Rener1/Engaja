@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero contained eyebrow="Certificados" eyebrow-icon="award" title="Pré-visualização da Certificação">
+    <p class="text-muted">Confira abaixo todos os usuários que receberão o certificado antes de confirmar a emissão.</p>
+</x-ui.page-hero>
+
 <div class="container">
     <div class="mb-4">
-        <h1 class="h4 fw-bold text-engaja mb-1">Pré-visualização da Certificação</h1>
-        <p class="text-muted">Confira abaixo todos os usuários que receberão o certificado antes de confirmar a emissão.</p>
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -59,7 +61,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">Nenhum participante apto para certificação nestas ações.</td>
+                            <td colspan="6"><x-ui.empty-state compact muted icon="inbox" title="Nenhum participante apto para certificação nestas ações." /></td>
                         </tr>
                     @endforelse
                     </tbody>

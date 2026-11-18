@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @section('content')
+<x-ui.page-hero eyebrow="Pessoas" eyebrow-icon="people" title="Prévia — Atualização de dados cadastrais" class="mb-0" />
+
 <div class="container-fluid py-4">
-    <h1 class="h4">Prévia — Atualização de dados cadastrais</h1>
     <p>{{ $rows->total() }} linha(s). Campos vazios preservam os valores existentes. Salve as alterações de cada página antes de confirmar o lote.</p>
     <p><strong>{{ $analysis['existingCount'] }} pessoa(s) existente(s)</strong> para conferir/atualizar e <strong>{{ $analysis['newCount'] }} nova(s) pessoa(s)</strong> para cadastrar. Contagem dos grupos válidos; a confirmação exige corrigir todos os erros.</p>
     <p class="text-muted">A localização indica a linha original do arquivo. Corrija os campos nesta tabela e clique em “Salvar alterações desta página” para verificar novamente.</p>

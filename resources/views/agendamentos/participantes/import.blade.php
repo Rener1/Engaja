@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Importar participantes do agendamento</h1>
-    <a href="{{ route('agendamentos.participantes.index', $agendamento) }}" class="btn btn-outline-secondary">Voltar</a>
-  </div>
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar-check" title="Importar participantes do agendamento" class="mb-0">
+    <x-slot:actions>
+        <a href="{{ route('agendamentos.participantes.index', $agendamento) }}" class="eg-hero-btn">Voltar</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container py-4">
   <div class="card shadow-sm">
     <div class="card-body">
       <form method="POST" action="{{ route('agendamentos.participantes.upload', $agendamento) }}" enctype="multipart/form-data" class="row g-3">

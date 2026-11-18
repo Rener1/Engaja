@@ -85,29 +85,25 @@
   }
 </style>
 
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Pré-visualização da Importação Moodle" class="mb-0">
+    <div class="text-muted small">Ação pedagógica: <strong>{{ $evento->nome }}</strong></div>
+    <x-slot:actions>
+        <a href="{{ route('inscricoes.moodle.import', $evento) }}" class="eg-hero-btn">Voltar</a>
+        <form
+          id="moodle-confirm-form"
+          method="POST"
+          action="{{ route('inscricoes.moodle.confirm', $evento) }}"
+          data-has-not-found="{{ $newUsers->isNotEmpty() ? '1' : '0' }}">
+          @csrf
+          <input type="hidden" name="session_key" value="{{ $sessionKey }}">
+          <button class="eg-hero-btn eg-hero-btn--solid" {{ $errorsList->isNotEmpty() ? 'disabled' : '' }}>
+            Confirmar importação Moodle
+          </button>
+        </form>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <div>
-      <h1 class="h4 mb-1">Pré-visualização da Importação Moodle</h1>
-      <div class="text-muted small">Ação pedagógica: <strong>{{ $evento->nome }}</strong></div>
-    </div>
-
-    <div class="d-flex gap-2">
-      <a href="{{ route('inscricoes.moodle.import', $evento) }}" class="btn btn-outline-secondary">Voltar</a>
-      <form
-        id="moodle-confirm-form"
-        method="POST"
-        action="{{ route('inscricoes.moodle.confirm', $evento) }}"
-        data-has-not-found="{{ $newUsers->isNotEmpty() ? '1' : '0' }}">
-        @csrf
-        <input type="hidden" name="session_key" value="{{ $sessionKey }}">
-        <button class="btn btn-primary" {{ $errorsList->isNotEmpty() ? 'disabled' : '' }}>
-          Confirmar importação Moodle
-        </button>
-      </form>
-    </div>
-  </div>
-
   <div class="row g-3 mb-3">
     <div class="col-md-3">
       <div class="card border-0 shadow-sm">
@@ -258,7 +254,7 @@
           </tr>
           @empty
           <tr>
-            <td colspan="4" class="text-center text-muted">Nenhum momento identificado.</td>
+            <td colspan="4"><x-ui.empty-state compact muted icon="inbox" title="Nenhum momento identificado." /></td>
           </tr>
           @endforelse
         </tbody>
@@ -308,10 +304,7 @@
 <div class="modal fade" id="moodleNotFoundModal" tabindex="-1" aria-labelledby="moodleNotFoundModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable new-users-modal">
     <div class="modal-content">
-      <div class="modal-header bg-warning-subtle">
-        <h5 class="modal-title text-warning-emphasis" id="moodleNotFoundModalLabel">⚠️ Pessoas não encontradas no Engaja</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-      </div>
+      <x-ui.modal-header title-id="moodleNotFoundModalLabel" title="⚠️ Pessoas não encontradas no Engaja" />
       <div class="modal-body">
         <p class="mb-2">
           <strong>{{ $newUsers->count() }}</strong> pessoa(s) da planilha não possuem cadastro no Engaja e

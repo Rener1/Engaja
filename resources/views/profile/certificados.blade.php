@@ -1,17 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <p class="text-uppercase text-muted small mb-1">Meu perfil</p>
-      <h1 class="h4 fw-bold text-engaja mb-0">Meus certificados</h1>
-    </div>
-    <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary btn-sm">Voltar para o perfil</a>
-  </div>
+<x-ui.page-hero contained eyebrow="Meu perfil" eyebrow-icon="person-circle" title="Meus certificados">
+    <x-slot:actions>
+        <a href="{{ route('profile.edit') }}" class="eg-hero-btn">Voltar para o perfil</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
+<div class="container">
   @if ($certificados->isEmpty())
-    <div class="alert alert-info">Você ainda não possui certificados emitidos.</div>
+    <x-ui.empty-state icon="inbox" muted>Você ainda não possui certificados emitidos.</x-ui.empty-state>
   @else
     <div class="card shadow-sm">
       <div class="table-responsive">

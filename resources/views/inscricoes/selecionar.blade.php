@@ -114,7 +114,7 @@
                 </div>
               </div>
 
-              <div class="col-12 d-flex gap-2">
+              <div class="col-12 d-flex gap-2 eg-filter-actions">
                 <button class="btn btn-engaja">Filtrar</button>
                 <a href="{{ route('inscricoes.selecionar', $evento) }}" class="btn btn-outline-secondary">Limpar</a>
               </div>

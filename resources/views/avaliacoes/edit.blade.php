@@ -9,19 +9,15 @@
   $showUrl = $showUrl ?? route('avaliacoes.show', $avaliacao);
   $bloquearEstrutura = $bloquearEstrutura ?? false;
 @endphp
+<x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="clipboard2-check">
+    <x-slot:heading>@if($universal) Editar avaliação universal @else Editar avaliação @endif</x-slot:heading>
+    <x-slot:actions>
+        <a href="{{ $showUrl }}" class="eg-hero-btn">Ver detalhes</a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="row justify-content-center">
   <div class="col-xl-10">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="h3 fw-bold text-engaja mb-0">
-        @if($universal)
-          Editar avaliação universal
-        @else
-          Editar avaliação
-        @endif
-      </h1>
-      <a href="{{ $showUrl }}" class="btn btn-outline-secondary">Ver detalhes</a>
-    </div>
-
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <form method="POST" action="{{ $formAction }}">

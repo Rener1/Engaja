@@ -2,17 +2,15 @@
 
 @section('content')
 <div class="mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
-        <div>
-            <p class="text-uppercase text-muted small mb-1">Avaliações</p>
-            <h1 class="h4 fw-bold text-engaja mb-2">Transcrição de Avaliação</h1>
-            <p class="text-muted">
-                <strong>Momento:</strong> {{ $avaliacao->atividade->descricao ?? '—' }}<br>
-                <strong>Modelo:</strong> {{ $avaliacao->templateAvaliacao->nome ?? '—' }}
-            </p>
-        </div>
-        <a href="{{ route('avaliacoes.index') }}" class="btn btn-outline-secondary">Voltar para listagem</a>
-    </div>
+    <x-ui.page-hero eyebrow="Avaliações" eyebrow-icon="mic" title="Transcrição de Avaliação">
+        <p class="text-muted">
+            <strong>Momento:</strong> {{ $avaliacao->atividade->descricao ?? '—' }}<br>
+            <strong>Modelo:</strong> {{ $avaliacao->templateAvaliacao->nome ?? '—' }}
+        </p>
+        <x-slot:actions>
+            <a href="{{ route('avaliacoes.index') }}" class="eg-hero-btn">Voltar para listagem</a>
+        </x-slot:actions>
+    </x-ui.page-hero>
 
     @if(session('error') === 'Usuário não encontrado.' || ($errors->any() && (old('name') || old('email') || old('cpf'))))
     <div class="alert alert-info shadow-sm">

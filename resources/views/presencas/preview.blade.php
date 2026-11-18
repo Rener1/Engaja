@@ -1,16 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-  <h1 class="h5 mb-3">
-    Pré-visualização de presenças — {{ $evento->nome }}<br>
-    <small class="text-muted">
-      Momento: {{ \Carbon\Carbon::parse($atividade->dia)->format('d/m/Y') }}
-      • {{ \Illuminate\Support\Str::of($atividade->hora_inicio)->substr(0,5) }}
-      • {{ $atividade->descricao ?? 'Momento' }}
-    </small>
-  </h1>
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="calendar2-check" class="mb-0">
+    <x-slot:heading>Pré-visualização de presenças — {{ $evento->nome }}<br> <small class="text-muted"> Momento: {{ \Carbon\Carbon::parse($atividade->dia)->format('d/m/Y') }} • {{ \Illuminate\Support\Str::of($atividade->hora_inicio)->substr(0,5) }} • {{ $atividade->descricao ?? 'Momento' }} </small></x-slot:heading>
+</x-ui.page-hero>
 
+<div class="container py-4">
   @if($errors->any())
   <div class="alert alert-danger" role="alert">
     <strong>Importação bloqueada. Corrija os problemas abaixo e salve cada página antes de continuar.</strong>

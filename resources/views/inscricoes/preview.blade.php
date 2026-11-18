@@ -7,8 +7,9 @@
   $atividadesEscopo = $atividadesEscopo ?? collect();
   $identityErrors = $identityErrors ?? [];
 @endphp
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" :title="'Pré-visualização da Importação - '.$evento->nome" class="mb-0" />
+
 <div class="container py-4">
-  <h1 class="h4 mb-3">Pré-visualização da Importação - {{ $evento->nome }}</h1>
   @if($modoTodosMomentos)
     <div class="text-muted mb-3">
       Escopo: <strong>todos os {{ $atividadesEscopo->count() }} momento(s)</strong> desta ação.

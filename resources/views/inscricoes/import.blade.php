@@ -1,30 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
+<x-ui.page-hero contained eyebrow="Operações" eyebrow-icon="person-lines-fill" title="Importar inscrições">
+    <div class="text-muted small">
+      Ação pedagógica: <strong>{{ $evento->nome }}</strong>
+      @php
+        $periodoInicio = $evento->data_inicio ? \Carbon\Carbon::parse($evento->data_inicio)->format('d/m/Y') : null;
+        $periodoFim = $evento->data_fim ? \Carbon\Carbon::parse($evento->data_fim)->format('d/m/Y') : null;
+      @endphp
+      @php $mostrarPeriodoFim = $periodoFim && (!$periodoInicio || $periodoFim !== $periodoInicio); @endphp
+      @if($periodoInicio || $periodoFim)
+      • {{ $periodoInicio ?? '—' }} @if($mostrarPeriodoFim)<span class="text-muted">até {{ $periodoFim }}</span>@endif
+      @endif
+    </div>
+    <x-slot:actions>
+        <a href="{{ route('eventos.show', $evento) }}" class="eg-hero-btn">
+          Voltar à ação pedagógica
+        </a>
+    </x-slot:actions>
+</x-ui.page-hero>
+
 <div class="container">
   @php $disableImport = $atividades->isEmpty(); @endphp
   {{-- Cabeçalho --}}
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h1 class="h4 fw-bold text-engaja mb-1">Importar inscrições</h1>
-      <div class="text-muted small">
-        Ação pedagógica: <strong>{{ $evento->nome }}</strong>
-        @php
-          $periodoInicio = $evento->data_inicio ? \Carbon\Carbon::parse($evento->data_inicio)->format('d/m/Y') : null;
-          $periodoFim = $evento->data_fim ? \Carbon\Carbon::parse($evento->data_fim)->format('d/m/Y') : null;
-        @endphp
-        @php $mostrarPeriodoFim = $periodoFim && (!$periodoInicio || $periodoFim !== $periodoInicio); @endphp
-        @if($periodoInicio || $periodoFim)
-        • {{ $periodoInicio ?? '—' }} @if($mostrarPeriodoFim)<span class="text-muted">até {{ $periodoFim }}</span>@endif
-        @endif
-      </div>
-    </div>
-
-    <a href="{{ route('eventos.show', $evento) }}" class="btn btn-outline-secondary">
-      Voltar à ação pedagógica
-    </a>
-  </div>
-
   {{-- Aviso: campos obrigatórios --}}
   <div class="alert alert-info d-flex align-items-center gap-2 mb-4" role="alert">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-info-circle-fill flex-shrink-0" viewBox="0 0 16 16">
@@ -59,9 +57,9 @@
         <div class="col-12">
           <label class="form-label">Momento <span class="text-danger">*</span></label>
           @if($disableImport)
-          <div class="alert alert-warning mb-2">
+          <x-ui.empty-state icon="inbox" muted>
             Nenhum momento cadastrado para este evento. Cadastre um momento antes de importar as inscrições.
-          </div>
+          </x-ui.empty-state>
           <select class="form-select" disabled>
             <option>Cadastre um momento antes de prosseguir</option>
           </select>
@@ -160,11 +158,7 @@
 <div class="modal fade" id="modalTutorialPlanilha" tabindex="-1" aria-labelledby="modalTutorialLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title fw-bold" id="modalTutorialLabel">
-           Como preencher a planilha de importação
-        </h5>
-      </div>
+      <x-ui.modal-header icon="question-circle" title="Como preencher a planilha de importação" title-id="modalTutorialLabel" :dismissible="false" />
       <div class="modal-body">
 
         {{-- Aviso obrigatórios --}}

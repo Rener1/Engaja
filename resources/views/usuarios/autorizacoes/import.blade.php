@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+    <x-ui.page-hero contained eyebrow="Pessoas" eyebrow-icon="people" title="Importar Autorizações de Imagem">
+        <p class="text-muted">Faça o upload de uma planilha para atualizar em lote os usuários que permitiram o uso de imagem.</p>
+    </x-ui.page-hero>
+
     <div class="container max-w-4xl mx-auto">
         <div class="mb-4">
-            <h1 class="h4 fw-bold text-engaja mb-1">Importar Autorizações de Imagem</h1>
-            <p class="text-muted">Faça o upload de uma planilha para atualizar em lote os usuários que permitiram o uso de imagem.</p>
         </div>
 
         <div class="card shadow-sm mb-4">
