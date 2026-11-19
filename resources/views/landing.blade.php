@@ -17,7 +17,7 @@
   <style>
     /* Landing page (Figma "Engaja — Landing Page", frame 1600×900). */
     .landing {
-      --landing-container: 1064px;
+      --landing-container: 1200px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -186,38 +186,59 @@
     .landing-hero {
       position: relative;
       flex-shrink: 0;
-      min-height: 525px;
       overflow: hidden;
       background: linear-gradient(180deg, #fcfcfd 0%, #f5f4fb 100%);
     }
 
-    .landing-hero-shapes-left {
+    .landing-hero-shapes-left,
+    .landing-hero-shapes-right {
       position: absolute;
-      left: 0;
       bottom: 0;
-      width: 560px;
-      height: 525px;
       pointer-events: none;
     }
 
-    .landing-hero-media {
-      position: absolute;
+    .landing-hero-shapes-left {
+      left: 0;
+      width: min(560px, 45%);
+      height: auto;
+      max-height: 100%;
+    }
+
+    /* Mantém a proporção do desenho: a curva da esquerda nunca é cortada */
+    .landing-hero-shapes-right {
       top: 0;
-      /* Abaixo de 1280px desliza para a direita (o design já corta a foto na borda). */
-      right: min(0px, calc((100vw - 1280px) / 2));
-      width: 731px;
-      height: 525px;
+      right: 0;
+      height: 100%;
+      width: auto;
+      aspect-ratio: 731 / 525;
+    }
+
+    /* Transição suave do hero para a seção de cards */
+    .landing-hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 72px;
+      background: linear-gradient(180deg, rgba(245, 244, 251, 0) 0%, #f5f4fb 100%);
+      pointer-events: none;
+    }
+
+    /* Texto à esquerda e foto no centro-direita, no mesmo container */
+    .landing-hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      align-items: center;
+      gap: clamp(24px, 4vw, 64px);
+      padding-block: 64px 32px;
     }
 
     .landing-hero-media svg {
       display: block;
       width: 100%;
-      height: 100%;
-    }
-
-    .landing-hero-content {
-      padding-top: 118px;
-      padding-bottom: 87px;
+      max-width: 640px;
+      height: auto;
+      margin-left: auto;
+      overflow: visible;
     }
 
     .landing-hero-detail {
@@ -232,7 +253,7 @@
       font-weight: 800;
       font-size: 68.23px;
       line-height: 78.879px;
-      letter-spacing: -.6823px;
+      letter-spacing: -.01em;
       color: #0c0d21;
     }
 
@@ -263,38 +284,109 @@
       margin: 27.7px 0 0 5px;
     }
 
-    /* ===== Footer ===== */
-    /* Rodapé institucional: componente site-footer (estilos em sass/ui/_site-footer.scss);
-       aqui ele só ocupa o restante da altura da página. */
-    .landing > .site-footer {
-      flex-grow: 1;
+    /* ===== Recursos (cards) ===== */
+    /* Ocupa o espaço que sobra em telas altas — o rodapé mantém a altura do design. */
+    .landing-features {
+      flex: 1 0 auto;
+      display: flex;
+      align-items: center;
+      padding-block: 16px 56px;
+      background: #f5f4fb;
+    }
+
+    .landing-features .landing-container {
+      width: min(var(--landing-container), 100% - 32px);
+    }
+
+    .landing-features-title {
+      margin: 0 0 20px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #820878;
+    }
+
+    .landing-features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(16px, 2vw, 24px);
+    }
+
+    /* Mesmo vocabulário dos cards internos (cores --stat-accent/--stat-soft e
+       .eg-stat-icon vêm de sass/ui/_stat-card.scss) */
+    .landing-feature {
+      position: relative;
+      overflow: hidden;
+      padding: 24px 24px 26px;
+      background: #fff;
+      border: 1px solid #ece7ee;
+      border-radius: 1.1rem;
+      box-shadow: 0 4px 24px rgba(66, 25, 68, .08), 0 1px 4px rgba(0, 0, 0, .04);
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+
+    .landing-feature::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 3px;
+      background: var(--stat-accent, #421944);
+    }
+
+    .landing-feature:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(66, 25, 68, .13);
+    }
+
+    .landing-feature .eg-stat-icon {
+      margin-bottom: 14px;
+    }
+
+    .landing-feature-title {
+      margin: 0 0 6px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .landing-feature-text {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.55;
+      color: #6b7280;
     }
 
     /* ===== Responsivo ===== */
+    /* O título muda de tamanho em degraus (não de forma fluida). */
     @media (max-width: 1199.98px) {
-      .landing-hero-shapes-left {
-        width: 420px;
-        height: 394px;
+      .landing-hero-title {
+        font-size: 56px;
+        line-height: 64px;
+      }
+    }
+
+    /* Empilhado: só o texto — a foto e as formas que a acompanham saem de cena. */
+    @media (max-width: 991.98px) {
+      .landing-hero-grid {
+        grid-template-columns: minmax(0, 1fr);
+        padding-block: 56px 32px;
       }
 
-      .landing-hero-content {
-        padding-top: 64px;
-        padding-bottom: 0;
+      .landing-hero-media,
+      .landing-hero-shapes-right {
+        display: none;
       }
 
-      .landing-hero-media {
-        position: relative;
-        right: auto;
-        width: min(731px, 100%);
-        height: auto;
-        margin: 8px 0 0 auto;
-        /* Empilhado, o topo do recorte deixa de encostar na navbar: esmaece a borda reta. */
-        -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%);
-        mask-image: linear-gradient(180deg, transparent 0, #000 12%);
+      .landing-hero-title {
+        font-size: 52px;
+        line-height: 60px;
       }
+    }
 
-      .landing-hero-media svg {
-        height: auto;
+    @media (max-width: 767.98px) {
+      .landing-features-grid {
+        grid-template-columns: minmax(0, 1fr);
       }
     }
 
@@ -303,8 +395,8 @@
         display: none;
       }
 
-      .landing-hero-content {
-        padding-top: 48px;
+      .landing-hero-grid {
+        padding-block: 48px 24px;
       }
 
       .landing-hero-title {
@@ -388,7 +480,25 @@
         <path d="M0 213C9.7 220.2 23.4 221.2 34 227.8C39.2 231.1 44.9 233.2 51 234C59.6 239.5 65.9 248.2 74.9 254C99.1 272.9 119.9 295.7 138.5 320C174.8 365 204.1 416.6 250 453C275 485 320 515 370 525H0V213Z" fill="url(#landing-hero-forma-esquerda)" />
       </svg>
 
-      <div class="landing-container landing-hero-content">
+      <svg class="landing-hero-shapes-right" viewBox="869 0 731 525" preserveAspectRatio="xMaxYMid meet" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="landing-hero-forma-foto" x1="1000" y1="300" x2="1560" y2="525" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#F1F0FC" />
+            <stop offset="0.55" stop-color="#F2F1FC" />
+            <stop offset="1" stop-color="#F2F1FC" stop-opacity="0" />
+          </linearGradient>
+          <linearGradient id="landing-hero-forma-inferior" x1="900" y1="0" x2="1560" y2="0" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#F0EFFC" />
+            <stop offset="0.5" stop-color="#F1F0FC" />
+            <stop offset="1" stop-color="#F1F0FC" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path d="M1097 0C1045 38 955 125 913.8 202C881.8 262 861.1 330.7 873 399C871 450 872 500 873 525H1600V0H1097Z" fill="url(#landing-hero-forma-foto)" />
+        <path d="M941 381C904.1 410.5 866 452.4 876 504C874 512 873 520 873 525H1600V381H941Z" fill="url(#landing-hero-forma-inferior)" />
+      </svg>
+
+      <div class="landing-container landing-hero-grid">
+        <div class="landing-hero-content">
         <div class="landing-hero-detail" aria-hidden="true"></div>
         <h1 class="landing-hero-title">Bem-vindo ao <span>Engaja</span></h1>
         <p class="landing-hero-description">
@@ -403,34 +513,46 @@
           </a>
           <a href="{{ route('register') }}" class="landing-btn landing-btn--contorno">Cadastrar</a>
         </div>
-      </div>
+        </div>
 
-      {{-- Recorte direito do design (x 869–1600): formas, foto com máscara orgânica e bolinha. --}}
-      <div class="landing-hero-media">
-        <svg width="731" height="525" viewBox="869 0 731 525" role="img" aria-label="Pessoas participando de uma formação" focusable="false">
-          <defs>
-            <linearGradient id="landing-hero-forma-foto" x1="1000" y1="300" x2="1560" y2="525" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#F1F0FC" />
-              <stop offset="0.55" stop-color="#F2F1FC" />
-              <stop offset="1" stop-color="#F2F1FC" stop-opacity="0" />
-            </linearGradient>
-            <linearGradient id="landing-hero-forma-inferior" x1="900" y1="0" x2="1560" y2="0" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#F0EFFC" />
-              <stop offset="0.5" stop-color="#F1F0FC" />
-              <stop offset="1" stop-color="#F1F0FC" stop-opacity="0" />
-            </linearGradient>
-            <clipPath id="landing-hero-mascara-foto">
-              <path transform="translate(951.2147 60.7437)" d="M387.785 0.756328C347.485 5.05633 312.385 28.5563 284.885 57.2563C253.585 88.8563 231.185 128.956 194.785 155.456C164.485 177.856 125.485 180.756 91.7853 195.756C54.0853 211.056 21.4853 240.656 7.18535 279.256C-6.41465 313.456 -0.614653 354.356 23.7853 382.256C47.7853 411.856 86.5853 429.756 124.785 426.056C194.585 416.656 256.885 368.856 329.785 377.956C399.085 386.356 463.185 427.356 534.785 417.456C570.885 413.756 605.285 401.156 637.785 385.656C647.385 382.256 659.785 370.956 659.785 363.256V134.356C625.685 123.356 607.885 114.456 591.785 102.956C527.585 63.6563 470.685 -8.14367 387.785 0.756328Z" />
-            </clipPath>
-          </defs>
-          <path d="M1097 0C1045 38 955 125 913.8 202C881.8 262 861.1 330.7 873 399C871 450 872 500 873 525H1600V0H1097Z" fill="url(#landing-hero-forma-foto)" />
-          <path d="M941 381C904.1 410.5 866 452.4 876 504C874 512 873 520 873 525H1600V381H941Z" fill="url(#landing-hero-forma-inferior)" />
-          <path d="M1178.5 0C1136.3 55.1 1121.1 124.5 1113 192C1108.9 225.4 1102.5 259.8 1083 288C1050.8 335.3 996.7 361.1 945.3 382H1200L1600 331V0H1178.5Z" fill="#E7E4F8" />
-          <image href="{{ asset('images/landing/hero-foto.jpg') }}" x="951" y="61" width="649" height="427" preserveAspectRatio="xMidYMid slice" clip-path="url(#landing-hero-mascara-foto)" />
-          <circle cx="1526" cy="81" r="12" fill="#B9A1EF" />
-        </svg>
+        {{-- Foto: SVG próprio com a forma orgânica completa (máscara) e a imagem dentro dela. --}}
+        <div class="landing-hero-media">
+          <svg viewBox="-10 -24 744 460" role="img" aria-label="Pessoas participando de uma formação" focusable="false">
+            <defs>
+              <mask id="landing-foto-mascara" maskUnits="userSpaceOnUse" x="-10" y="-24" width="744" height="460">
+                <path d="M387.785 0.756C347.485 5.056 312.385 28.556 284.885 57.256C253.585 88.856 231.185 128.956 194.785 155.456C164.485 177.856 125.485 180.756 91.785 195.756C54.085 211.056 21.485 240.656 7.185 279.256C-6.415 313.456 -0.615 354.356 23.785 382.256C47.785 411.856 86.585 429.756 124.785 426.056C194.585 416.656 256.885 368.856 329.785 377.956C399.085 386.356 463.185 427.356 534.785 417.456C570.885 413.756 605.285 401.156 637.785 385.656C663.8 373.3 698 335 700 270C702 205 678 158 645 133C625 118 607 112 591.785 102.956C527.585 63.656 470.685 -8.144 387.785 0.756Z" fill="#fff" />
+              </mask>
+            </defs>
+            <path d="M387.785 0.756C347.485 5.056 312.385 28.556 284.885 57.256C253.585 88.856 231.185 128.956 194.785 155.456C164.485 177.856 125.485 180.756 91.785 195.756C54.085 211.056 21.485 240.656 7.185 279.256C-6.415 313.456 -0.615 354.356 23.785 382.256C47.785 411.856 86.585 429.756 124.785 426.056C194.585 416.656 256.885 368.856 329.785 377.956C399.085 386.356 463.185 427.356 534.785 417.456C570.885 413.756 605.285 401.156 637.785 385.656C663.8 373.3 698 335 700 270C702 205 678 158 645 133C625 118 607 112 591.785 102.956C527.585 63.656 470.685 -8.144 387.785 0.756Z" transform="translate(22 -18)" fill="#E7E4F8" />
+            <image href="{{ asset('images/landing/hero-foto.jpg') }}" x="-8" y="-2" width="716" height="434" preserveAspectRatio="xMidYMid slice" mask="url(#landing-foto-mascara)" />
+            <circle cx="702" cy="-6" r="11" fill="#B9A1EF" />
+          </svg>
+        </div>
       </div>
     </main>
+
+    <section class="landing-features" aria-labelledby="landing-features-title">
+      <div class="landing-container">
+        <h2 id="landing-features-title" class="landing-features-title">O que você encontra no Engaja</h2>
+        <div class="landing-features-grid">
+          <article class="landing-feature eg-stat-card--purple">
+            <span class="eg-stat-icon"><i class="bi bi-calendar-event" aria-hidden="true"></i></span>
+            <h3 class="landing-feature-title">Ações pedagógicas</h3>
+            <p class="landing-feature-text">Organize e acompanhe inscrições para formações, encontros e reuniões.</p>
+          </article>
+          <article class="landing-feature eg-stat-card--green">
+            <span class="eg-stat-icon"><i class="bi bi-qr-code-scan" aria-hidden="true"></i></span>
+            <h3 class="landing-feature-title">Presença</h3>
+            <p class="landing-feature-text">Controle a participação com check-in via QR Code ou registro manual.</p>
+          </article>
+          <article class="landing-feature eg-stat-card--orange">
+            <span class="eg-stat-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
+            <h3 class="landing-feature-title">Relatórios</h3>
+            <p class="landing-feature-text">Visualize indicadores de engajamento por ação pedagógica, município ou região.</p>
+          </article>
+        </div>
+      </div>
+    </section>
 
     <x-site-footer />
   </div>

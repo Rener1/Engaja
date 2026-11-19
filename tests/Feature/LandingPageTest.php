@@ -41,6 +41,26 @@ class LandingPageTest extends TestCase
         $response->assertDontSee('figma.com/api/mcp/asset', false);
     }
 
+    public function test_landing_page_apresenta_os_recursos_em_cards(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('O que você encontra no Engaja')
+            ->assertSeeInOrder(['Ações pedagógicas', 'Presença', 'Relatórios'])
+            ->assertSee('Organize e acompanhe inscrições para formações, encontros e reuniões.')
+            ->assertSee('Controle a participação com check-in via QR Code ou registro manual.')
+            ->assertSee('Visualize indicadores de engajamento por ação pedagógica, município ou região.');
+    }
+
+    public function test_foto_do_hero_usa_svg_com_mascara_da_forma(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('<mask id="landing-foto-mascara"', false)
+            ->assertSee('mask="url(#landing-foto-mascara)"', false)
+            ->assertDontSee('clip-path="url(#landing-hero-mascara-foto)"', false);
+    }
+
     public function test_usuario_autenticado_continua_na_pagina_inicial_da_aplicacao(): void
     {
         $this->actingAs(User::factory()->create())
