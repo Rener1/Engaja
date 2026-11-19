@@ -333,6 +333,40 @@
       overflow-x: hidden;
     }
 
+    /* Páginas públicas (login, cadastro…): mesmo fundo lilás claro da landing */
+    .guest-shell {
+      background: #f5f4fb;
+    }
+
+    /* Conteúdo alinhado ao header institucional (1200px úteis, 16px de respiro) */
+    .guest-shell main > .container {
+      max-width: 1232px;
+      padding-inline: 16px;
+    }
+
+    /* Páginas com .auth-center (ex.: login): conteúdo centralizado na vertical
+       no espaço entre o header e o rodapé */
+    .guest-shell main:has(.auth-center) {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .guest-shell main:has(.auth-center) > .container {
+      display: flex;
+      flex: 1 0 auto;
+      flex-direction: column;
+    }
+
+    .auth-center {
+      flex: 1 0 auto;
+      align-content: center;
+    }
+
+    /* sem a margem do rodapé, o respiro fica igual acima e abaixo do card */
+    .guest-shell main:has(.auth-center) + .site-footer {
+      margin-top: 0 !important;
+    }
+
     .admin-page-header {
       background: #fff;
       border: 1px solid #e7e8ed;
@@ -470,7 +504,7 @@
 </head>
 
 @php($useSidebar = auth()->check())
-<body class="{{ $useSidebar ? 'min-vh-100 bg-light' : 'd-flex flex-column min-vh-100' }}">
+<body class="{{ $useSidebar ? 'min-vh-100 bg-light' : 'd-flex flex-column min-vh-100 guest-shell' }}">
   @if($useSidebar)
     <div class="admin-shell d-flex">
       @include('layouts.partials.admin-sidebar')
@@ -567,7 +601,7 @@
     </div>
   @else
     <div class="d-flex flex-column min-vh-100">
-      @includeWhen(View::exists('layouts.navigation'), 'layouts.navigation')
+      <x-site-header />
 
       @isset($header)
         <header class="bg-white border-bottom py-3">
@@ -647,11 +681,8 @@
 
   <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content shadow-lg border-0">
-        <div class="modal-header bg-engaja text-white">
-          <h5 class="modal-title" id="confirmModalLabel">Confirmar acao</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
+      <div class="modal-content">
+        <x-ui.modal-header icon="question-circle" title="Confirmar ação" title-id="confirmModalLabel" />
         <div class="modal-body">
           <p class="mb-0 js-confirm-message"></p>
         </div>
@@ -666,18 +697,15 @@
   <div class="modal fade" id="blockedDeleteModal" tabindex="-1" aria-labelledby="blockedDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content shadow-lg border-0">
-        <div class="modal-header bg-warning text-dark">
-          <h5 class="modal-title" id="blockedDeleteModalLabel">⚠️ Exclusão bloqueada</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
+        <x-ui.modal-header warning icon="exclamation-triangle" title="Exclusão bloqueada" title-id="blockedDeleteModalLabel" />
         <div class="modal-body">
           <p class="fw-semibold text-dark mb-2 js-blocked-delete-title">Não é possível excluir este momento.</p>
-          <p class="mb-0 text-secondary js-blocked-delete-message">
+          <p class="mb-0 text-muted js-blocked-delete-message">
             Este momento possui presenças associadas e não pode ser excluído. Para excluí-lo, é necessário remover as presenças antes.
           </p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendi</button>
+          <button type="button" class="btn btn-engaja" data-bs-dismiss="modal">Entendi</button>
         </div>
       </div>
     </div>
@@ -702,12 +730,8 @@
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
           <div class="modal-content">
 
-              <div class="modal-header bg-engaja text-white">
-                  <h5 class="modal-title" id="modalCompletarPerfilLabel">
-                      📋 Complete seu perfil demográfico
-                  </h5>
-                  {{-- SEM botão de fechar --}}
-              </div>
+              {{-- sem botão de fechar: o preenchimento é obrigatório --}}
+              <x-ui.modal-header icon="clipboard-data" title="Complete seu perfil demográfico" title-id="modalCompletarPerfilLabel" :dismissible="false" />
 
               <div class="modal-body">
                   <p class="text-muted mb-4">

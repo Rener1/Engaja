@@ -33,9 +33,9 @@ class LandingPageTest extends TestCase
     {
         $response = $this->get('/')->assertOk();
 
-        foreach (['engaja-icone.png', 'hero-foto.jpg', 'instituto-paulo-freire.png', 'petrobras.png'] as $asset) {
-            $response->assertSee(asset('images/landing/'.$asset), false);
-            $this->assertFileExists(public_path('images/landing/'.$asset));
+        foreach (['engaja-favicon.png', 'ipf-white.png', 'petrobras-white.png', 'landing/hero-foto.jpg'] as $asset) {
+            $response->assertSee(asset('images/'.$asset), false);
+            $this->assertFileExists(public_path('images/'.$asset));
         }
 
         $response->assertDontSee('figma.com/api/mcp/asset', false);

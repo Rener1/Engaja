@@ -34,8 +34,7 @@
 .site-footer__logo {
   display: inline-flex;
   align-items: center;
-  gap: 4.48px;
-  margin-left: 6.6px;
+  gap: 14px;
   color: #fff;
   text-decoration: none;
 
@@ -43,17 +42,18 @@
     color: #fff;
   }
 
+  /* Ícone original (images/engaja-favicon.png) + nome na fonte do logo */
   img {
     display: block;
-    width: 57.12px;
-    height: 52.64px;
-    object-fit: contain;
+    width: auto;
+    height: 56px;
   }
 
   span {
-    font-weight: 600;
-    font-size: 29.1px;
-    line-height: normal;
+    font-weight: 700;
+    font-size: 33px;
+    line-height: 1;
+    letter-spacing: -.01em;
   }
 }
 

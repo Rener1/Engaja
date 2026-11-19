@@ -30,7 +30,7 @@
 
     <div class="site-footer__container">
         <a href="{{ url('/') }}" class="site-footer__logo" aria-label="Engaja — página inicial">
-            <img src="{{ asset('images/landing/engaja-icone.png') }}" alt="">
+            <img src="{{ asset('images/engaja-favicon.png') }}" alt="" width="48" height="56">
             <span>Engaja</span>
         </a>
 
@@ -40,13 +40,13 @@
             <div class="site-footer__partner">
                 <span class="site-footer__partner-label">Realização</span>
                 <div class="site-footer__partner-logo">
-                    <img src="{{ asset('images/landing/instituto-paulo-freire.png') }}" alt="Instituto Paulo Freire" width="206" height="50">
+                    <img src="{{ asset('images/ipf-white.png') }}" alt="Instituto Paulo Freire" width="206" height="45">
                 </div>
             </div>
             <div class="site-footer__partner">
                 <span class="site-footer__partner-label">Parceria</span>
                 <div class="site-footer__partner-logo">
-                    <img src="{{ asset('images/landing/petrobras.png') }}" alt="Petrobras" width="211" height="58">
+                    <img src="{{ asset('images/petrobras-white.png') }}" alt="Petrobras" width="211" height="42">
                 </div>
             </div>
         </div>

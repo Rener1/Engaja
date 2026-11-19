@@ -70,37 +70,6 @@
       flex-shrink: 0;
     }
 
-    .landing-btn--claro {
-      gap: 8px;
-      width: 120px;
-      height: 44px;
-      border-radius: 22px;
-      background: #f6eef9;
-      color: #401648;
-      font-size: 15px;
-      filter: drop-shadow(0 3px 4px rgba(15, 3, 22, .24));
-    }
-
-    .landing-btn--claro:hover {
-      background: #fff;
-      color: #401648;
-    }
-
-    .landing-btn--contorno-claro {
-      width: 132px;
-      height: 44px;
-      border: 2px solid #e2c4e8;
-      border-radius: 22px;
-      color: #fff;
-      font-size: 15px;
-    }
-
-    .landing-btn--contorno-claro:hover {
-      background: rgba(226, 196, 232, .14);
-      border-color: #fff;
-      color: #fff;
-    }
-
     .landing-btn--escuro {
       gap: 10px;
       width: 164px;
@@ -128,58 +97,6 @@
     .landing-btn--contorno:hover {
       background: #f6eef9;
       color: #7a168c;
-    }
-
-    /* ===== Marca ===== */
-    .landing-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .landing-logo:hover {
-      color: #fff;
-    }
-
-    .landing-logo img {
-      display: block;
-      width: 51px;
-      height: 47px;
-      object-fit: contain;
-    }
-
-    .landing-logo span {
-      font-weight: 600;
-      font-size: 24.504px;
-      line-height: normal;
-    }
-
-    /* ===== Navbar ===== */
-    .landing-navbar {
-      position: relative;
-      height: 69px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .landing-navbar .landing-container {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      height: 100%;
-    }
-
-    .landing-navbar .landing-logo {
-      margin-top: 8px;
-    }
-
-    .landing-navbar-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 12px;
-      margin-right: 5px;
     }
 
     /* ===== Hero ===== */
@@ -229,7 +146,8 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
       align-items: center;
       gap: clamp(24px, 4vw, 64px);
-      padding-block: 64px 32px;
+      /* mais respiro em cima que embaixo: o conteúdo fica próximo dos cards */
+      padding-block: 104px 8px;
     }
 
     .landing-hero-media svg {
@@ -391,10 +309,6 @@
     }
 
     @media (max-width: 575.98px) {
-      .landing-navbar .landing-btn--contorno-claro {
-        display: none;
-      }
-
       .landing-hero-grid {
         padding-block: 48px 24px;
       }
@@ -431,42 +345,7 @@
 
 <body>
   <div class="landing">
-    <header class="landing-navbar">
-      <svg class="landing-bg" viewBox="0 0 1600 69" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id="landing-navbar-fundo" x1="0" y1="0" x2="1600" y2="0" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#5E2068" />
-            <stop offset="0.1" stop-color="#4E1A5B" />
-            <stop offset="0.25" stop-color="#3F1349" />
-            <stop offset="1" stop-color="#3E1448" />
-          </linearGradient>
-          <linearGradient id="landing-navbar-onda-direita" x1="1250" y1="0" x2="1500" y2="0" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#BE6ED2" stop-opacity="0" />
-            <stop offset="1" stop-color="#BE6ED2" stop-opacity="0.12" />
-          </linearGradient>
-        </defs>
-        <path d="M1600 0H0V69H1600V0Z" fill="url(#landing-navbar-fundo)" />
-        <path d="M0 0H60C80 25 100 50 128 69H0V0Z" fill="#BE6ED2" fill-opacity="0.13" />
-        <path d="M1250 0H1512C1470 25 1430 50 1388 69H1250V0Z" fill="url(#landing-navbar-onda-direita)" />
-      </svg>
-
-      <div class="landing-container">
-        <a href="{{ url('/') }}" class="landing-logo" aria-label="Engaja — página inicial">
-          <img src="{{ asset('images/landing/engaja-icone.png') }}" alt="">
-          <span>Engaja</span>
-        </a>
-
-        <nav class="landing-navbar-actions" aria-label="Acesso">
-          <a href="{{ route('login') }}" class="landing-btn landing-btn--claro">
-            Entrar
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" focusable="false">
-              <path d="M3.75 9H14.25M9.75 13.5L14.25 9L9.75 4.5" stroke="#401648" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </a>
-          <a href="{{ route('register') }}" class="landing-btn landing-btn--contorno-claro">Cadastrar</a>
-        </nav>
-      </div>
-    </header>
+    <x-site-header />
 
     <main class="landing-hero">
       <svg class="landing-hero-shapes-left" viewBox="0 0 560 525" preserveAspectRatio="xMinYMax meet" aria-hidden="true" focusable="false">
