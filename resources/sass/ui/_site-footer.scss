@@ -1,0 +1,137 @@
+/* ──────────────────────────────────────────────────────
+   RODAPÉ INSTITUCIONAL — <x-site-footer> (layout do Figma)
+   Usado na landing page e no layout da aplicação.
+────────────────────────────────────────────────────── */
+.site-footer {
+  position: relative;
+  min-height: 306px;
+  overflow: hidden;
+  background: #320f3c;
+  text-align: center;
+  font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.site-footer__bg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.site-footer__container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(1064px, 100% - 32px);
+  margin-inline: auto;
+  padding: 23px 0 41px;
+}
+
+.site-footer__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4.48px;
+  margin-left: 6.6px;
+  color: #fff;
+  text-decoration: none;
+
+  &:hover {
+    color: #fff;
+  }
+
+  img {
+    display: block;
+    width: 57.12px;
+    height: 52.64px;
+    object-fit: contain;
+  }
+
+  span {
+    font-weight: 600;
+    font-size: 29.1px;
+    line-height: normal;
+  }
+}
+
+.site-footer__slogan {
+  margin: 10.57px 0 0;
+  font-weight: 400;
+  font-size: 16.452px;
+  line-height: normal;
+  color: #e8d6ec;
+}
+
+.site-footer__partners {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 173px;
+  row-gap: 24px;
+  margin: 28.3px 0 0 -4px;
+}
+
+.site-footer__partner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 211px;
+
+  &:first-child {
+    width: 206px;
+
+    .site-footer__partner-label {
+      margin-left: 15px;
+    }
+  }
+
+  &:last-child .site-footer__partner-label {
+    margin-right: 22px;
+  }
+}
+
+.site-footer__partner-label {
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 13.225px;
+  line-height: 20px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #f0e2f8;
+}
+
+.site-footer__partner-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 58px;
+  margin-top: 6px;
+
+  img {
+    display: block;
+    object-fit: contain;
+  }
+}
+
+.site-footer__legal {
+  margin: 33.2px 0 0;
+  font-weight: 500;
+  font-size: 10.317px;
+  line-height: normal;
+  letter-spacing: 1.1px;
+  white-space: pre;
+  color: #d9c8e0;
+}
+
+@media (max-width: 767.98px) {
+  .site-footer__partners {
+    column-gap: 48px;
+  }
+
+  .site-footer__legal {
+    white-space: normal;
+  }
+}

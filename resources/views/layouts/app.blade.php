@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="{{ asset('images/engaja-favicon.png') }}">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@500&display=swap" rel="stylesheet">
 
   @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 

@@ -4,7 +4,7 @@
 @use "sass:map";
 
 /* Fonte Montserrat */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@500&display=swap');
 
 /* Paleta Engaja */
 $engaja-purple: #421944; // primária
@@ -75,6 +75,7 @@ $theme-colors: map.merge(
 @import "ui/modal";
 @import "ui/pagination";
 @import "ui/table";
+@import "ui/site-footer";
 
 /* Custom utilities */
 .text-engaja     { color: $engaja-purple !important; }

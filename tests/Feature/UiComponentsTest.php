@@ -255,6 +255,25 @@ class UiComponentsTest extends TestCase
             ->assertDontSee('dt-footer', false);
     }
 
+    public function test_site_footer_renderiza_marca_parceiros_e_aceita_classes(): void
+    {
+        $view = $this->blade('<x-site-footer class="mt-5" />');
+
+        $view->assertSee('<footer class="site-footer mt-5">', false)
+            ->assertSee('Sistema de Gestão de Participação e Engajamento.')
+            ->assertSeeInOrder(['Realização', 'Parceria'])
+            ->assertSee(asset('images/landing/instituto-paulo-freire.png'), false)
+            ->assertSee(asset('images/landing/petrobras.png'), false)
+            ->assertSee('CNPJ 04.950.603/0001-05');
+    }
+
+    public function test_layout_da_aplicacao_usa_o_rodape_institucional(): void
+    {
+        $view = $this->view('layouts.footer');
+
+        $view->assertSee('class="site-footer mt-5"', false);
+    }
+
     public function test_empty_state_renderiza_icone_titulo_e_texto(): void
     {
         $view = $this->blade('<x-ui.empty-state icon="search" muted compact title="Nada encontrado">Ajuste os filtros.</x-ui.empty-state>');

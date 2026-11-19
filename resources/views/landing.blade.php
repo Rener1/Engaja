@@ -264,103 +264,10 @@
     }
 
     /* ===== Footer ===== */
-    .landing-footer {
-      position: relative;
+    /* Rodapé institucional: componente site-footer (estilos em sass/ui/_site-footer.scss);
+       aqui ele só ocupa o restante da altura da página. */
+    .landing > .site-footer {
       flex-grow: 1;
-      min-height: 306px;
-      overflow: hidden;
-      background: #320f3c;
-      text-align: center;
-    }
-
-    .landing-footer .landing-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 23px 0 41px;
-    }
-
-    .landing-footer .landing-logo {
-      gap: 4.48px;
-      margin-left: 6.6px;
-    }
-
-    .landing-footer .landing-logo img {
-      width: 57.12px;
-      height: 52.64px;
-    }
-
-    .landing-footer .landing-logo span {
-      font-size: 29.1px;
-    }
-
-    .landing-footer-slogan {
-      margin: 10.57px 0 0;
-      font-weight: 400;
-      font-size: 16.452px;
-      line-height: normal;
-      color: #e8d6ec;
-    }
-
-    .landing-footer-partners {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      column-gap: 173px;
-      row-gap: 24px;
-      margin: 28.3px 0 0 -4px;
-    }
-
-    .landing-footer-partner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 211px;
-    }
-
-    .landing-footer-partner:first-child {
-      width: 206px;
-    }
-
-    .landing-footer-partner:first-child .landing-footer-partner-label {
-      margin-left: 15px;
-    }
-
-    .landing-footer-partner:last-child .landing-footer-partner-label {
-      margin-right: 22px;
-    }
-
-    .landing-footer-partner-label {
-      font-family: 'Poppins', system-ui, sans-serif;
-      font-weight: 500;
-      font-size: 13.225px;
-      line-height: 20px;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-      color: #f0e2f8;
-    }
-
-    .landing-footer-partner-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 58px;
-      margin-top: 6px;
-    }
-
-    .landing-footer-partner-logo img {
-      display: block;
-      object-fit: contain;
-    }
-
-    .landing-footer-legal {
-      margin: 33.2px 0 0;
-      font-weight: 500;
-      font-size: 10.317px;
-      line-height: normal;
-      letter-spacing: 1.1px;
-      white-space: pre;
-      color: #d9c8e0;
     }
 
     /* ===== Responsivo ===== */
@@ -388,16 +295,6 @@
 
       .landing-hero-media svg {
         height: auto;
-      }
-    }
-
-    @media (max-width: 767.98px) {
-      .landing-footer-partners {
-        column-gap: 48px;
-      }
-
-      .landing-footer-legal {
-        white-space: normal;
       }
     }
 
@@ -535,57 +432,7 @@
       </div>
     </main>
 
-    <footer class="landing-footer">
-      <svg class="landing-bg" viewBox="0 0 1600 306" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id="landing-footer-fundo" x1="800" y1="0" x2="800" y2="306" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#621F6E" />
-            <stop offset="1" stop-color="#320F3C" />
-          </linearGradient>
-          <linearGradient id="landing-footer-clareamento" x1="0" y1="153" x2="1600" y2="153" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#BE6ED2" stop-opacity="0.087" />
-            <stop offset="0.15" stop-color="#BE6ED2" stop-opacity="0.044" />
-            <stop offset="0.3" stop-color="#BE6ED2" stop-opacity="0.016" />
-            <stop offset="0.5" stop-color="#BE6ED2" stop-opacity="0" />
-            <stop offset="0.7" stop-color="#BE6ED2" stop-opacity="0.016" />
-            <stop offset="0.85" stop-color="#BE6ED2" stop-opacity="0.044" />
-            <stop offset="1" stop-color="#BE6ED2" stop-opacity="0.087" />
-          </linearGradient>
-        </defs>
-        <rect width="1600" height="306" fill="url(#landing-footer-fundo)" />
-        <rect width="1600" height="306" fill="url(#landing-footer-clareamento)" />
-        <path d="M0 40C41.2987 45.3868 79.3735 54.9644 116.019 67.4951C78.3347 69.9686 39.715 74.0427 0 80V40Z" fill="#BE6ED2" fill-opacity="0.117647" />
-        <path d="M1180 0C1351.28 38.0618 1441.07 103.285 1578.6 126.748C1502.13 150.278 1429.81 166.191 1360.72 176.135C1209.18 119.76 1092.34 48.0842 900 0H1180Z" fill="#BE6ED2" fill-opacity="0.117647" />
-        <path d="M1600 120C1592.83 122.316 1585.7 124.564 1578.6 126.748C1441.07 103.285 1351.28 38.0618 1180 0H1600V120Z" fill="#BE6ED2" fill-opacity="0.109804" />
-        <path d="M0 80C600 -9.99997 950 330 1600 120V306H0V80Z" fill="#180622" fill-opacity="0.235294" />
-      </svg>
-
-      <div class="landing-container">
-        <a href="{{ url('/') }}" class="landing-logo" aria-label="Engaja — página inicial">
-          <img src="{{ asset('images/landing/engaja-icone.png') }}" alt="">
-          <span>Engaja</span>
-        </a>
-
-        <p class="landing-footer-slogan">Sistema de Gestão de Participação e Engajamento.</p>
-
-        <div class="landing-footer-partners">
-          <div class="landing-footer-partner">
-            <span class="landing-footer-partner-label">Realização</span>
-            <div class="landing-footer-partner-logo">
-              <img src="{{ asset('images/landing/instituto-paulo-freire.png') }}" alt="Instituto Paulo Freire" width="206" height="50">
-            </div>
-          </div>
-          <div class="landing-footer-partner">
-            <span class="landing-footer-partner-label">Parceria</span>
-            <div class="landing-footer-partner-logo">
-              <img src="{{ asset('images/landing/petrobras.png') }}" alt="Petrobras" width="211" height="58">
-            </div>
-          </div>
-        </div>
-
-        <p class="landing-footer-legal">INSTITUTO DE EDUCAÇÃO E DIREITOS HUMANOS PAULO FREIRE   |   CNPJ 04.950.603/0001-05</p>
-      </div>
-    </footer>
+    <x-site-footer />
   </div>
 </body>
 
