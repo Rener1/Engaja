@@ -48,7 +48,10 @@ $eg-table-shadow: 0 4px 24px rgba(66, 25, 68, .08), 0 1px 4px rgba(0, 0, 0, .04)
   @include eg-table-surface;
   box-shadow: $eg-table-shadow !important;   // .shadow-sm usa !important
 
-  > .card-body:only-child {
+  /* Sem padding só quando a tabela é o único conteúdo; cards com título,
+     texto ou formulário junto da tabela mantêm o padding do card-body. */
+  > .card-body:only-child:has(> [data-ag-grid]:only-child),
+  > .card-body:only-child:has(> .dt-frame:only-child) {
     padding: 0;
   }
 
