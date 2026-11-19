@@ -349,10 +349,7 @@
 <div class="modal fade" id="modalTermosImagem" tabindex="-1" aria-labelledby="modalTermosImagemLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title text-engaja fw-bold" id="modalTermosImagemLabel">Autorização de Imagem, Voz e Nome</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
+            <x-ui.modal-header icon="camera" title="Autorização de Imagem, Voz e Nome" title-id="modalTermosImagemLabel" />
             <div class="modal-body text-muted" style="font-size: 0.95rem;">
                 <p>Ao marcar este campo você confirma e possui a ciência da destinação do uso do conteúdo descrito abaixo:</p>
                 <ol type="a" class="ps-3 mb-3" style="line-height: 1.2;">

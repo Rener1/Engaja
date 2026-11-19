@@ -1,11 +1,40 @@
 /* ──────────────────────────────────────────────────────
-   MODAL — cabeçalho roxo com botão fechar branco
-   Uso: <x-ui.modal-header title="..." icon="..." /> dentro de .modal-content
+   MODAIS — mesmo acabamento dos cards (cantos, sombra, rodapé suave)
+   Cabeçalho: <x-ui.modal-header title="..." icon="..." /> dentro de .modal-content
+   Campos e botões dentro de .modal usam o estilo de .eg-form (ver _form.scss).
 ────────────────────────────────────────────────────── */
-.modal-content:has(> .eg-modal-header) {
-  border: 0;
-  border-radius: 1rem;
-  overflow: hidden;
+.modal {
+  --bs-modal-border-width: 0;
+  --bs-modal-border-radius: 1.1rem;
+  --bs-modal-inner-border-radius: 1.1rem;
+  --bs-modal-padding: 1.5rem;
+  --bs-modal-header-padding: 1.1rem 1.5rem;
+  --bs-modal-header-border-color: #f0edf2;
+  --bs-modal-footer-border-color: #f0edf2;
+  --bs-modal-footer-gap: .5rem;
+}
+
+/* sem overflow:hidden, para não cortar listas suspensas (TomSelect, datepicker) */
+.modal-content {
+  box-shadow: 0 24px 64px rgba(30, 10, 40, .22), 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  background: #faf8fb;
+
+  /* mesma altura em todos os botões do rodapé (inclusive os btn-sm) */
+  .btn:not(.btn-link):not(.btn-close) {
+    padding: .6rem 1.1rem;
+    border-width: 1.5px;
+    border-radius: .75rem;
+    font-size: .875rem;
+    line-height: 1.6;
+  }
+}
+
+.modal-title {
+  font-weight: 700;
 }
 
 .eg-modal-header {
@@ -14,12 +43,21 @@
   border: none;
 
   .modal-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.05rem;
     font-weight: 700;
+    color: #fff;
   }
 }
 
 .eg-modal-header--danger {
   background: $engaja-pink;
+}
+
+/* avisos (ex.: exclusão bloqueada, pessoas não importadas) */
+.eg-modal-header--warning {
+  background: #b45309;
 }
 
 .eg-modal-header__subtitle {

@@ -62,11 +62,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
 
-            <div class="modal-header bg-engaja text-white border-0">
-                <h5 class="modal-title fw-bold" id="{{ $id }}Label">
-                    ✅ {{ $title }}
-                </h5>
-            </div>
+            <x-ui.modal-header icon="list-check" :title="$title" :title-id="$id.'Label'" :dismissible="false" />
 
             <div class="modal-body pt-2">
                 <div class="d-flex align-items-center justify-content-between mb-2">

@@ -2,16 +2,14 @@
 <div class="modal fade" id="modalFotoPerfilPrompt" tabindex="-1" aria-labelledby="modalFotoPerfilPromptLabel" aria-hidden="true"
   data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title fw-bold" id="modalFotoPerfilPromptLabel">Foto de perfil</h5>
-      </div>
+    <div class="modal-content">
+      <x-ui.modal-header icon="camera" title="Foto de perfil" title-id="modalFotoPerfilPromptLabel" :dismissible="false" />
       <div class="modal-body">
-        <p class="mb-3">Adicione uma foto ao seu perfil para personalizar sua conta. Você pode enviar agora ou pular e fazer depois em &quot;Meu perfil&quot;.</p>
+        <p class="mb-4 text-muted">Adicione uma foto ao seu perfil para personalizar sua conta. Você pode enviar agora ou pular e fazer depois em &quot;Meu perfil&quot;.</p>
 
         <form method="POST" action="{{ route('profile.photo-prompt.store') }}" enctype="multipart/form-data" id="formFotoPerfilPrompt">
           @csrf
-          <div class="mb-3">
+          <div class="mb-4">
             <label for="profile_photo_prompt_input" class="form-label">Imagem</label>
             <input id="profile_photo_prompt_input" type="file" name="profile_photo"
               class="form-control @error('profile_photo', 'photoPrompt') is-invalid @enderror"
@@ -27,7 +25,7 @@
               formmethod="POST"
               formenctype="application/x-www-form-urlencoded"
               formnovalidate>Pular</button>
-            <button type="submit" class="btn btn-primary">Enviar foto</button>
+            <button type="submit" class="btn btn-engaja"><i class="bi bi-upload me-1"></i> Enviar foto</button>
           </div>
         </form>
       </div>

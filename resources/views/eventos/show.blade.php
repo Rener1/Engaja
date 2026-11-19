@@ -692,10 +692,7 @@ $jaInscrito = \Illuminate\Support\Facades\DB::table('inscricaos')
 <div class="modal fade" id="modalUsuariosNaoEncontrados" tabindex="-1" aria-labelledby="modalUsuariosNaoEncontradosLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header bg-warning-subtle">
-        <h5 class="modal-title text-warning-emphasis" id="modalUsuariosNaoEncontradosLabel">⚠️ Pessoas não inseridas na importação</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-      </div>
+      <x-ui.modal-header warning icon="exclamation-triangle" title="Pessoas não inseridas na importação" title-id="modalUsuariosNaoEncontradosLabel" />
       <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
         <div class="alert alert-danger mb-3">
           <strong>{{ count(session('usuarios_nao_encontrados')) }}</strong> pessoa(s) da planilha <strong>NÃO foram inseridas para criação de certificado</strong>

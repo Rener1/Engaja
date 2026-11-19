@@ -262,8 +262,8 @@ class UiComponentsTest extends TestCase
         $view->assertSee('<footer class="site-footer mt-5">', false)
             ->assertSee('Sistema de Gestão de Participação e Engajamento.')
             ->assertSeeInOrder(['Realização', 'Parceria'])
-            ->assertSee(asset('images/landing/instituto-paulo-freire.png'), false)
-            ->assertSee(asset('images/landing/petrobras.png'), false)
+            ->assertSee(asset('images/ipf-white.png'), false)
+            ->assertSee(asset('images/petrobras-white.png'), false)
             ->assertSee('CNPJ 04.950.603/0001-05');
     }
 
@@ -272,6 +272,27 @@ class UiComponentsTest extends TestCase
         $view = $this->view('layouts.footer');
 
         $view->assertSee('class="site-footer mt-5"', false);
+    }
+
+    public function test_site_header_mostra_acesso_para_visitantes(): void
+    {
+        $view = $this->blade('<x-site-header />');
+
+        $view->assertSee('<header class="site-header">', false)
+            ->assertSee('href="'.route('login').'"', false)
+            ->assertSee('href="'.route('register').'"', false)
+            ->assertSee(asset('images/engaja-favicon.png'), false);
+    }
+
+    public function test_login_e_cadastro_usam_header_institucional_e_cards_de_formulario(): void
+    {
+        foreach (['login', 'register'] as $rota) {
+            $this->get(route($rota))
+                ->assertOk()
+                ->assertSee('class="site-header"', false)
+                ->assertSee('eg-form-card', false)
+                ->assertSee('aria-current="page"', false);
+        }
     }
 
     public function test_empty_state_renderiza_icone_titulo_e_texto(): void
@@ -301,5 +322,13 @@ class UiComponentsTest extends TestCase
         $view = $this->blade('<x-ui.modal-header title="Excluir" danger />');
 
         $view->assertSee('eg-modal-header--danger', false);
+    }
+
+    public function test_modal_header_variante_warning_e_sem_botao_fechar(): void
+    {
+        $view = $this->blade('<x-ui.modal-header warning title="Exclusão bloqueada" :dismissible="false" />');
+
+        $view->assertSee('eg-modal-header--warning', false)
+            ->assertDontSee('btn-close', false);
     }
 }
