@@ -126,6 +126,8 @@ const emptyStateTemplate = (text) =>
     `<p>${escapeOverlayText(text)}</p>` +
     `</div>`;
 
+const DEFAULT_ROW_HEIGHT = 52;
+
 const ALIGN_TO_JUSTIFY = { start: "flex-start", end: "flex-end", center: "center" };
 const ALIGN_TO_TEXT_CLASS = { start: "text-start", end: "text-end", center: "text-center" };
 
@@ -251,8 +253,11 @@ const initTable = (el) => {
     const detailRowField = el.dataset.detailRowField || null;
     const detailRowHeight = Number(el.dataset.detailRowHeight || 420);
 
-    const hasHtmlColumn = columns.some((col) => col.html);
     const customRowHeight = Number(el.dataset.rowHeight || 0) || null;
+    // Altura padrão única para todas as tabelas (antes, só as que tinham coluna
+    // HTML usavam 52px e as de texto ficavam com os 42px do tema). Telas com
+    // conteúdo em mais de uma linha continuam podendo passar :row-height.
+    const rowHeight = customRowHeight || DEFAULT_ROW_HEIGHT;
 
     const gridOptions = {
         columnDefs: buildColumnDefs(columns, rowClassField),
@@ -262,7 +267,7 @@ const initTable = (el) => {
         paginationPageSizeSelector: false,
         domLayout,
         suppressRowVirtualisation: el.dataset.suppressRowVirtualisation === "true",
-        rowHeight: customRowHeight || (hasHtmlColumn ? 52 : undefined),
+        rowHeight,
         suppressCellFocus: true,
         suppressColumnVirtualisation: true,
         defaultColDef: {
@@ -374,7 +379,7 @@ const initTable = (el) => {
         // node.setRowHeight()/api.onRowHeightChanged(), respeitando o teto de
         // detailRowHeight (acima disso o .dt-detail-row rola internamente).
         gridOptions.getRowHeight = (params) =>
-            params.data?.[detailRowField] ? 70 : hasHtmlColumn ? 52 : undefined;
+            params.data?.[detailRowField] ? 70 : rowHeight;
 
         if (!gridOptions.onGridReady) {
             gridOptions.onGridReady = (event) => {
