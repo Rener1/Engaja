@@ -1,52 +1,47 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card shadow-sm">
-                <div class="card-header text-center bg-primary">
-                    <h5 class="mb-0 fw-bold text-white">Esqueci minha senha</h5>
-                </div>
+<div class="row justify-content-center py-4 auth-center">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card eg-form-card eg-form">
+            <div class="card-header">
+                <h1 class="eg-form-card__title"><i class="bi bi-key"></i> Esqueci minha senha</h1>
+                <p class="eg-form-card__subtitle">Informe seu e-mail e enviaremos um link para você redefinir sua senha.</p>
+            </div>
 
-                <div class="card-body">
-                    <p class="text-muted">
-                        Informe seu e-mail e enviaremos um link para você redefinir sua senha.
-                    </p>
+            <div class="card-body">
+                {{-- status de sucesso (link enviado) --}}
+                @if (session('status'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('status') }}
+                    </div>
+                @endif
 
-                    {{-- status de sucesso (link enviado) --}}
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+                <form method="POST" action="{{ route('password.email') }}" class="needs-validation" novalidate>
+                    @csrf
 
-                    <form method="POST" action="{{ route('password.email') }}" class="needs-validation" novalidate>
-                        @csrf
+                    {{-- E-mail --}}
+                    <div class="mb-4">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input id="email" type="email"
+                               class="form-control @error('email') is-invalid @enderror"
+                               name="email" value="{{ old('email') }}" placeholder="seu@email.com"
+                               autocomplete="email" required autofocus>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">Verifique sua caixa de entrada e o spam.</div>
+                    </div>
 
-                        {{-- E-mail --}}
-                        <div class="mb-3">
-                            <label for="email" class="form-label">E-mail</label>
-                            <input id="email" type="email"
-                                   class="form-control @error('email') is-invalid @enderror"
-                                   name="email" value="{{ old('email') }}" required autofocus>
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <button type="submit" class="btn btn-engaja w-100">
+                        <i class="bi bi-send me-1"></i> Enviar link
+                    </button>
+                </form>
+            </div>
 
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ route('login') }}" class="btn btn-link p-0">Voltar ao login</a>
-                            <button type="submit" class="btn btn-engaja">
-                                Enviar link
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card-footer text-center">
-                    <small class="text-muted">Verifique sua caixa de entrada e o spam.</small>
-                </div>
+            <div class="eg-form-card__footer">
+                Lembrou a senha?
+                <a href="{{ route('login') }}" class="eg-form-link">Voltar ao login</a>
             </div>
         </div>
     </div>

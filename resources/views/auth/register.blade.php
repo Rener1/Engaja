@@ -1,20 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow-sm">
-                <div class="card-header text-center bg-primary text-white fw-bold">
-                    {{ __('Criar conta no Engaja') }}
-                </div>
+<x-ui.page-hero eyebrow="Cadastro" eyebrow-icon="person-plus" :title="__('Criar conta no Engaja')"
+    subtitle="Preencha seus dados para participar das ações pedagógicas do Engaja.">
+    <x-slot:actions>
+        <a href="{{ route('login') }}" class="eg-hero-btn"><i class="bi bi-box-arrow-in-right me-1"></i> {{ __('Já tem conta? Entrar') }}</a>
+    </x-slot:actions>
+</x-ui.page-hero>
 
-                <div class="card-body">
+<div class="eg-form">
                     <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
                         @csrf
 
+                        <div class="card eg-form-card mb-4">
+                            <div class="card-header">
+                                <h2 class="eg-form-card__title"><i class="bi bi-shield-lock"></i> Dados de acesso</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+
                         {{-- Name --}}
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label for="name" class="form-label">{{ __('Nome') }}</label>
                             <input id="name" type="text"
                                    class="form-control @error('name') is-invalid @enderror"
@@ -25,7 +31,7 @@
                         </div>
 
                         {{-- Email --}}
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label for="email" class="form-label">{{ __('E-mail') }}</label>
                             <input id="email" type="email"
                                    class="form-control @error('email') is-invalid @enderror"
@@ -36,7 +42,7 @@
                         </div>
 
                         {{-- Password --}}
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label for="password" class="form-label">{{ __('Senha') }}</label>
                             <input id="password" type="password"
                                    class="form-control @error('password') is-invalid @enderror"
@@ -50,19 +56,22 @@
                         </div>
 
                         {{-- Confirm Password --}}
-                        <div class="mb-4">
+                        <div class="col-md-6">
                             <label for="password_confirmation" class="form-label">{{ __('Confirmar senha') }}</label>
                             <input id="password_confirmation" type="password"
                                    class="form-control"
                                    name="password_confirmation" required autocomplete="new-password">
                         </div>
+                                </div>
+                            </div>
+                        </div>
 
                         {{-- Inicializa $u como nulo para a view de registro não quebrar --}}
                         @php $u = null; @endphp
 
-                        <div class="card shadow-sm mb-4 border-light">
-                            <div class="card-header bg-light">
-                                <strong>Dados do participante</strong>
+                        <div class="card eg-form-card mb-4">
+                            <div class="card-header">
+                                <h2 class="eg-form-card__title"><i class="bi bi-person-vcard"></i> Dados do participante</h2>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
@@ -167,9 +176,9 @@
                         </div>
 
                         {{-- DADOS DEMOGRÁFICOS --}}
-                        <div class="card shadow-sm mb-4 border-light">
-                            <div class="card-header bg-light">
-                                <strong>Dados demográficos</strong>
+                        <div class="card eg-form-card mb-4">
+                            <div class="card-header">
+                                <h2 class="eg-form-card__title"><i class="bi bi-people"></i> Dados demográficos</h2>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
@@ -350,25 +359,15 @@
                         </div>
 
                         {{-- Actions --}}
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a class="btn btn-link p-0" href="{{ route('login') }}">
-                                {{ __('Já tem conta? Entrar') }}
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                {{ __('Cadastrar') }}
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-4">
+                            <small class="text-muted">
+                                {{ __('Ao criar a conta, você concorda com os termos de uso e a política de privacidade.') }}
+                            </small>
+                            <button type="submit" class="btn btn-engaja px-4">
+                                <i class="bi bi-person-check me-1"></i> {{ __('Cadastrar') }}
                             </button>
                         </div>
                     </form>
-                </div>
-
-                <div class="card-footer text-center">
-                    <small class="text-muted">
-                        {{ __('Ao criar a conta, você concorda com os termos de uso e a política de privacidade.') }}
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>

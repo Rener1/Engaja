@@ -64,7 +64,8 @@
 }
 
 /* Campos */
-.eg-form {
+.eg-form,
+.modal {
   .form-control,
   .form-select {
     border: 1.5px solid #e5e7eb !important;     // o layout força border-color com !important
@@ -153,5 +154,29 @@
   .form-check-input:focus {
     border-color: $engaja-purple;
     box-shadow: 0 0 0 3px rgba(66, 25, 68, .12);
+  }
+}
+
+/* Rodapé de card de formulário (ex.: "Ainda não tem conta? Cadastre-se") */
+.eg-form-card__footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f0edf2;
+  border-radius: 0 0 1.1rem 1.1rem;
+  background: #faf8fb;
+  font-size: .875rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* Link de texto nos formulários (roxo, sem sublinhado até o hover) */
+.eg-form-link {
+  font-size: .85rem;
+  font-weight: 600;
+  color: $engaja-purple;
+  text-decoration: none;
+
+  &:hover {
+    color: #7a3a72;
+    text-decoration: underline;
   }
 }
