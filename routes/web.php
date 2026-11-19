@@ -43,7 +43,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    // Visitantes veem a landing page; após o login o usuário é redirecionado para '/',
+    // então autenticados continuam na página inicial com o layout da aplicação.
+    return auth()->check() ? view('welcome') : view('landing');
 });
 
 Route::prefix('cartas')->name('cartas.')->group(function () {
