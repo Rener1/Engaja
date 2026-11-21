@@ -7,13 +7,13 @@
       $qrPng = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
           ->style('round')
           ->color(129, 18, 131)
-          ->eye('circle')
+          ->eye('square')
           ->eyeColor(0, 0, 156, 209, 0, 156, 209)
           ->eyeColor(1, 44, 181, 124, 44, 181, 124)
           ->eyeColor(2, 192, 12, 142, 192, 12, 142)
-          ->size(300)
-          ->margin(0)
-          ->merge(public_path('/images/favicon-eja.png'), 0.3, true)
+          ->size(600)
+          ->margin(4)
+          ->merge(public_path('/images/favicon-eja.png'), 0.2, true)
           ->errorCorrection('H')
           ->generate($link);
       $qrBase64 = 'data:image/png;base64,' . base64_encode($qrPng);
