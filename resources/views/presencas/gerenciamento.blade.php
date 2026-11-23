@@ -19,10 +19,8 @@
     {{-- Cards de resumo rápido --}}
     <div class="eg-stats-row">
         <x-ui.stat-card color="purple" icon="collection-fill" label="Total de Momentos" :value="$totalAtividades" />
-        <x-ui.stat-card color="green" icon="check-circle-fill" label="Nesta Listagem (Abertos)" value-id="kpi-abertas"
-            :value="$atividades->getCollection()->filter(fn($a) => $a->presencaEstaAberta())->count()" />
-        <x-ui.stat-card color="gray" icon="lock-fill" label="Nesta Listagem (Fechados)" value-id="kpi-fechadas"
-            :value="$atividades->getCollection()->filter(fn($a) => ! $a->presencaEstaAberta())->count()" />
+        <x-ui.stat-card color="green" icon="check-circle-fill" label="Total de Momentos Abertos" value-id="kpi-abertas" :value="$totalAbertas" />
+        <x-ui.stat-card color="gray" icon="lock-fill" label="Total de Momentos Fechados" value-id="kpi-fechadas" :value="$totalFechadas" />
         <x-ui.stat-card color="blue" icon="clock-history" label="Com Agendamento Futuro" :value="$comAgendamentoFuturo" />
     </div>
 
@@ -207,10 +205,9 @@
                     . '</div>';
 
                 // 5. Agendamento (formato enxuto)
-                $sugestao = \App\Support\AgendamentoPresenca::sugestao($a);
                 $temAgendamento = (bool) ($a->presenca_abre_em || $a->presenca_fecha_em);
-                $valAbreInput = \App\Support\AgendamentoPresenca::paraInput($a->presenca_abre_em) ?? ($sugestao['abre'] ?? '');
-                $valFechaInput = \App\Support\AgendamentoPresenca::paraInput($a->presenca_fecha_em) ?? ($sugestao['fecha'] ?? '');
+                $valAbreInput = \App\Support\AgendamentoPresenca::paraInput($a->presenca_abre_em) ?? '';
+                $valFechaInput = \App\Support\AgendamentoPresenca::paraInput($a->presenca_fecha_em) ?? '';
 
                 $agendamentoParts = [];
                 if ($a->presenca_abre_em) {

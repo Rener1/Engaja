@@ -123,7 +123,7 @@
                 <th style="min-width:220px;">Tipo de Organização</th>
                 <th style="min-width:220px;">Organização</th>
                 <th style="min-width:200px;">Tag</th>
-                <th style="min-width:180px;">Data de nascimento *</th>
+                <th style="min-width:180px;">Data de nascimento</th>
                 <th style="min-width:180px;">Sexo</th>
                 @foreach($demograficoLabels as $campoDemo => $labelDemo)
                 <th style="min-width:180px;">{{ $labelDemo }}</th>
@@ -229,7 +229,7 @@
                     class="form-control form-control-sm @error("rows.$idx.data_nascimento") is-invalid @enderror"
                     name="rows[{{ $idx }}][data_nascimento]"
                     value="{{ old("rows.$idx.data_nascimento", $r['data_nascimento'] ?? '') }}"
-                    max="{{ now()->toDateString() }}" required>
+                    max="{{ now()->toDateString() }}">
                   @error("rows.$idx.data_nascimento") <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </td>
                 <td>

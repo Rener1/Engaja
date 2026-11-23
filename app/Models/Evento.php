@@ -95,6 +95,11 @@ class Evento extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function autorizacoesImagem(): HasMany
+    {
+        return $this->hasMany(AutorizacaoImagem::class);
+    }
+
     public function atividades(): HasMany
     {
         return $this->hasMany(Atividade::class);

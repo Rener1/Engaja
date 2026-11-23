@@ -358,6 +358,9 @@
   if (!container) return;
 
   const endpoint = container.dataset.endpoint;
+  // O modulo Vite controla os filtros e graficos do LimeSurvey.
+  if (new URL(endpoint, window.location.href).searchParams.get('fonte') === 'limesurvey') return;
+
   const pdfEndpoint = "{{ route('dashboards.avaliacoes.pdf') }}";
   const btnExportarPdf = document.getElementById('btn-exportar-pdf');
 
@@ -967,11 +970,8 @@
         }
       }
 
-      if (page > 1) {
-      showNotice('danger', 'Falha ao carregar', 'Erro ao carregar os dados. Verifique a conexão e tente novamente.');
-      cardsQuestoes.innerHTML = '<div class="card border-0 shadow-sm"><div class="card-body text-danger">Erro ao carregar dados. Verifique sua conexão.</div></div>';
-      }
     } catch (error) {
+      console.error('Falha ao renderizar os graficos de avaliacoes:', error);
       cardsQuestoes.innerHTML = '<div class=\"card border-0 shadow-sm\"><div class=\"card-body text-danger\">Erro ao carregar dados. Verifique sua conexão.</div></div>';
       paginacaoNav.style.display = 'none';
     }

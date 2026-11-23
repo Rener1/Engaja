@@ -7,6 +7,7 @@ use App\Models\Cartas\CartaMensagem;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Throwable;
 
@@ -58,6 +59,11 @@ class Participante extends Model
     public function municipio()
     {
         return $this->belongsTo(Municipio::class, 'municipio_id');
+    }
+
+    public function autorizacoesImagem(): HasMany
+    {
+        return $this->hasMany(AutorizacaoImagem::class);
     }
 
     public function inscricoes()

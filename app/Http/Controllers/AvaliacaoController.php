@@ -1004,7 +1004,7 @@ class AvaliacaoController extends Controller
 
         $dados = $request->validate([
             'inscricao_id' => ['nullable', Rule::exists('inscricaos', 'id')],
-            'atividade_id' => ['required', Rule::exists('atividades', 'id')],
+            'atividade_id' => ['required', 'integer', Rule::exists('atividades', 'id')->withoutTrashed()],
             'template_avaliacao_id' => ['required', Rule::exists('template_avaliacaos', 'id')],
             'descricao_universal' => ['nullable', 'string', 'max:255'],
             'respostas' => ['nullable', 'array'],

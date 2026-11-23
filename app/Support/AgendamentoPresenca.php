@@ -19,14 +19,22 @@ class AgendamentoPresenca
     /** Formato usado por <input type="datetime-local">. */
     public const FORMATO_INPUT = 'Y-m-d\TH:i';
 
+    public const MENSAGEM_SEM_HORARIO = 'Não é possível salvar: informe ao menos um horário em "Abrir presença em" ou "Fechar presença em", pois a opção "Ativar agendamento de presença" está marcada.';
+
     /**
      * Regras de validação dos campos de agendamento.
      *
      * @param  bool  $fechamentoNoFuturo  exige que o fechamento seja posterior ao momento atual
+     * @param  bool  $exigirAoMenosUm  exige abertura ou fechamento preenchido quando o agendamento está ativo
      * @return array<string, array<int, mixed>>
      */
-    public static function regras(bool $fechamentoNoFuturo = false): array
+    public static function regras(bool $fechamentoNoFuturo = false, bool $exigirAoMenosUm = false): array
     {
+        $abre = ['nullable', 'date_format:'.self::FORMATO_INPUT];
+        if ($exigirAoMenosUm) {
+            array_unshift($abre, 'required_without:presenca_fecha_em');
+        }
+
         $fecha = ['nullable', 'date_format:'.self::FORMATO_INPUT, 'after:presenca_abre_em'];
 
         if ($fechamentoNoFuturo) {
@@ -39,7 +47,7 @@ class AgendamentoPresenca
         }
 
         return [
-            'presenca_abre_em' => ['nullable', 'date_format:'.self::FORMATO_INPUT],
+            'presenca_abre_em' => $abre,
             'presenca_fecha_em' => $fecha,
         ];
     }
@@ -48,6 +56,7 @@ class AgendamentoPresenca
     public static function mensagens(): array
     {
         return [
+            'presenca_abre_em.required_without' => self::MENSAGEM_SEM_HORARIO,
             'presenca_abre_em.date_format' => 'Informe uma data e hora válidas para a abertura.',
             'presenca_fecha_em.date_format' => 'Informe uma data e hora válidas para o fechamento.',
             'presenca_fecha_em.after' => 'O fechamento deve ser posterior à abertura.',

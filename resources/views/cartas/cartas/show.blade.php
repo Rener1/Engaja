@@ -84,13 +84,11 @@
                 </div>
 
                 @if($gestor)
-                    @unless($carta->podeEducandoEnviar())
+                    @if($carta->temMensagemPendente())
                         <p class="cpe-turn-note">
-                            {{ $carta->temMensagemPendente()
-                                ? 'Há uma resposta aguardando verificação. Resolva-a antes de enviar uma nova carta.'
-                                : 'Aguardando a resposta do voluntário para enviar uma nova carta.' }}
+                            Há uma resposta aguardando verificação. Resolva-a antes de enviar uma nova carta.
                         </p>
-                    @endunless
+                    @endif
                 @else
                     @unless($carta->podeVoluntarioEnviar())
                         <p class="cpe-turn-note">
@@ -132,8 +130,8 @@
 
                                     @if($loop->last)
                                         @if($gestor)
-                                            @if($carta->podeEducandoEnviar())
-                                                <button type="button" class="cpe-button" data-modal-open="addCartaModal">Adicionar carta</button>
+                                            @if(! $carta->temMensagemPendente())
+                                                <button type="button" class="cpe-button" data-modal-open="addCartaModal">{{ $carta->podeVoluntarioEnviar() ? 'Adicionar resposta do voluntário' : 'Adicionar carta do educando' }}</button>
                                             @endif
                                         @else
                                             @if($carta->podeVoluntarioEnviar())
@@ -291,10 +289,11 @@
         <div class="cpe-modal" id="addCartaModal">
             <div class="cpe-modal__backdrop"></div>
             <div class="cpe-modal__dialog">
-                <h2>Responder {{ $remetentePrimeiroNome }}</h2>
-                <p>Anexe o arquivo PDF da sua carta.</p>
+                <h2>{{ $carta->podeVoluntarioEnviar() ? 'Adicionar resposta do voluntário' : 'Adicionar carta do educando' }}</h2>
+                <p>Anexe o PDF para registrar a próxima mensagem da conversa.</p>
                 <form method="POST" action="{{ route('cartas.cartas.mensagens.store', $carta) }}" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="tipo_remetente" value="{{ $carta->proximoTipoRemetente() }}">
                     <label class="cpe-upload">
                         <input type="file" name="arquivo" required accept=".pdf,application/pdf">
                         <span>
@@ -307,11 +306,11 @@
                     <div class="cpe-fixed-participants">
                         <div>
                             <span>Remetente</span>
-                            <strong>{{ $carta->educando?->nome ?? 'Remetente' }}</strong>
+                            <strong>{{ $carta->podeVoluntarioEnviar() ? $carta->voluntario?->nome : $carta->educando?->nome }}</strong>
                         </div>
                         <div>
                             <span>Destinatário</span>
-                            <strong>{{ $carta->voluntario?->nome ?? 'Voluntário' }}</strong>
+                            <strong>{{ $carta->podeVoluntarioEnviar() ? $carta->educando?->nome : $carta->voluntario?->nome }}</strong>
                         </div>
                     </div>
 

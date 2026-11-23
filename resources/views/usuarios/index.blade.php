@@ -9,7 +9,10 @@
                 <button type="button" class="eg-hero-btn" data-bs-toggle="modal" data-bs-target="#modalExportarUsuarios">
                     Baixar planilha de usuários
                 </button>
-                <a href="{{ route('usuarios.autorizacoes.import') }}" class="eg-hero-btn">Importar Autorizações de Imagem</a>
+                @can('viewAny', \App\Models\AutorizacaoImagem::class)
+                <a href="{{ route('autorizacoes-imagem.index') }}" class="eg-hero-btn">Autorizações por ação</a>
+                @endcan
+                <a href="{{ route('usuarios.autorizacoes.import') }}" class="eg-hero-btn">Importar autorizações globais (legado)</a>
                 @role('administrador')
                 <a href="{{ route('usuarios.notificacoes-agendamento.index') }}" class="eg-hero-btn">Notificações de Agendamento</a>
                 @endrole

@@ -892,6 +892,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!root) return;
 
   const endpoint = root.dataset.endpoint;
+  // O script da view controla os filtros e a paginacao dos formularios nativos.
+  if (new URL(endpoint, window.location.href).searchParams.get('fonte') !== 'limesurvey') return;
+
   const cardsQuestoes = document.getElementById('cards-questoes');
   const modal = createTextModal();
 
@@ -965,7 +968,8 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadData() {
     setLoading(true);
     try {
-      const url = `${endpoint}?${buildParams()}`;
+      const url = new URL(endpoint, window.location.href);
+      new URLSearchParams(buildParams()).forEach((value, key) => url.searchParams.set(key, value));
       const response = await fetch(url, { headers: { Accept: 'application/json' } });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload?.erro || 'Erro ao carregar dados.');

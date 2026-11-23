@@ -133,13 +133,14 @@
 </div>
 
 @php
-  $municipiosSelecionados = collect(old('municipios', isset($atividade) ? $atividade->municipios->pluck('id')->all() : []))
+  $municipiosSelecionados = collect(old('municipios_enviados') ? old('municipios', []) : (isset($atividade) ? $atividade->municipios->pluck('id')->all() : []))
     ->map(fn($v) => (string) $v)
     ->all();
   $abrangenciaNacional = (bool) old('abrangencia_nacional', $atividade->abrangencia_nacional ?? false);
 @endphp
 <div class="mb-3">
   <span class="form-label d-block">Abrangência territorial</span>
+  <input type="hidden" name="municipios_enviados" value="1">
   <input type="hidden" name="abrangencia_nacional" value="0">
   <div class="form-check border rounded p-3 ps-5 mb-3 bg-light">
     <input
@@ -184,6 +185,9 @@
       <div class="d-flex flex-wrap gap-2 mb-2 municipios-filtros-tags" id="municipios-filtros-tags" hidden></div>
 
       <div class="btn-toolbar flex-wrap gap-2 mb-2" role="toolbar" aria-label="Seleção em massa">
+        <button type="button" class="btn btn-sm btn-outline-primary" id="municipios-btn-prioritarios">
+          Selecionar municípios prioritários
+        </button>
         <div class="btn-group btn-group-sm" role="group">
           <button type="button" class="btn btn-outline-primary" id="municipios-btn-selecionar-todos" title="Aplica aos municípios visíveis no filtro atual (ou a todos, sem filtro)">
             Selecionar filtrados
@@ -201,7 +205,7 @@
            class="municipios-checkbox-list @error('municipios') is-invalid @enderror @error('municipios.*') is-invalid @enderror"></div>
       <div id="municipios-hidden-inputs" class="d-none" aria-hidden="true"></div>
 
-      <div class="form-text">Selecione um ou mais municípios atendidos por este momento. A busca filtra pelo <strong>nome do município</strong>; as sugestões permitem filtrar por estado ou região.</div>
+      <div class="form-text">Selecione um ou mais municípios atendidos por este momento. A opção de municípios prioritários substitui a seleção atual. A busca filtra pelo <strong>nome do município</strong>; as sugestões permitem filtrar por estado ou região.</div>
       @error('municipios') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
       @error('municipios.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
     </div>
@@ -248,6 +252,7 @@
   const selected = new Set(inicialSelecionados.map(String));
   let scopeEstado = null;
   let scopeRegiao = null;
+  let somentePrioritarios = false;
   let query = buscaInput.value || '';
   let debounceTimer = null;
 
@@ -275,6 +280,9 @@
 
   function getFilteredMunicipios() {
     let list = MUNICIPIOS.slice();
+    if (somentePrioritarios) {
+      list = list.filter((m) => m.prioritario);
+    }
     if (scopeEstado) {
       const uf = String(scopeEstado).trim().toUpperCase();
       list = list.filter((m) => siglaEstado(m).trim().toUpperCase() === uf);
@@ -300,6 +308,21 @@
       inp.value = id;
       hiddenEl.appendChild(inp);
     });
+  }
+
+  function restaurarListaSePrioritariosDesmarcados() {
+    if (!somentePrioritarios || MUNICIPIOS.some((m) => m.prioritario && selected.has(m.id))) return;
+
+    somentePrioritarios = false;
+    scopeEstado = null;
+    scopeRegiao = null;
+    buscaInput.value = '';
+    query = '';
+    window.clearTimeout(debounceTimer);
+    sugestoesEl.classList.remove('is-open');
+    sugestoesEl.innerHTML = '';
+    renderFiltrosTags();
+    renderListaCheckboxes();
   }
 
   function renderResumo() {
@@ -386,6 +409,7 @@
         else selected.delete(m.id);
         syncHiddenInputs();
         renderResumo();
+        if (!cb.checked) restaurarListaSePrioritariosDesmarcados();
       });
       const lab = document.createElement('label');
       lab.className = 'form-check-label small';
@@ -400,6 +424,25 @@
   function renderFiltrosTags() {
     filtrosTags.innerHTML = '';
     let has = false;
+    if (somentePrioritarios) {
+      has = true;
+      const span = document.createElement('span');
+      span.className = 'badge bg-primary d-inline-flex align-items-center gap-1';
+      span.appendChild(document.createTextNode('Municípios prioritários '));
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-close btn-close-white btn-sm p-0 ms-1';
+      btn.style.fontSize = '0.6rem';
+      btn.setAttribute('aria-label', 'Remover filtro de municípios prioritários');
+      btn.addEventListener('click', () => {
+        somentePrioritarios = false;
+        renderFiltrosTags();
+        renderListaCheckboxes();
+        buildSugestoes();
+      });
+      span.appendChild(btn);
+      filtrosTags.appendChild(span);
+    }
     if (scopeEstado) {
       has = true;
       const span = document.createElement('span');
@@ -451,12 +494,13 @@
     const limEst = 8;
     const limReg = 6;
 
-    const munHits = MUNICIPIOS.filter((m) => norm(m.nome).includes(q))
+    const disponiveis = somentePrioritarios ? MUNICIPIOS.filter((m) => m.prioritario) : MUNICIPIOS;
+    const munHits = disponiveis.filter((m) => norm(m.nome).includes(q))
       .sort((a, b) => String(a.nome).localeCompare(String(b.nome), 'pt-BR'))
       .slice(0, limMun);
 
     const estadosMap = new Map();
-    MUNICIPIOS.forEach((m) => {
+    disponiveis.forEach((m) => {
       const sigla = siglaEstado(m);
       if (sigla && !estadosMap.has(sigla)) {
         estadosMap.set(sigla, nomeEstado(m) || sigla);
@@ -468,7 +512,7 @@
       .sort((a, b) => a.sigla.localeCompare(b.sigla, 'pt-BR'))
       .slice(0, limEst);
 
-    const regSet = new Set(MUNICIPIOS.map((m) => nomeRegiao(m)).filter(Boolean));
+    const regSet = new Set(disponiveis.map((m) => nomeRegiao(m)).filter(Boolean));
     const regHits = [...regSet]
       .filter((nome) => norm(nome).includes(q))
       .sort((a, b) => a.localeCompare(b, 'pt-BR'))
@@ -576,6 +620,22 @@
     }
   });
 
+  document.getElementById('municipios-btn-prioritarios')?.addEventListener('click', () => {
+    somentePrioritarios = true;
+    scopeEstado = null;
+    scopeRegiao = null;
+    buscaInput.value = '';
+    query = '';
+    sugestoesEl.classList.remove('is-open');
+    sugestoesEl.innerHTML = '';
+    selected.clear();
+    MUNICIPIOS.filter((m) => m.prioritario).forEach((m) => selected.add(m.id));
+    syncHiddenInputs();
+    renderResumo();
+    renderFiltrosTags();
+    renderListaCheckboxes();
+  });
+
   document.getElementById('municipios-btn-selecionar-todos')?.addEventListener('click', () => {
     getFilteredMunicipios().forEach((m) => selected.add(m.id));
     syncHiddenInputs();
@@ -587,6 +647,7 @@
     getFilteredMunicipios().forEach((m) => selected.delete(m.id));
     syncHiddenInputs();
     renderResumo();
+    restaurarListaSePrioritariosDesmarcados();
     renderListaCheckboxes();
   });
 
@@ -597,12 +658,14 @@
     });
     syncHiddenInputs();
     renderResumo();
+    restaurarListaSePrioritariosDesmarcados();
     renderListaCheckboxes();
   });
 
   document.getElementById('municipios-btn-limpar-filtros')?.addEventListener('click', () => {
     scopeEstado = null;
     scopeRegiao = null;
+    somentePrioritarios = false;
     buscaInput.value = '';
     query = '';
     sugestoesEl.classList.remove('is-open');
@@ -739,17 +802,22 @@
 
 @can('presenca.abrir')
   @php
-    $sugestaoAgendamento = isset($atividade) ? \App\Support\AgendamentoPresenca::sugestao($atividade) : ['abre' => null, 'fecha' => null];
-    $temAgendamentoGravado = isset($atividade) && ($atividade->presenca_abre_em || $atividade->presenca_fecha_em);
-    $valorAbreEm = old('presenca_abre_em', $temAgendamentoGravado ? \App\Support\AgendamentoPresenca::paraInput($atividade->presenca_abre_em) : ($sugestaoAgendamento['abre'] ?? null));
-    $valorFechaEm = old('presenca_fecha_em', $temAgendamentoGravado ? \App\Support\AgendamentoPresenca::paraInput($atividade->presenca_fecha_em) : ($sugestaoAgendamento['fecha'] ?? null));
+    $valorAbreEm = old('presenca_abre_em', isset($atividade) ? \App\Support\AgendamentoPresenca::paraInput($atividade->presenca_abre_em) : null);
+    $valorFechaEm = old('presenca_fecha_em', isset($atividade) ? \App\Support\AgendamentoPresenca::paraInput($atividade->presenca_fecha_em) : null);
+    $agendamentoAtivo = (bool) old('agendamento_presenca_ativo', $valorAbreEm || $valorFechaEm);
+    if (! $agendamentoAtivo) {
+      $valorAbreEm = null;
+      $valorFechaEm = null;
+    }
   @endphp
   <div class="border rounded p-3 mt-3 bg-light">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
       <label class="form-label fw-bold mb-0 text-engaja">
         <i class="bi bi-clock-history me-1"></i> Confirmação de presença — Agendamento de abertura/fechamento
       </label>
-      <div class="btn-group btn-group-sm">
+    </div>
+    <x-agendamento-presenca id="agendamento_presenca_ativo" :ativo="$agendamentoAtivo">
+      <div class="btn-group btn-group-sm mb-3">
         <button type="button" class="btn btn-outline-secondary" id="btn-preencher-agendamento-sugestao" title="Preenche os campos com a data e horários do momento">
           Preencher com dia/horário do momento
         </button>
@@ -757,10 +825,6 @@
           Limpar agendamento
         </button>
       </div>
-    </div>
-    <div class="form-text mb-3">
-      Se configurado, a confirmação de presença abrirá e/ou fechará automaticamente nos dias e horários determinados (horário de Brasília). Deixe em branco para que o momento inicie com a presença aberta.
-    </div>
 
     <div class="row g-3">
       <div class="col-md-6">
@@ -779,6 +843,7 @@
         @error('presenca_fecha_em') <div class="invalid-feedback">{{ $message }}</div> @enderror
       </div>
     </div>
+    </x-agendamento-presenca>
   </div>
 
   <script>
@@ -791,12 +856,6 @@
       const inputAbre = document.getElementById('presenca_abre_em');
       const inputFecha = document.getElementById('presenca_fecha_em');
 
-      let editouAbreManualmente = Boolean(inputAbre && inputAbre.value);
-      let editouFechaManualmente = Boolean(inputFecha && inputFecha.value);
-
-      inputAbre?.addEventListener('input', () => { editouAbreManualmente = true; });
-      inputFecha?.addEventListener('input', () => { editouFechaManualmente = true; });
-
       function formatarDateTime(dia, hora) {
         if (!dia || !hora) return '';
         const h = hora.length >= 5 ? hora.substring(0, 5) : hora;
@@ -806,34 +865,24 @@
         return `${dia}T${h}`;
       }
 
-      function aplicarSugestao(forcar = false) {
+      function aplicarSugestao() {
         if (!inputDia || !inputAbre || !inputFecha) return;
         const dia = inputDia.value;
         const hIni = inputHoraInicio?.value;
         const hFim = inputHoraFim?.value;
 
-        if (dia && hIni && (forcar || !editouAbreManualmente || !inputAbre.value)) {
-          const v = formatarDateTime(dia, hIni);
-          if (v || forcar) inputAbre.value = v;
-        }
-        if (dia && hFim && (forcar || !editouFechaManualmente || !inputFecha.value)) {
-          const v = formatarDateTime(dia, hFim);
-          if (v || forcar) inputFecha.value = v;
-        }
+        inputAbre.value = formatarDateTime(dia, hIni);
+        inputFecha.value = formatarDateTime(dia, hFim);
+        inputAbre.dispatchEvent(new Event('input', { bubbles: true }));
+        inputFecha.dispatchEvent(new Event('input', { bubbles: true }));
       }
 
-      // A sugestão de agendamento é aplicada explicitamente quando o usuário clica no botão:
-      btnSugestao?.addEventListener('click', function () {
-        aplicarSugestao(true);
-        editouAbreManualmente = true;
-        editouFechaManualmente = true;
-      });
+      btnSugestao?.addEventListener('click', aplicarSugestao);
 
       btnLimpar?.addEventListener('click', function () {
-        if (inputAbre) inputAbre.value = '';
-        if (inputFecha) inputFecha.value = '';
-        editouAbreManualmente = true;
-        editouFechaManualmente = true;
+        const toggle = document.getElementById('agendamento_presenca_ativo');
+        toggle.checked = false;
+        toggle.dispatchEvent(new Event('change'));
       });
     });
   </script>

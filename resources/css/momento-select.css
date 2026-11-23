@@ -1,0 +1,109 @@
+.momento-select {
+    position: relative;
+    min-width: 0;
+}
+
+.momento-select [hidden] {
+    display: none !important;
+}
+
+.momento-select__loading {
+    display: none;
+    cursor: wait;
+}
+
+@media (scripting: enabled) {
+    .momento-select:not(.momento-select--enhanced) .momento-select__native {
+        display: none;
+    }
+
+    .momento-select:not(.momento-select--enhanced) .momento-select__loading {
+        display: block;
+    }
+}
+
+.momento-select--enhanced .momento-select__native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.momento-select__trigger {
+    text-align: left;
+}
+
+.momento-select__trigger [data-momento-selected] {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.momento-select__trigger:disabled {
+    background-color: var(--bs-secondary-bg, #e9ecef);
+    cursor: not-allowed;
+}
+
+.momento-select__panel {
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    z-index: 1050;
+    margin-top: .25rem;
+    overflow: hidden;
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius, .375rem);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.momento-select__filter {
+    padding: .75rem;
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.momento-select__filter input {
+    min-width: 0;
+}
+
+.momento-select__list {
+    max-height: min(16rem, 40vh);
+    margin: 0;
+    padding: .25rem 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    list-style: none;
+}
+
+.momento-select__list:focus-visible {
+    outline: 2px solid var(--engaja-purple, #421944);
+    outline-offset: -2px;
+}
+
+.momento-select__option {
+    padding: .625rem .75rem;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.momento-select__option:hover,
+.momento-select__option.is-active {
+    background-color: #f2edf3;
+}
+
+.momento-select__option[aria-selected="true"] {
+    font-weight: 600;
+    color: var(--engaja-purple, #421944);
+}
+
+.momento-select__status {
+    padding: .5rem .75rem;
+    border-top: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.momento-select [data-momento-error]:not([hidden]) {
+    display: block;
+}

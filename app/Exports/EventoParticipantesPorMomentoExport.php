@@ -38,6 +38,7 @@ class EventoParticipantesPorMomentoExport implements FromCollection, WithHeading
         return [
             'Ação pedagógica',
             'Momento',
+            'Data do momento',
             'ID do usuário',
             'Nome',
             'Email',
@@ -57,6 +58,7 @@ class EventoParticipantesPorMomentoExport implements FromCollection, WithHeading
         return [
             $this->evento->nome,
             $row->momento,
+            $row->data_momento ? Carbon::parse($row->data_momento)->format('d/m/Y') : null,
             $row->usuario_id,
             $row->nome,
             $row->email,
@@ -88,6 +90,7 @@ class EventoParticipantesPorMomentoExport implements FromCollection, WithHeading
             ->select([
                 'atividades.id as atividade_id',
                 'atividades.descricao as momento',
+                'atividades.dia as data_momento',
                 'users.id as usuario_id',
                 'users.name as nome',
                 'users.email',

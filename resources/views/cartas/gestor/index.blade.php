@@ -23,6 +23,11 @@
                 <form id="gestorCartaForm" method="POST" action="{{ route('cartas.cartas.store') }}" enctype="multipart/form-data" class="cpe-manager-form">
                     @csrf
                     <input type="hidden" name="envio_token" value="{{ $errors->has('envio_token') ? (string) \Illuminate\Support\Str::uuid() : old('envio_token', (string) \Illuminate\Support\Str::uuid()) }}">
+                    <label for="gestorCartaFluxo">Forma de envio</label>
+                    <select id="gestorCartaFluxo" name="fluxo" class="cpe-field">
+                        <option value="automatico" @selected(old('fluxo') !== 'manual')>Distribuição automática</option>
+                        <option value="manual" @selected(old('fluxo') === 'manual')>Conversa com voluntário escolhido</option>
+                    </select>
                     <label class="cpe-upload">
                         <input type="file" name="arquivo" required accept=".pdf,application/pdf">
                         <span>
@@ -54,6 +59,23 @@
                         </ul>
                     </div>
 
+                    <div id="gestorConversaCampos" @if(old('fluxo') !== 'manual') hidden @endif>
+                        <label for="gestorVoluntario">Voluntário que responde</label>
+                        <select id="gestorVoluntario" name="voluntario_user_id" class="cpe-field" @if(old('fluxo') !== 'manual') disabled @endif @required(old('fluxo') === 'manual')>
+                            <option value="">Selecione o voluntário</option>
+                            @foreach($voluntarios as $voluntario)
+                                <option value="{{ $voluntario->id }}" @selected((string) old('voluntario_user_id') === (string) $voluntario->id)>{{ $voluntario->nome_com_localidade }}</option>
+                            @endforeach
+                        </select>
+                        <label class="cpe-upload">
+                            <input type="file" name="arquivo_resposta" accept=".pdf,application/pdf" @if(old('fluxo') !== 'manual') disabled @endif>
+                            <span>
+                                <span class="cpe-upload__link">Anexar resposta do voluntário (opcional)</span>
+                                <span class="cpe-upload__hint">PDF (máx. 10MB). Você também pode adicioná-la depois na conversa.</span>
+                            </span>
+                        </label>
+                    </div>
+
                     <button type="button" class="cpe-button" id="gestorCartaSubmitBtn">Enviar carta</button>
                 </form>
             </div>
@@ -72,16 +94,43 @@
 
                 <form id="filterForm" method="GET" action="{{ route('cartas.dashboard') }}" style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; background: #fff; padding: 16px 20px; border-radius: 8px; border: 1px solid #eaeaea; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%; justify-content: space-between;">
 
+                    @php
+                        $municipioFiltroSelecionado = $municipioId ? $municipios->firstWhere('id', (int) $municipioId) : null;
+                        $municipioFiltroLabel = $municipioFiltroSelecionado
+                            ? $municipioFiltroSelecionado->nome . ($municipioFiltroSelecionado->estado?->sigla ? ' - '.$municipioFiltroSelecionado->estado->sigla : '')
+                            : 'Todos os municípios';
+                    @endphp
                     <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px;">
-                        <label for="municipio_id" style="font-size: 13px; font-weight: 600; color: #111; height: 20px; display: flex; align-items: center; white-space: nowrap;">Município do educando:</label>
-                        <select id="municipio_id" name="municipio_id" style="height: 40px; box-sizing: border-box; padding: 0 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; background: #fff; color: #111;">
-                            <option value="" style="color: #333;">Todos os municípios</option>
-                            @foreach($municipios as $mun)
-                                <option value="{{ $mun->id }}" style="color: #111;" @selected($municipioId == $mun->id)>
-                                    {{ $mun->nome }}{{ $mun->estado?->sigla ? ' - '.$mun->estado->sigla : '' }}{{ $mun->isPrioritario() ? ' ★ (Prioritário)' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label for="municipioSelectTrigger" style="font-size: 13px; font-weight: 600; color: #111; height: 20px; display: flex; align-items: center; white-space: nowrap;">Município do educando:</label>
+                        <div class="cpe-municipio-select" id="municipioSelectDropdown">
+                            <input type="hidden" id="municipio_id" name="municipio_id" value="{{ $municipioId }}">
+                            <button type="button" id="municipioSelectTrigger" class="cpe-municipio-select__trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span id="municipioSelectLabel" class="cpe-municipio-select__label">{{ $municipioFiltroLabel }}</span>
+                                <svg class="cpe-municipio-select__chevron" width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="cpe-municipio-select__panel" role="dialog" aria-label="Filtrar município">
+                                <div class="cpe-municipio-select__search-wrap">
+                                    <input type="search" id="municipio_search_input" class="cpe-municipio-select__search" placeholder="Digite o nome do município..." autocomplete="off" aria-label="Digite o nome do município">
+                                </div>
+                                <ul class="cpe-municipio-select__list" role="listbox" id="municipioSelectList">
+                                    <li class="cpe-municipio-select__option {{ empty($municipioId) ? 'is-selected' : '' }}" role="option" data-value="" data-label="Todos os municípios" aria-selected="{{ empty($municipioId) ? 'true' : 'false' }}">
+                                        Todos os municípios
+                                    </li>
+                                    @foreach($municipios as $mun)
+                                        @php
+                                            $munLabel = $mun->nome . ($mun->estado?->sigla ? ' - '.$mun->estado->sigla : '');
+                                            $isMunSelected = (string) $municipioId === (string) $mun->id;
+                                        @endphp
+                                        <li class="cpe-municipio-select__option {{ $isMunSelected ? 'is-selected' : '' }}" role="option" data-value="{{ $mun->id }}" data-label="{{ $munLabel }}" aria-selected="{{ $isMunSelected ? 'true' : 'false' }}">
+                                            {{ $munLabel }}
+                                        </li>
+                                    @endforeach
+                                    <li class="cpe-municipio-select__empty" id="municipioSelectEmpty" hidden>Nenhum município encontrado.</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; max-width: 180px;">
@@ -109,17 +158,16 @@
                     <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; justify-content: flex-start;">
                         <label style="font-size: 13px; font-weight: 600; color: #111; height: 20px; display: flex; align-items: center; white-space: nowrap;">Ações:</label>
                         <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <button type="submit" id="btnDownloadBatch" form="filterForm" formaction="{{ route('cartas.download-batch') }}" style="display: flex; align-items: center; justify-content: center; white-space: nowrap; padding: 0 16px; border-radius: 6px; height: 40px; box-sizing: border-box; text-decoration: none; background-color: var(--cartas-purple, #6a1b9a); color: white; font-weight: 500; font-size: 14px; border: none; cursor: pointer; transition: opacity 0.2s;">
-                                Baixar Cartas PDF
+                            <button type="submit" id="btnDownloadBatch" form="filterForm" formaction="{{ route('cartas.download-batch') }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 12px; border-radius: 6px; min-height: 40px; box-sizing: border-box; text-decoration: none; background-color: var(--cartas-purple, #6a1b9a); color: white; font-weight: 500; font-size: 14px; line-height: 1.2; border: none; cursor: pointer; transition: opacity 0.2s;">
+                                <span>Baixar cartas PDF</span>
+                                <small style="font-size: 11px;">(todas as páginas)</small>
                             </button>
-                            <span id="selectedCountBadge" style="font-size: 11px; font-weight: 600; color: #666; text-align: center;">
-                                {{ $cartas->count() }} de {{ $cartas->count() }} selecionadas
-                            </span>
                         </div>
                     </div>
                 </form>
             </div>
 
+            @include('cartas.gestor._approval')
             @include('cartas.gestor._table')
 
         </section>
@@ -149,6 +197,46 @@
     @include('cartas.shared._scripts')
 
     <style>
+        .cpe-batch-approval {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 16px 28px;
+        }
+
+        .cpe-batch-approval p {
+            margin: 0 0 4px;
+        }
+
+        #selectedCountBadge {
+            font-size: 13px;
+            color: #666;
+        }
+
+        #batchApprovalFeedback {
+            margin-top: 8px;
+            color: #b42318;
+        }
+
+        .cpe-approval-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .cpe-approval-checkbox:disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        #btnApproveBatch:disabled,
+        #confirmApproveBatch:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .cpe-manager {
             display: grid;
             grid-template-columns: minmax(320px, 26%) minmax(0, 1fr);
@@ -166,9 +254,15 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 20px;
+            padding-top: 260px;
             padding-bottom: 110px;
+        }
+
+        #gestorConversaCampos:not([hidden]) {
+            display: grid;
+            gap: 14px;
         }
 
         .cpe-manager-form {
@@ -219,6 +313,144 @@
         #search_input::placeholder {
             color: #333;
             opacity: 1;
+        }
+
+        .cpe-municipio-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .cpe-municipio-select__trigger {
+            width: 100%;
+            height: 40px;
+            box-sizing: border-box;
+            padding: 0 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            background: #fff;
+            color: #111;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .cpe-municipio-select__trigger:hover,
+        .cpe-municipio-select.is-open .cpe-municipio-select__trigger,
+        .cpe-municipio-select__trigger:focus {
+            border-color: var(--cpe-purple, #a900d9);
+            box-shadow: 0 0 0 3px rgba(169, 0, 217, 0.12);
+        }
+
+        .cpe-municipio-select__label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .cpe-municipio-select__chevron {
+            flex-shrink: 0;
+            color: #555;
+            transition: transform 0.15s ease;
+        }
+
+        .cpe-municipio-select.is-open .cpe-municipio-select__chevron {
+            transform: rotate(180deg);
+        }
+
+        .cpe-municipio-select__panel {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            min-width: 250px;
+            z-index: 120;
+            display: none;
+            flex-direction: column;
+            background: #fff;
+            border: 1px solid #d6d6d6;
+            border-radius: 6px;
+            box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
+            overflow: hidden;
+        }
+
+        .cpe-municipio-select.is-open .cpe-municipio-select__panel {
+            display: flex;
+        }
+
+        .cpe-municipio-select__search-wrap {
+            padding: 8px;
+            border-bottom: 1px solid #ececec;
+            background: #fafafa;
+        }
+
+        .cpe-municipio-select__search {
+            width: 100%;
+            height: 36px;
+            box-sizing: border-box;
+            padding: 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #111;
+            background: #fff;
+            outline: none;
+        }
+
+        .cpe-municipio-select__search::placeholder {
+            color: #555;
+            opacity: 1;
+        }
+
+        .cpe-municipio-select__search:focus {
+            border-color: var(--cpe-purple, #a900d9);
+            box-shadow: 0 0 0 2px rgba(169, 0, 217, 0.12);
+        }
+
+        .cpe-municipio-select__list {
+            max-height: 240px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 4px;
+            list-style: none;
+        }
+
+        .cpe-municipio-select__option {
+            padding: 8px 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #222;
+            cursor: pointer;
+        }
+
+        .cpe-municipio-select__option[hidden] {
+            display: none;
+        }
+
+        .cpe-municipio-select__option:hover,
+        .cpe-municipio-select__option.is-active {
+            background: var(--cpe-bg, #f4f0ec);
+            color: var(--cpe-purple, #a900d9);
+        }
+
+        .cpe-municipio-select__option.is-selected {
+            font-weight: 700;
+            color: var(--cpe-purple, #a900d9);
+        }
+
+        .cpe-municipio-select__empty {
+            padding: 10px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
         }
 
         .cpe-search {
@@ -426,6 +658,7 @@
             }
 
             .cpe-manager__form-wrap {
+                padding-top: 0;
                 padding-bottom: 0;
             }
         }
@@ -438,44 +671,127 @@
             const municipioSelect = document.getElementById('municipio_id');
             const tableContainer = document.querySelector('.cpe-manager-table');
             const paginationContainer = document.querySelector('.cpe-pagination');
+            const approvalForm = document.getElementById('approveBatchForm');
+            const approveButton = document.getElementById('btnApproveBatch');
+            const approvalModal = document.getElementById('approveBatchModal');
+            const confirmApproval = document.getElementById('confirmApproveBatch');
+            const approvalFeedback = document.getElementById('batchApprovalFeedback');
             let debounceTimer;
+            let resultsRequest = 0;
+            let resultsController;
+            let loadingResults = false;
+            let approving = false;
+
+            function selectedResponses() {
+                return Array.from(tableContainer.querySelectorAll('.carta-checkbox:checked:not(:disabled)'));
+            }
 
             function updateSelectedBadge() {
-                const badge = document.getElementById('selectedCountBadge');
-                if (!badge) return;
-                const checkboxes = document.querySelectorAll('.carta-checkbox');
-                const checked = document.querySelectorAll('.carta-checkbox:checked');
-                badge.textContent = `${checked.length} de ${checkboxes.length} selecionadas`;
+                const eligible = tableContainer.querySelectorAll('.carta-checkbox:not(:disabled)');
+                const count = selectedResponses().length;
+                const selectAll = document.getElementById('selectAllApprovals');
+                document.getElementById('selectedCountBadge').textContent =
+                    count + (count === 1 ? ' resposta selecionada' : ' respostas selecionadas') + ' nesta página';
+                approveButton.textContent = 'Aprovar selecionadas (' + count + ')';
+                approveButton.disabled = approving || loadingResults || count === 0;
+                confirmApproval.disabled = approving || loadingResults || count === 0;
+
+                if (selectAll) {
+                    selectAll.disabled = approving || loadingResults || eligible.length === 0;
+                    selectAll.checked = eligible.length > 0 && count === eligible.length;
+                    selectAll.indeterminate = count > 0 && count < eligible.length;
+                }
             }
 
             document.addEventListener('change', function(e) {
-                if (e.target.classList.contains('carta-checkbox')) {
+                if (e.target.id === 'selectAllApprovals') {
+                    tableContainer.querySelectorAll('.carta-checkbox:not(:disabled)').forEach(function(checkbox) {
+                        checkbox.checked = e.target.checked;
+                    });
+                    updateSelectedBadge();
+                } else if (e.target.classList.contains('carta-checkbox')) {
                     updateSelectedBadge();
                 }
             });
 
+            approveButton.addEventListener('click', function() {
+                const count = selectedResponses().length;
+                if (approving || loadingResults || count === 0) return;
+                document.getElementById('approveBatchDescription').textContent = count === 1
+                    ? 'Você está aprovando 1 resposta. A carta passará para “Respondida”. Deseja continuar?'
+                    : 'Você está aprovando ' + count + ' respostas. As cartas passarão para “Respondida”. Deseja continuar?';
+                approvalModal.classList.add('is-open');
+                confirmApproval.focus();
+            });
+
+            approvalForm.addEventListener('submit', function(e) {
+                if (approving || loadingResults || selectedResponses().length === 0
+                    || !approvalModal.classList.contains('is-open')) {
+                    e.preventDefault();
+                    return;
+                }
+
+                approving = true;
+                confirmApproval.textContent = 'Aprovando...';
+                updateSelectedBadge();
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && approvalModal.classList.contains('is-open') && !approving) {
+                    approvalModal.classList.remove('is-open');
+                    approveButton.focus();
+                }
+            });
+
+            updateSelectedBadge();
+
             function fetchResults(url) {
+                if (approving) return;
+                const request = ++resultsRequest;
+                resultsController?.abort();
+                resultsController = new AbortController();
+                loadingResults = true;
+                approvalFeedback.hidden = true;
+                approvalModal.classList.remove('is-open');
+                tableContainer.querySelectorAll('.carta-checkbox').forEach(function(checkbox) {
+                    checkbox.checked = false;
+                });
+                tableContainer.inert = true;
                 tableContainer.style.opacity = '0.5';
+                updateSelectedBadge();
 
                 fetch(url, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    signal: resultsController.signal
                 })
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) throw new Error('Falha ao atualizar a listagem');
+                    return response.text();
+                })
                 .then(html => {
+                    if (request !== resultsRequest) return;
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
+                    const table = doc.querySelector('.cpe-manager-table');
+                    const pagination = doc.querySelector('.cpe-pagination');
+                    if (!table || !pagination) throw new Error('Listagem indisponível');
 
-                    tableContainer.innerHTML = doc.querySelector('.cpe-manager-table').innerHTML;
-                    paginationContainer.innerHTML = doc.querySelector('.cpe-pagination').innerHTML;
-
-                    tableContainer.style.opacity = '1';
-                    updateSelectedBadge();
+                    tableContainer.innerHTML = table.innerHTML;
+                    paginationContainer.innerHTML = pagination.innerHTML;
                 })
                 .catch(error => {
-                    console.error('Erro ao buscar dados:', error);
+                    if (error.name === 'AbortError' || request !== resultsRequest) return;
+                    approvalFeedback.textContent = 'Não foi possível atualizar a lista. Tente novamente.';
+                    approvalFeedback.hidden = false;
+                })
+                .finally(() => {
+                    if (request !== resultsRequest) return;
+                    loadingResults = false;
+                    tableContainer.inert = false;
                     tableContainer.style.opacity = '1';
+                    updateSelectedBadge();
                 });
             }
 
@@ -519,6 +835,146 @@
                 });
             }
 
+            const municipioDropdown = document.getElementById('municipioSelectDropdown');
+            const municipioTrigger = document.getElementById('municipioSelectTrigger');
+            const municipioLabel = document.getElementById('municipioSelectLabel');
+            const municipioSearchInput = document.getElementById('municipio_search_input');
+            const municipioEmpty = document.getElementById('municipioSelectEmpty');
+
+            if (municipioDropdown && municipioTrigger && municipioSelect && municipioSearchInput) {
+                const normalizeText = function(val) {
+                    return (val || '')
+                        .toString()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase()
+                        .trim();
+                };
+
+                const municipioOptions = Array.from(municipioDropdown.querySelectorAll('.cpe-municipio-select__option')).map(function(el) {
+                    el.dataset.normalized = normalizeText(el.dataset.label);
+                    return el;
+                });
+
+                function setActiveMunicipioOption(option) {
+                    municipioOptions.forEach(function(item) {
+                        item.classList.remove('is-active');
+                    });
+                    if (option) {
+                        option.classList.add('is-active');
+                        option.scrollIntoView({ block: 'nearest' });
+                    }
+                }
+
+                function filterMunicipioOptions() {
+                    const term = normalizeText(municipioSearchInput.value);
+                    let visibleCount = 0;
+
+                    municipioOptions.forEach(function(option) {
+                        const match = term === '' || option.dataset.normalized.includes(term);
+                        option.hidden = !match;
+                        if (match) {
+                            visibleCount++;
+                        }
+                    });
+
+                    if (municipioEmpty) {
+                        municipioEmpty.hidden = visibleCount > 0;
+                    }
+                }
+
+                function openMunicipioDropdown() {
+                    municipioDropdown.classList.add('is-open');
+                    municipioTrigger.setAttribute('aria-expanded', 'true');
+                    municipioSearchInput.value = '';
+                    filterMunicipioOptions();
+                    const selectedOption = municipioDropdown.querySelector('.cpe-municipio-select__option.is-selected');
+                    setActiveMunicipioOption(selectedOption);
+                    requestAnimationFrame(function() {
+                        municipioSearchInput.focus();
+                    });
+                }
+
+                function closeMunicipioDropdown() {
+                    municipioDropdown.classList.remove('is-open');
+                    municipioTrigger.setAttribute('aria-expanded', 'false');
+                    setActiveMunicipioOption(null);
+                }
+
+                function selectMunicipioOption(option) {
+                    const newValue = option.dataset.value || '';
+                    const newLabel = option.dataset.label || 'Todos os municípios';
+                    const changed = String(municipioSelect.value) !== String(newValue);
+
+                    municipioSelect.value = newValue;
+                    if (municipioLabel) {
+                        municipioLabel.textContent = newLabel;
+                    }
+
+                    municipioOptions.forEach(function(item) {
+                        const isSel = item === option;
+                        item.classList.toggle('is-selected', isSel);
+                        item.setAttribute('aria-selected', isSel ? 'true' : 'false');
+                    });
+
+                    closeMunicipioDropdown();
+
+                    if (changed) {
+                        municipioSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+
+                municipioTrigger.addEventListener('click', function() {
+                    if (municipioDropdown.classList.contains('is-open')) {
+                        closeMunicipioDropdown();
+                    } else {
+                        openMunicipioDropdown();
+                    }
+                });
+
+                municipioSearchInput.addEventListener('input', function() {
+                    filterMunicipioOptions();
+                    const firstVisible = municipioOptions.find(function(opt) { return !opt.hidden; });
+                    setActiveMunicipioOption(firstVisible || null);
+                });
+
+                municipioSearchInput.addEventListener('keydown', function(e) {
+                    const visibleOptions = municipioOptions.filter(function(opt) { return !opt.hidden; });
+                    const current = municipioDropdown.querySelector('.cpe-municipio-select__option.is-active');
+                    const index = visibleOptions.indexOf(current);
+
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setActiveMunicipioOption(visibleOptions[Math.min(index + 1, visibleOptions.length - 1)] || visibleOptions[0]);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        setActiveMunicipioOption(visibleOptions[Math.max(index - 1, 0)]);
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const target = current || visibleOptions[0];
+                        if (target) {
+                            selectMunicipioOption(target);
+                        }
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        closeMunicipioDropdown();
+                        municipioTrigger.focus();
+                    }
+                });
+
+                municipioOptions.forEach(function(option) {
+                    option.addEventListener('click', function() {
+                        selectMunicipioOption(option);
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!municipioDropdown.contains(e.target)) {
+                        closeMunicipioDropdown();
+                    }
+                });
+            }
+
             const statusFilter = document.getElementById('statusFilter');
             if (statusFilter && filterForm) {
                 statusFilter.addEventListener('change', function() {
@@ -542,6 +998,17 @@
             //logica do modal de confirmação do gestor
             const gestorSubmitBtn = document.getElementById('gestorCartaSubmitBtn');
             const gestorForm = document.getElementById('gestorCartaForm');
+            const fluxoSelect = document.getElementById('gestorCartaFluxo');
+            const conversaCampos = document.getElementById('gestorConversaCampos');
+            const voluntarioSelect = document.getElementById('gestorVoluntario');
+            function atualizarFluxoCarta() {
+                const manual = fluxoSelect.value === 'manual';
+                conversaCampos.hidden = !manual;
+                conversaCampos.querySelectorAll('input, select').forEach(campo => campo.disabled = !manual);
+                voluntarioSelect.required = manual;
+            }
+            fluxoSelect.addEventListener('change', atualizarFluxoCarta);
+            atualizarFluxoCarta();
             const gestorConfirmModal = document.getElementById('gestorConfirmModal');
             const gestorConfirmOk = document.getElementById('gestorConfirmOk');
             const gestorConfirmCancel = document.querySelectorAll('[data-gestor-confirm-close]');

@@ -8,6 +8,7 @@ use App\Http\Controllers\AtividadeAcaoController;
 use App\Http\Controllers\AtividadeController;
 use App\Http\Controllers\AtualizacaoCadastralController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\AutorizacaoImagemController;
 use App\Http\Controllers\AutorizacaoImagemImportController;
 use App\Http\Controllers\AvaliacaoAtividadeController;
 use App\Http\Controllers\AvaliacaoConsolidadaController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\Cartas\AuthController as CartasAuthController;
 use App\Http\Controllers\Cartas\CartaController as CartasCartaController;
 use App\Http\Controllers\Cartas\CartaViewerDiagnosticController as CartasViewerDiagnosticController;
+use App\Http\Controllers\Cartas\RelatorioController as CartasRelatorioController;
 use App\Http\Controllers\Cartas\UserManagementController as CartasUserManagementController;
 use App\Http\Controllers\CertificadoController;
 use App\Http\Controllers\DashboardController;
@@ -29,6 +31,7 @@ use App\Http\Controllers\ModeloCertificadoController;
 use App\Http\Controllers\MunicipioController;
 use App\Http\Controllers\PainelGerencialController;
 use App\Http\Controllers\ParticipantesExclusivosController;
+use App\Http\Controllers\PresencaAutorizacaoImagemController;
 use App\Http\Controllers\PresencaController;
 use App\Http\Controllers\PresencaGerenciamentoController;
 use App\Http\Controllers\PresencaImportController;
@@ -101,6 +104,9 @@ Route::prefix('cartas')->name('cartas.')->group(function () {
         Route::middleware('cartas.verified')->group(function () {
             Route::post('/welcome-seen', [CartasAuthController::class, 'markWelcomeSeen'])->name('welcome.seen');
             Route::get('/dashboard', [CartasCartaController::class, 'dashboard'])->name('dashboard');
+            Route::get('/relatorios', [CartasRelatorioController::class, 'index'])
+                ->middleware('can:cartas.ver-relatorios')
+                ->name('relatorios.index');
             Route::get('/usuarios', [CartasUserManagementController::class, 'index'])->name('usuarios.index');
             Route::get('/usuarios/{managedUser}/editar', [CartasUserManagementController::class, 'edit'])->name('usuarios.edit');
             Route::put('/usuarios/{managedUser}', [CartasUserManagementController::class, 'update'])->name('usuarios.update');
@@ -111,6 +117,7 @@ Route::prefix('cartas')->name('cartas.')->group(function () {
             Route::post('/cartas/{carta}/mensagens', [CartasCartaController::class, 'storeMessage'])->name('cartas.mensagens.store');
             Route::post('/cartas/{carta}/responder', [CartasCartaController::class, 'respond'])->name('cartas.respond');
             Route::delete('/cartas/{carta}', [CartasCartaController::class, 'destroy'])->name('cartas.destroy');
+            Route::post('/mensagens/aprovar-lote', [CartasCartaController::class, 'approveBatch'])->name('mensagens.approve-batch');
             Route::post('/mensagens/{mensagem}/aprovar', [CartasCartaController::class, 'approveMessage'])->name('mensagens.approve');
             Route::post('/mensagens/{mensagem}/solicitar-ajuste', [CartasCartaController::class, 'requestMessageAdjustment'])->name('mensagens.adjustment');
             Route::put('/mensagens/{mensagem}/ajustar', [CartasCartaController::class, 'updateAdjustedMessage'])->name('mensagens.update-adjustment');
@@ -432,6 +439,19 @@ Route::resource('eventos.atividades', AtividadeController::class)
 Route::get('/eventos/{evento_id}/{atividade_id}/cadastro-e-inscricao', [EventoController::class, 'cadastro_inscricao'])->name('evento.cadastro_inscricao');
 Route::post('/eventos/cadastro-e-inscricao/store', [EventoController::class, 'store_cadastro_inscricao'])->name('evento.store_cadastro_inscricao');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/minhas-autorizacoes-imagem', [AutorizacaoImagemController::class, 'minhas'])->name('profile.autorizacoes-imagem');
+    Route::post('/minhas-autorizacoes-imagem/{evento}', [AutorizacaoImagemController::class, 'salvarMinha'])->name('profile.autorizacoes-imagem.salvar');
+
+    Route::get('/autorizacoes-imagem', [AutorizacaoImagemController::class, 'index'])->name('autorizacoes-imagem.index');
+    Route::get('/autorizacoes-imagem/exportar', [AutorizacaoImagemController::class, 'exportar'])->name('autorizacoes-imagem.export');
+    Route::post('/eventos/{evento}/participantes/{participante}/autorizacao-imagem', [AutorizacaoImagemController::class, 'registrar'])->name('autorizacoes-imagem.registrar');
+});
+Route::post('/presenca/{atividade}/autorizacao-imagem', [PresencaAutorizacaoImagemController::class, 'store'])
+    ->middleware('throttle:autorizacao-imagem-publica')->name('presenca.autorizacao-imagem');
+
+Route::post('/presenca/{atividade}/identificar', [PresencaController::class, 'identificar'])
+    ->middleware('throttle:autorizacao-imagem-publica')->name('presenca.identificar');
 Route::get('/presenca/{atividade}/confirmar', [PresencaController::class, 'confirmarPresenca'])->name('presenca.confirmar');
 Route::post('/presenca/{atividade}/confirmar', [PresencaController::class, 'store'])->name('presenca.store');
 Route::post('/presenca/{atividade}/demograficos', [PresencaController::class, 'salvarDemograficosEConfirmar'])->name('presenca.demograficos');

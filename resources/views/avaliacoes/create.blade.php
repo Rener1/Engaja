@@ -22,19 +22,7 @@
 
             @unless($universal)
             <div class="col-md-6">
-              <label for="atividade_id" class="form-label">Atividade</label>
-              <select id="atividade_id" name="atividade_id"
-                class="form-select @error('atividade_id') is-invalid @enderror" required>
-                <option value="">Selecione...</option>
-                @foreach ($atividades as $atividade)
-                <option value="{{ $atividade->id }}" @selected(old('atividade_id') == $atividade->id)>
-                  {{ $atividade->descricao }} @if($atividade->dia) ({{ \Carbon\Carbon::parse($atividade->dia)->format('d/m/Y') }})@endif — {{ $atividade->evento->nome ?? 'Sem evento' }}
-                </option>
-                @endforeach
-              </select>
-              @error('atividade_id')
-              <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
+              <x-momento-select id="atividade_id" name="atividade_id" :momentos="$atividades" required />
             </div>
             @endunless
 

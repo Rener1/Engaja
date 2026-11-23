@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrigemAutorizacaoImagem;
 use App\Http\Requests\AgendarPresencaRequest;
 use App\Models\Atividade;
 use App\Models\Evento;
@@ -11,6 +12,7 @@ use App\Models\Participante;
 use App\Models\Presenca;
 use App\Pdf\AutorizacaoDeImagem\ListaAutorizacaoImagem;
 use App\Pdf\ListaDePresenca\ListaPresencaFactory;
+use App\Services\AutorizacaoImagemContexto;
 use App\Support\AgendamentoPresenca;
 use App\Support\CargaHoraria;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -26,6 +28,12 @@ class AtividadeController extends Controller
 
     public function index(Request $request, Evento $evento)
     {
+        $filtros = $request->validate([
+            'municipio_id' => ['nullable', 'string'],
+            'de' => ['nullable', 'date_format:Y-m-d'],
+            'ate' => ['nullable', 'date_format:Y-m-d'],
+            'descricao' => ['nullable', 'string', 'max:255'],
+        ]);
         $userId = auth()->id();
 
         $municipiosDisponiveis = Municipio::whereHas('atividades', fn ($q) => $q->where('evento_id', $evento->id))
@@ -43,11 +51,14 @@ class AtividadeController extends Controller
                 'municipios.estado',
                 'avaliacaoAtividades' => fn ($rel) => $rel->when($userId, fn ($query) => $query->where('user_id', $userId)),
             ])
-            ->when($request->input('municipio_id') === 'brasil', fn ($q) => $q->where('abrangencia_nacional', true))
-            ->when($request->filled('municipio_id') && $request->input('municipio_id') !== 'brasil', fn ($q) => $q->whereHas(
+            ->when(($filtros['municipio_id'] ?? null) === 'brasil', fn ($q) => $q->where('abrangencia_nacional', true))
+            ->when(! empty($filtros['municipio_id']) && $filtros['municipio_id'] !== 'brasil', fn ($q) => $q->whereHas(
                 'municipios',
-                fn ($q2) => $q2->where('municipios.id', $request->municipio_id)
+                fn ($q2) => $q2->where('municipios.id', $filtros['municipio_id'])
             ))
+            ->when(! empty($filtros['de']), fn ($q) => $q->whereDate('dia', '>=', $filtros['de']))
+            ->when(! empty($filtros['ate']), fn ($q) => $q->whereDate('dia', '<=', $filtros['ate']))
+            ->when(! empty($filtros['descricao']), fn ($q) => $q->where('descricao', 'like', '%'.addcslashes($filtros['descricao'], '%_\\').'%'))
             ->orderByDesc('dia')
             ->orderByDesc('hora_inicio')
             ->paginate(12)
@@ -271,7 +282,17 @@ class AtividadeController extends Controller
      */
     private function regrasAgendamentoFormulario(Request $request): array
     {
-        return $request->user()?->can('presenca.abrir') ? AgendamentoPresenca::regras() : [];
+        if (! $request->user()?->can('presenca.abrir')) {
+            return [];
+        }
+
+        $ativo = $request->boolean('agendamento_presenca_ativo');
+        $regras = ['agendamento_presenca_ativo' => ['sometimes', 'boolean']];
+        foreach (AgendamentoPresenca::regras(exigirAoMenosUm: $ativo) as $campo => $validacoes) {
+            $regras[$campo] = ['exclude_if:agendamento_presenca_ativo,0', ...$validacoes];
+        }
+
+        return $regras;
     }
 
     /**
@@ -280,8 +301,17 @@ class AtividadeController extends Controller
      */
     private function converterAgendamentoFormulario(Request $request, array $dados): array
     {
+        unset($dados['agendamento_presenca_ativo']);
+
         if (! $request->user()?->can('presenca.abrir')) {
             unset($dados['presenca_abre_em'], $dados['presenca_fecha_em']);
+
+            return $dados;
+        }
+
+        if ($request->exists('agendamento_presenca_ativo') && ! $request->boolean('agendamento_presenca_ativo')) {
+            $dados['presenca_abre_em'] = null;
+            $dados['presenca_fecha_em'] = null;
 
             return $dados;
         }
@@ -320,7 +350,7 @@ class AtividadeController extends Controller
      * Dados dos municípios para o seletor: apenas o nome no município; UF e região por associação.
      *
      * @param  Collection<int, Municipio>  $municipios
-     * @return array<int, array{id: string, nome: string, estado: array{sigla: string, nome: string}, regiao: array{nome: string}}>
+     * @return array<int, array{id: string, nome: string, prioritario: bool, estado: array{sigla: string, nome: string}, regiao: array{nome: string}}>
      */
     private function municipiosParaSelecaoJson($municipios): array
     {
@@ -328,6 +358,7 @@ class AtividadeController extends Controller
             return [
                 'id' => (string) $m->id,
                 'nome' => $m->nome,
+                'prioritario' => $m->isPrioritario(),
                 'estado' => [
                     'sigla' => $m->estado->sigla ?? '',
                     'nome' => $m->estado->nome ?? '',
@@ -454,12 +485,13 @@ class AtividadeController extends Controller
         }
 
         // 3) Marca presenca (idempotente)
-        Presenca::updateOrCreate(
+        $presenca = Presenca::updateOrCreate(
             ['inscricao_id' => $inscricao->id, 'atividade_id' => $atividade->id],
             ['status' => 'presente', 'justificativa' => null]
         );
 
-        return back()->with('success', 'Presença confirmada com sucesso!');
+        return back()->with('success', 'Presença confirmada com sucesso!')
+            ->with(AutorizacaoImagemContexto::FLASH_KEY, app(AutorizacaoImagemContexto::class)->paraPresenca($presenca, session()->driver(), OrigemAutorizacaoImagem::PresencaAutenticada, $user));
     }
 
     private function listarAtividadesCopiaveis(?Atividade $ignorar = null)
@@ -534,8 +566,10 @@ class AtividadeController extends Controller
     {
         $this->authorize('presenca.abrir');
 
-        // o default para evitar erros é assessoria
-        $tipoTemplate = $request->query('tipo', 'assessoria');
+        $dados = $request->validate([
+            'tipo' => 'sometimes|string|in:assessoria,oficina,escuta_territorial,feira_pedagogica',
+        ]);
+        $tipoTemplate = $dados['tipo'] ?? 'assessoria';
 
         // puxa os dados
         $inscritos = $atividade->inscricoes()->with([

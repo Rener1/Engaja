@@ -29,7 +29,7 @@
       <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
     </svg>
     <div>
-      <strong>Nome e data de nascimento são obrigatórios. Informe e-mail ou CPF em cada registro.</strong>
+      <strong>Nome é obrigatório. Informe e-mail ou CPF em cada registro.</strong>
       Todos os demais campos da planilha são opcionais durante o processo de importação.
     </div>
   </div>
@@ -163,7 +163,7 @@
 
         {{-- Aviso obrigatórios --}}
         <div class="alert alert-success py-2 mb-4">
-           <strong>Nome e data de nascimento são obrigatórios. Informe e-mail ou CPF em cada registro.</strong> Todos os outros campos são opcionais durante o processo de importação.
+           <strong>Nome é obrigatório. Informe e-mail ou CPF em cada registro.</strong> Todos os outros campos são opcionais durante o processo de importação.
         </div>
 
         {{-- Accordion por campo --}}
@@ -319,12 +319,13 @@
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#campo-nascimento">
-                <span class="badge bg-danger me-2">Obrigatório</span> Data de nascimento
+                <span class="badge bg-secondary me-2">Opcional</span> Data de nascimento
               </button>
             </h2>
             <div id="campo-nascimento" class="accordion-collapse collapse" data-bs-parent="#accordionCampos">
               <div class="accordion-body">
-                <p>Informe em todos os registros uma data de nascimento válida, sem data futura. Use ano com quatro dígitos: <code>25/03/1990</code> ou <code>1990-03-25</code>.</p>
+                <p>Se informada, a data de nascimento deve ser válida, sem data futura. Use <code>DD/MM/AAAA</code>, <code>DD/MM/AA</code> ou <code>AAAA-MM-DD</code>.</p>
+                <p class="text-muted small">Ao utilizar anos com dois dígitos, valores até {{ now()->format('y') }} pertencem ao século atual; os demais, ao anterior. Para pessoas com 100 anos ou mais, é necessário informar o ano com quatro dígitos.</p>
                 <p class="mb-0 text-muted small">Células reconhecidas pelo Excel como data também são aceitas, mesmo quando exibem o ano com dois dígitos.</p>
               </div>
             </div>

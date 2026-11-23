@@ -10,6 +10,9 @@
         @if(Auth::user()->hasRole('cartas_admin'))
             <a href="{{ route('cartas.usuarios.index') }}">Gerenciar usuários</a>
         @endif
+        @can('cartas.ver-relatorios')
+            <a href="{{ route('cartas.relatorios.index') }}">Relatórios</a>
+        @endcan
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit">Sair</button>

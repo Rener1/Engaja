@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/dashboards/avaliacoes.js',
                 'resources/js/avaliacoes-distribuicao-charts.js',
+                'resources/js/cartas/relatorios.js',
             ],
             refresh: true,
         }),

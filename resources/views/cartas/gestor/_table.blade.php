@@ -3,6 +3,10 @@
         <thead>
             <tr>
                 <th style="width: 40px; text-align: center;">
+                    <input type="checkbox" id="selectAllApprovals" class="cpe-approval-checkbox"
+                        aria-label="Selecionar todas as respostas em preparação desta página"
+                        title="Selecionar todas as respostas em preparação desta página"
+                        @disabled(! $cartas->contains(fn ($carta) => $carta->podeAprovarResposta()))>
                 </th>
                 <th>ID</th>
                 <th>Status</th>
@@ -19,6 +23,7 @@
             @if ($cartas->count() > 0)
                 @foreach ($cartas as $carta)
                     @php
+                        $podeAprovar = $carta->podeAprovarResposta();
                         $ultimoStatus = $carta->ultimaMensagem?->status ?? $carta->status;
                         $statusClass = match (true) {
                             $carta->status === 'respondida' => 'cpe-pill--green',
@@ -35,7 +40,12 @@
                     @endphp
                     <tr>
                         <td style="text-align: center;">
-                            <input type="checkbox" name="carta_ids[]" value="{{ $carta->id }}" class="carta-checkbox" form="filterForm" checked style="width: 18px; height: 18px; cursor: pointer;">
+                            <span @if(! $podeAprovar) tabindex="0" title="Esta troca não possui resposta aguardando aprovação" @endif>
+                                <input type="checkbox" name="mensagem_ids[]" value="{{ $carta->ultimaMensagem?->id }}"
+                                    class="carta-checkbox cpe-approval-checkbox" form="approveBatchForm"
+                                    aria-label="{{ $podeAprovar ? 'Selecionar resposta da carta '.$carta->codigo.' para aprovação' : 'Esta troca não possui resposta aguardando aprovação' }}"
+                                    @disabled(! $podeAprovar)>
+                            </span>
                         </td>
                         <td>{{ $carta->codigo }}</td>
                         <td>

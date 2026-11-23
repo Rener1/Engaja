@@ -215,6 +215,11 @@ $jaInscrito = \Illuminate\Support\Facades\DB::table('inscricaos')
           Gerenciar
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownGerenciarEvento">
+          @can('viewAny', \App\Models\AutorizacaoImagem::class)
+            <li>
+              <a class="dropdown-item" href="{{ route('autorizacoes-imagem.index', ['evento_id' => $evento->id]) }}">Autorizações de imagem desta ação</a>
+            </li>
+          @endcan
           @hasanyrole('administrador|gerente|eq_pedagogica')
             <li>
               <a class="dropdown-item" href="{{ route('inscricoes.import', $evento)}}">Importar participantes</a>

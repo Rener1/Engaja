@@ -55,9 +55,26 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                   @enderror
                 </div>
-                <div class="d-flex justify-content-end">
-                  <button type="submit" class="btn btn-primary">Confirmar Presença / Realizar Avaliação</button>
+                <div id="autorizacao-presenca" class="mb-3" hidden>
+                  <fieldset>
+                    <legend class="fs-6"><strong>Você autoriza o uso de imagem, voz e nome nesta ação?</strong> </legend>
+                    <button type="button" class="btn btn-link p-0 mb-2" data-bs-toggle="modal" data-bs-target="#termoAutorizacaoImagemModal">Ler o termo de autorização</button>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="autorizado" value="1" id="autorizacaoPresencaSim" disabled @checked(in_array(old('autorizado'), [true, 1, '1'], true))>
+                      <label class="form-check-label" for="autorizacaoPresencaSim">Sim, autorizo.</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="autorizado" value="0" id="autorizacaoPresencaNao" disabled @checked(in_array(old('autorizado'), [false, 0, '0'], true))>
+                      <label class="form-check-label" for="autorizacaoPresencaNao">Não autorizo.</label>
+                    </div>
+                  </fieldset>
                 </div>
+                <p id="status-identificacao-presenca" class="small text-muted mb-2" role="status" aria-live="polite"></p>
+                <button type="button" id="tentar-identificacao-presenca" class="btn btn-link p-0 mb-2" hidden>Tentar novamente</button>
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary" id="confirmar-presenca" disabled>Confirmar Presença / Realizar Avaliação</button>
+                </div>
+                <noscript><p class="small text-muted mt-2">Ative o JavaScript para verificar o cadastro e confirmar sua presença.</p></noscript>
 
                 @if (session('show_register_button') && session('error'))
                   <a class="btn btn-outline-primary float-end mt-2"
@@ -122,6 +139,13 @@
             <input type="hidden"
                    name="user_token"
                    value="{{ session('demograficos_user_token', old('user_token')) }}">
+
+            @php
+              $escolhaImagem = old('autorizado', session('demograficos_autorizado'));
+            @endphp
+            @if(in_array($escolhaImagem, [true, false, 1, 0, '1', '0'], true))
+              <input type="hidden" name="autorizado" value="{{ (int) $escolhaImagem }}">
+            @endif
 
             {{-- 1. Identidade de Gênero --}}
             <div class="mb-3">
@@ -370,15 +394,112 @@
     </div>
   </div>
 
+  @if($estaAberta)
+    <div class="modal fade" id="termoAutorizacaoImagemModal" tabindex="-1" aria-labelledby="termoAutorizacaoImagemTitulo" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="termoAutorizacaoImagemTitulo"><strong>Termo de autorização de uso de imagem, voz e nome</strong></h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body" style="white-space: pre-line">{{ config('autorizacao_imagem.texto') }}</div>
+          <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('form-busca-presenca');
+        const campo = form.querySelector('[name="campo"]');
+        const bloco = document.getElementById('autorizacao-presenca');
+        const opcoes = Array.from(bloco.querySelectorAll('[name="autorizado"]'));
+        const confirmar = document.getElementById('confirmar-presenca');
+        const status = document.getElementById('status-identificacao-presenca');
+        const tentar = document.getElementById('tentar-identificacao-presenca');
+        let identificado = null;
+        let pendente = false;
+        let enviando = false;
+        let consulta = 0;
+        let controle;
+        let atraso;
+
+        const podeConfirmar = () => !enviando && identificado === campo.value.trim() &&
+          identificado !== '' && (!pendente || opcoes.some(opcao => opcao.checked));
+        const atualizarBotao = () => { confirmar.disabled = !podeConfirmar(); };
+        const invalidar = () => {
+          consulta++;
+          controle?.abort();
+          clearTimeout(atraso);
+          identificado = null;
+          pendente = false;
+          bloco.hidden = true;
+          tentar.hidden = true;
+          status.textContent = '';
+          opcoes.forEach(opcao => { opcao.checked = false; opcao.required = false; opcao.disabled = true; });
+          atualizarBotao();
+        };
+        const verificar = async () => {
+          const valor = campo.value.trim();
+          if (!valor || identificado === valor) return;
+          controle?.abort();
+          controle = new AbortController();
+          const atual = ++consulta;
+          confirmar.disabled = true;
+          tentar.hidden = true;
+          status.textContent = 'Verificando cadastro…';
+          try {
+            const response = await fetch(@json(route('presenca.identificar', $atividade)), {
+              method: 'POST', credentials: 'same-origin', signal: controle.signal,
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': form.querySelector('[name="_token"]').value },
+              body: JSON.stringify({ campo: valor })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (atual !== consulta || campo.value.trim() !== valor) return;
+            if (!response.ok || typeof data.autorizacao_pendente !== 'boolean') {
+              throw new Error(data.errors?.campo?.[0] || data.message || 'Não foi possível verificar o cadastro. Tente novamente.');
+            }
+            identificado = valor;
+            pendente = data.autorizacao_pendente;
+            bloco.hidden = !pendente;
+            opcoes.forEach(opcao => {
+              opcao.disabled = !pendente;
+              opcao.required = pendente;
+              if (!pendente) opcao.checked = false;
+            });
+            status.textContent = '';
+            atualizarBotao();
+          } catch (error) {
+            if (error.name === 'AbortError' || atual !== consulta) return;
+            identificado = null;
+            status.textContent = error.message || 'Não foi possível verificar o cadastro. Tente novamente.';
+            tentar.hidden = false;
+            atualizarBotao();
+          }
+        };
+
+        campo.addEventListener('input', () => {
+          invalidar();
+          if (campo.value.trim()) atraso = setTimeout(verificar, 350);
+        });
+        campo.addEventListener('blur', () => { clearTimeout(atraso); verificar(); });
+        tentar.addEventListener('click', verificar);
+        opcoes.forEach(opcao => opcao.addEventListener('change', atualizarBotao));
+        form.addEventListener('submit', event => {
+          if (!podeConfirmar()) { event.preventDefault(); return; }
+          enviando = true;
+          atualizarBotao();
+        });
+        if (campo.value.trim()) verificar();
+      });
+    </script>
+  @endif
+
   {{-- Scripts de controle dos modais --}}
   @if(session('success-presenca'))
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         const modalEl = document.getElementById('confirmacaoPresencaModal');
-        if (modalEl) {
-          const modal = new bootstrap.Modal(modalEl);
-          modal.show();
-        }
+        if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
       });
     </script>
   @endif

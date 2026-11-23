@@ -12,6 +12,7 @@ use App\Models\Municipio;
 use App\Models\User;
 use App\Notifications\Cartas\AjusteSolicitadoNotification;
 use App\Notifications\Cartas\CartaRecebidaNotification;
+use App\Services\Cartas\CartaAprovacaoService;
 use App\Services\Cartas\CartaTimbradoService;
 use App\Services\Cartas\CartaViewerLogger;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -29,6 +30,7 @@ class CartaController extends Controller
     public function __construct(
         private CartaTimbradoService $timbrado,
         private CartaViewerLogger $viewerLog,
+        private CartaAprovacaoService $aprovacao,
     ) {}
 
     public function dashboard(Request $request): View
@@ -78,6 +80,9 @@ class CartaController extends Controller
         abort_unless($this->isGestor($request->user()), 403);
 
         $data = $request->validate([
+            'fluxo' => ['nullable', Rule::in(['automatico', 'manual'])],
+            'voluntario_user_id' => ['exclude_unless:fluxo,manual', 'required', 'integer', 'exists:users,id'],
+            'arquivo_resposta' => ['exclude_unless:fluxo,manual', 'nullable', 'file', 'mimes:pdf', 'max:10240'],
             'envio_token' => ['required', 'uuid'],
             'remetente_user_id' => ['required', 'integer', 'exists:users,id'],
             'arquivo' => ['required', 'file', 'mimes:pdf', 'max:10240'],
@@ -91,14 +96,25 @@ class CartaController extends Controller
 
         $file = $request->file('arquivo');
         $envioToken = strtolower($data['envio_token']);
-        $envioHash = hash('sha256', json_encode([
+        $dadosHash = [
             (int) $data['remetente_user_id'],
             hash('sha256', $file->getClientOriginalName()),
             hash_file('sha256', $file->getRealPath()),
-        ], JSON_THROW_ON_ERROR));
+        ];
+        $manual = ($data['fluxo'] ?? 'automatico') === 'manual';
+        $resposta = $manual ? $request->file('arquivo_resposta') : null;
+        if ($manual && ! $this->remetenteCandidatosQuery()->whereKey($data['remetente_user_id'])->exists()) {
+            throw ValidationException::withMessages(['remetente_user_id' => 'Selecione um educando da lista de remetentes.']);
+        }
+        if ($manual) {
+            $dadosHash[] = (int) $data['voluntario_user_id'];
+            $dadosHash[] = $resposta ? hash_file('sha256', $resposta->getRealPath()) : null;
+            $dadosHash[] = $resposta?->getClientOriginalName();
+        }
+        $envioHash = hash('sha256', json_encode($dadosHash, JSON_THROW_ON_ERROR));
 
         if ($this->cartaDoEnvio($request->user(), $envioToken, $envioHash)) {
-            return redirect()->route('cartas.dashboard')->with('status', 'Carta enviada para o voluntário.');
+            return redirect()->route('cartas.dashboard')->with('status', $manual ? 'Conversa registrada.' : 'Carta enviada para o voluntário.');
         }
 
         $remetente = User::with('participante')->findOrFail($data['remetente_user_id']);
@@ -116,13 +132,15 @@ class CartaController extends Controller
             return back()->withErrors(['remetente_user_id' => 'Nenhuma ação de cartas está configurada.'])->withInput();
         }
 
-        $voluntario = $this->selectVoluntario($remetente);
+        $voluntario = $this->selectVoluntario($remetente, $manual ? (int) $data['voluntario_user_id'] : null);
         if (! $voluntario) {
-            return back()->withErrors(['destinatario' => 'Não há voluntários disponíveis para receber a carta.'])->withInput();
+            return back()->withErrors($manual
+                ? ['voluntario_user_id' => 'Selecione um voluntário válido que não seja o próprio remetente.']
+                : ['destinatario' => 'Não há voluntários disponíveis para receber a carta.'])->withInput();
         }
 
         try {
-            $carta = DB::transaction(function () use ($request, $participante, $voluntario, $file, $eventoCartas, $envioToken, $envioHash) {
+            $carta = DB::transaction(function () use ($request, $participante, $voluntario, $file, $eventoCartas, $envioToken, $envioHash, $resposta) {
                 if (! $participante->inscricoes()->where('evento_id', $eventoCartas->id)->exists()) {
                     Inscricao::create([
                         'evento_id' => $eventoCartas->id,
@@ -178,6 +196,10 @@ class CartaController extends Controller
                     ],
                 ]);
 
+                if ($resposta) {
+                    $this->registrarRespostaGestor($request, $carta, $resposta, 2);
+                }
+
                 return $carta;
             });
         } catch (UniqueConstraintViolationException $exception) {
@@ -186,19 +208,22 @@ class CartaController extends Controller
                 throw $exception;
             }
 
-            return redirect()->route('cartas.dashboard')->with('status', 'Carta enviada para o voluntário.');
+            return redirect()->route('cartas.dashboard')->with('status', $manual ? 'Conversa registrada.' : 'Carta enviada para o voluntário.');
         }
 
-        $voluntario->notify(new CartaRecebidaNotification($carta->load('mensagens')));
+        if (! $resposta) {
+            $voluntario->notify(new CartaRecebidaNotification($carta->load('mensagens')));
+        }
 
-        return redirect()->route('cartas.dashboard')->with('status', 'Carta enviada para o voluntário.');
+        return redirect()->route('cartas.dashboard')->with('status', $manual ? 'Conversa registrada.' : 'Carta enviada para o voluntário.');
     }
 
     public function storeMessage(Request $request, Carta $carta): RedirectResponse
     {
         abort_unless($this->isGestor($request->user()), 403);
 
-        $request->validate([
+        $data = $request->validate([
+            'tipo_remetente' => ['nullable', Rule::in([CartaMensagem::TIPO_REMETENTE_EDUCANDO, CartaMensagem::TIPO_REMETENTE_VOLUNTARIO])],
             'arquivo' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ], [
             'arquivo.required' => 'Selecione o arquivo da carta.',
@@ -211,6 +236,21 @@ class CartaController extends Controller
 
         abort_unless($participante && $voluntario, 422);
 
+        $tipo = $data['tipo_remetente'] ?? CartaMensagem::TIPO_REMETENTE_EDUCANDO;
+        if ($carta->proximoTipoRemetente() !== $tipo) {
+            return back()->withErrors(['arquivo' => 'A conversa mudou ou há uma resposta pendente. Atualize a página antes de anexar a próxima carta.']);
+        }
+
+        if ($tipo === CartaMensagem::TIPO_REMETENTE_VOLUNTARIO) {
+            DB::transaction(function () use ($request, $carta) {
+                $carta = Carta::whereKey($carta->id)->lockForUpdate()->firstOrFail();
+                abort_unless($carta->podeVoluntarioEnviar(), 422);
+                $this->registrarRespostaGestor($request, $carta, $request->file('arquivo'), ((int) $carta->mensagens()->max('rodada')) + 1);
+            });
+
+            return redirect()->route('cartas.cartas.show', $carta)->with('status', 'Resposta do voluntário adicionada.');
+        }
+
         if (! $carta->podeEducandoEnviar()) {
             return back()->withErrors(['arquivo' => 'Aguarde a resposta do voluntário antes de enviar uma nova carta.']);
         }
@@ -218,6 +258,8 @@ class CartaController extends Controller
         $file = $request->file('arquivo');
 
         DB::transaction(function () use ($request, $carta, $participante, $voluntario, $file) {
+            $carta = Carta::whereKey($carta->id)->lockForUpdate()->firstOrFail();
+            abort_unless($carta->podeEducandoEnviar(), 422);
             $rodada = ((int) $carta->mensagens()->max('rodada')) + 1;
             $path = $file->store("cartas/{$carta->id}/originais", 'local');
 
@@ -256,6 +298,37 @@ class CartaController extends Controller
         $voluntario->notify(new CartaRecebidaNotification($carta->load('mensagens')));
 
         return redirect()->route('cartas.cartas.show', $carta)->with('status', 'Carta adicionada.');
+    }
+
+    private function registrarRespostaGestor(Request $request, Carta $carta, \Illuminate\Http\UploadedFile $file, int $rodada): void
+    {
+        $path = $file->store("cartas/{$carta->id}/originais", 'local');
+        $mensagem = $carta->mensagens()->create([
+            'rodada' => $rodada,
+            'remetente_user_id' => $carta->voluntario_user_id,
+            'destinatario_participante_id' => $carta->educando_participante_id,
+            'tipo_remetente' => CartaMensagem::TIPO_REMETENTE_VOLUNTARIO,
+            'canal_entrada' => CartaMensagem::CANAL_ANEXO_MANUSCRITO,
+            'status' => CartaMensagem::STATUS_APROVADA,
+            'anexo_original_path' => $path,
+            'anexo_original_nome' => $file->getClientOriginalName(),
+            'anexo_original_mime' => $file->getClientMimeType(),
+            'anexo_original_tamanho' => $file->getSize(),
+            'enviada_em' => now(),
+            'verificada_por' => $request->user()->id,
+            'verificada_em' => now(),
+            'criada_por' => $request->user()->id,
+            'atualizada_por' => $request->user()->id,
+        ]);
+        $this->timbrado->aplicarAnexo($mensagem);
+        $carta->update(['status' => Carta::STATUS_RESPONDIDA, 'atualizada_por' => $request->user()->id]);
+        CartaEvento::create([
+            'carta_id' => $carta->id,
+            'carta_mensagem_id' => $mensagem->id,
+            'user_id' => $request->user()->id,
+            'tipo' => CartaEvento::TIPO_MENSAGEM_ENVIADA,
+            'dados_depois' => ['tipo_remetente' => CartaMensagem::TIPO_REMETENTE_VOLUNTARIO, 'registrada_pelo_gestor' => true],
+        ]);
     }
 
     public function respond(Request $request, Carta $carta): RedirectResponse
@@ -423,42 +496,48 @@ class CartaController extends Controller
     {
         abort_unless($this->isGestor($request->user()), 403);
 
-        $mensagem->load('carta');
-        abort_unless($mensagem->status === CartaMensagem::STATUS_AGUARDANDO_VERIFICACAO, 422);
-
-        DB::transaction(function () use ($request, $mensagem) {
-            $before = [
-                'mensagem_status' => $mensagem->status,
-                'carta_status' => $mensagem->carta->status,
-            ];
-
-            $mensagem->update([
-                'status' => CartaMensagem::STATUS_APROVADA,
-                'verificada_por' => $request->user()->id,
-                'verificada_em' => now(),
-                'parecer_verificacao' => null,
-                'atualizada_por' => $request->user()->id,
-            ]);
-
-            $mensagem->carta->update([
-                'status' => Carta::STATUS_RESPONDIDA,
-                'atualizada_por' => $request->user()->id,
-            ]);
-
-            CartaEvento::create([
-                'carta_id' => $mensagem->carta_id,
-                'carta_mensagem_id' => $mensagem->id,
-                'user_id' => $request->user()->id,
-                'tipo' => CartaEvento::TIPO_MENSAGEM_VERIFICADA,
-                'dados_antes' => $before,
-                'dados_depois' => [
-                    'mensagem_status' => CartaMensagem::STATUS_APROVADA,
-                    'carta_status' => Carta::STATUS_RESPONDIDA,
-                ],
-            ]);
-        });
+        abort_unless($this->aprovacao->aprovar($mensagem, $request->user()), 422);
 
         return back()->with('status', 'Resposta aprovada.');
+    }
+
+    public function approveBatch(Request $request): RedirectResponse
+    {
+        abort_unless($this->isGestor($request->user()), 403);
+
+        $data = $request->validate([
+            'mensagem_ids' => ['required', 'array', 'min:1', 'max:15'],
+            'mensagem_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+        ], [
+            'mensagem_ids.required' => 'Selecione pelo menos uma resposta para aprovar.',
+            'mensagem_ids.max' => 'Selecione no máximo 15 respostas por vez.',
+            'mensagem_ids.*.distinct' => 'Cada resposta deve ser selecionada apenas uma vez.',
+        ]);
+
+        $aprovadas = 0;
+        $mensagens = CartaMensagem::query()
+            ->whereIn('id', $data['mensagem_ids'])
+            ->orderBy('carta_id')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($mensagens as $mensagem) {
+            if ($this->aprovacao->aprovar($mensagem, $request->user())) {
+                $aprovadas++;
+            }
+        }
+
+        $ignoradas = count($data['mensagem_ids']) - $aprovadas;
+        $resultado = $aprovadas === 1 ? '1 resposta aprovada.' : "{$aprovadas} respostas aprovadas.";
+
+        if ($ignoradas > 0) {
+            $resultado .= $ignoradas === 1
+                ? ' 1 resposta não foi aprovada porque sua situação mudou ou ela não está mais disponível.'
+                : " {$ignoradas} respostas não foram aprovadas porque sua situação mudou ou elas não estão mais disponíveis.";
+            $resultado .= ' Atualizamos a listagem.';
+        }
+
+        return back()->with('status', $resultado);
     }
 
     public function requestMessageAdjustment(Request $request, CartaMensagem $mensagem): RedirectResponse
@@ -767,38 +846,30 @@ class CartaController extends Controller
         $municipioId = $request->input('municipio_id', $request->query('municipio_id'));
         $statusFilter = $request->input('status', $request->query('status'));
 
-        $cartaIds = $request->input('carta_ids', $request->query('carta_ids'));
-        if (is_string($cartaIds)) {
-            $cartaIds = array_filter(explode(',', $cartaIds));
-        }
-
-        $query = Carta::query()
+        $cartas = Carta::query()
             ->with([
                 'educando.user',
                 'educando.municipio.estado',
                 'voluntario',
                 'mensagens' => function ($q) {
-                    $q->orderBy('rodada', 'asc');
+                    $q->where('tipo_remetente', CartaMensagem::TIPO_REMETENTE_VOLUNTARIO)
+                        ->whereNotNull('enviada_em')
+                        ->reorder('rodada', 'desc')
+                        ->limit(1);
                 },
-            ]);
-
-        if (! empty($cartaIds) && is_array($cartaIds)) {
-            $query->whereIn('cartas.id', $cartaIds);
-        } else {
-            $query->when($search !== '', function ($query) use ($search) {
+            ])
+            ->when($search !== '', function ($query) use ($search) {
                 $this->applySearchFilter($query, $search);
             })
-                ->when($municipioId, function ($query) use ($municipioId) {
-                    $query->whereHas('educando', function ($q) use ($municipioId) {
-                        $q->where('municipio_id', $municipioId);
-                    });
-                })
-                ->when($statusFilter, function ($query) use ($statusFilter) {
-                    $this->applyStatusFilter($query, $statusFilter);
+            ->when($municipioId, function ($query) use ($municipioId) {
+                $query->whereHas('educando', function ($q) use ($municipioId) {
+                    $q->where('municipio_id', $municipioId);
                 });
-        }
-
-        $cartas = $query->latest()->get();
+            })
+            ->when($statusFilter, function ($query) use ($statusFilter) {
+                $this->applyStatusFilter($query, $statusFilter);
+            })
+            ->latest()->get();
 
         $zipFile = storage_path('app/temp_cartas_lote_'.uniqid().'.zip');
         $zip = new \ZipArchive;
@@ -871,7 +942,7 @@ class CartaController extends Controller
                 $this->applyStatusFilter($query, $statusFilter);
             })
             ->latest('updated_at')
-            ->paginate(9)
+            ->paginate(15)
             ->withQueryString();
 
         $hasActiveFilter = filled($municipioId) || filled($statusFilter) || ($search !== '');
@@ -881,9 +952,10 @@ class CartaController extends Controller
         }
 
         $engajaUsers = $this->remetenteCandidatosQuery()->get();
+        $voluntarios = $this->voluntariosQuery()->get();
         $municipios = Municipio::with('estado.regiao')->orderBy('nome')->get();
 
-        return view('cartas.gestor.index', compact('cartas', 'engajaUsers', 'search', 'municipioId', 'statusFilter', 'municipios'));
+        return view('cartas.gestor.index', compact('cartas', 'engajaUsers', 'search', 'municipioId', 'statusFilter', 'municipios', 'voluntarios'));
     }
 
     /**
@@ -987,17 +1059,18 @@ class CartaController extends Controller
     {
         return User::query()
             ->where('sistema_origem', User::SISTEMA_CARTAS)
-            ->role('cartas_voluntario')
+            ->whereHas('roles', fn ($query) => $query->where('name', 'cartas_voluntario')->where('guard_name', 'web'))
             ->with('participante.municipio.estado')
             ->orderBy('name');
     }
 
-    private function selectVoluntario(?User $remetente = null): ?User
+    private function selectVoluntario(?User $remetente = null, ?int $voluntarioId = null): ?User
     {
         $randomFn = DB::getDriverName() === 'mysql' ? 'RAND()' : 'RANDOM()';
         $remetenteCpf = $remetente?->participante?->cpf ? preg_replace('/\D+/', '', $remetente->participante->cpf) : null;
 
         return $this->voluntariosQuery()
+            ->when($voluntarioId, fn ($query) => $query->whereKey($voluntarioId))
             ->when($remetente, fn ($query) => $query->where('users.id', '!=', $remetente->id))
             ->when($remetenteCpf, function ($query) use ($remetenteCpf) {
                 $query->whereDoesntHave('participante', function ($sub) use ($remetenteCpf) {
@@ -1005,7 +1078,7 @@ class CartaController extends Controller
                 });
             })
             ->withCount('cartasComoVoluntario as cartas_atribuidas_count')
-            ->whereRaw('(SELECT COUNT(*) FROM "cartas" WHERE "cartas"."voluntario_user_id" = "users"."id" AND "cartas"."deleted_at" IS NULL) < "users"."cartas_limite_respostas"')
+            ->when($voluntarioId === null, fn ($query) => $query->whereRaw('(SELECT COUNT(*) FROM "cartas" WHERE "cartas"."voluntario_user_id" = "users"."id" AND "cartas"."deleted_at" IS NULL) < "users"."cartas_limite_respostas"'))
             ->reorder()
             ->orderByRaw("CASE WHEN \"users\".\"cartas_tipo_vinculo\" = 'petrobras' THEN 0 ELSE 1 END ASC")
             ->orderByRaw("cartas_atribuidas_count ASC, {$randomFn}")

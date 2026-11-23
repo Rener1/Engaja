@@ -62,11 +62,10 @@ class ParticipanteImportValidator
         unset($row);
 
         return $this->validateRows($rows, array_merge([
-            'data_nascimento' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'data_nascimento' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'sexo' => ['nullable', 'string', Rule::in(Participante::SEXOS)],
         ], $additionalRules), array_merge([
-            'data_nascimento.required' => 'Informe a data de nascimento.',
-            'data_nascimento.date_format' => 'Informe uma data de nascimento válida, com ano de quatro dígitos (DD/MM/AAAA ou AAAA-MM-DD).',
+            'data_nascimento.date_format' => 'Informe uma data de nascimento válida (DD/MM/AAAA, DD/MM/AA ou AAAA-MM-DD).',
             'data_nascimento.before_or_equal' => 'A data de nascimento não pode estar no futuro.',
             'sexo.string' => 'Informe um sexo válido.',
             'sexo.in' => 'Sexo não reconhecido. Selecione Masculino, Feminino ou Não preenchido.',
@@ -134,6 +133,16 @@ class ParticipanteImportValidator
 
         if (is_numeric($value) && (float) $value > 0 && (float) $value < 100000) {
             return ExcelDate::excelToDateTimeObject((float) $value)->format('Y-m-d');
+        }
+
+        if (preg_match('/^\d{2}\/\d{2}\/(\d{2})$/', $value, $matches)) {
+            $currentYear = now()->year;
+            $year = intdiv($currentYear, 100) * 100 + (int) $matches[1];
+            if ($year > $currentYear) {
+                $year -= 100;
+            }
+
+            $value = substr($value, 0, 6).$year;
         }
 
         foreach (['Y-m-d', 'd/m/Y'] as $format) {

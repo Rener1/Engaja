@@ -10,6 +10,8 @@ use App\Models\Municipio;
 use App\Models\Regiao;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ZipArchive;
 
 class CartaDownloadBatchTest extends CartasBaseTest
@@ -20,7 +22,7 @@ class CartaDownloadBatchTest extends CartasBaseTest
         Evento::where('id', '!=', $this->eventoCartas->id)->update(['is_cartas' => false]);
     }
 
-    public function test_gestor_dashboard_without_filters_has_unchecked_checkboxes(): void
+    public function test_gestor_dashboard_without_pending_responses_disables_approval_selection(): void
     {
         $this->criarCartaParaVoluntario();
 
@@ -28,11 +30,11 @@ class CartaDownloadBatchTest extends CartasBaseTest
             ->get(route('cartas.dashboard'));
 
         $response->assertOk();
-        $response->assertSee('1 de 1 selecionadas');
-        $response->assertSee('checked style="width: 18px;', false);
+        $response->assertSee('0 respostas selecionadas nesta página');
+        $response->assertSee('Esta troca não possui resposta aguardando aprovação');
     }
 
-    public function test_gestor_dashboard_with_municipio_filter_checks_boxes_by_default(): void
+    public function test_gestor_dashboard_with_municipio_filter_starts_without_approval_selection(): void
     {
         $regiao = Regiao::firstOrCreate(['nome' => 'Norte']);
         $estado = Estado::factory()->create(['regiao_id' => $regiao->id]);
@@ -47,8 +49,9 @@ class CartaDownloadBatchTest extends CartasBaseTest
             ->get(route('cartas.dashboard', ['municipio_id' => $municipioTarget->id]));
 
         $response->assertOk();
-        $response->assertSee('1 de 1 selecionadas');
-        $response->assertSee('checked', false);
+        $response->assertSee('0 respostas selecionadas nesta página');
+        $response->assertSee('Baixar cartas PDF');
+        $response->assertSee('(todas as páginas)');
     }
 
     public function test_gestor_dashboard_with_status_filter_filters_correctly(): void
@@ -65,7 +68,7 @@ class CartaDownloadBatchTest extends CartasBaseTest
         $response->assertOk();
         $response->assertSee('CARTA_RESP_999');
         $response->assertDontSee('CARTA_ENV_111');
-        $response->assertSee('1 de 1 selecionadas');
+        $response->assertSee('0 respostas selecionadas nesta página');
     }
 
     public function test_gestor_dashboard_combined_filters(): void
@@ -93,97 +96,155 @@ class CartaDownloadBatchTest extends CartasBaseTest
         $response->assertOk();
         $response->assertSee('CARTA_MATCH_777');
         $response->assertDontSee('CARTA_OTHER_333');
-        $response->assertSee('1 de 1 selecionadas');
+        $response->assertSee('0 respostas selecionadas nesta página');
     }
 
-    public function test_download_batch_downloads_only_selected_carta_ids(): void
+    public function test_download_batch_downloads_only_latest_sent_volunteer_message_per_carta(): void
     {
-        Storage::fake('local');
+        $carta = $this->criarCartaParaVoluntario();
+        $this->criarRespostaComArquivo($carta, 2, ['status' => CartaMensagem::STATUS_APROVADA]);
+        $this->criarRespostaComArquivo($carta, 4, ['arquivo_final_path' => 'cartas/resposta-final.pdf']);
+        Storage::disk('local')->put('cartas/resposta-final.pdf', 'Ultima resposta timbrada');
 
-        $userRemetente1 = User::factory()->create(['name' => 'Ana Remetente', 'sistema_origem' => User::SISTEMA_ENGAJA]);
-        $participante1 = $userRemetente1->participante;
-
-        $userRemetente2 = User::factory()->create(['name' => 'Bruno Remetente', 'sistema_origem' => User::SISTEMA_ENGAJA]);
-        $participante2 = $userRemetente2->participante;
-
-        // Carta 1 com arquivo
-        $carta1 = Carta::create([
-            'educando_participante_id' => $participante1->id,
-            'voluntario_user_id' => $this->voluntario->id,
-            'evento_id' => $this->eventoCartas->id,
-            'codigo' => 'CARTA_SEL_1',
-            'status' => Carta::STATUS_AGUARDANDO_VERIFICACAO,
-            'rodada_atual' => 1,
-            'criada_por' => $this->gestor->id,
-            'atualizada_por' => $this->gestor->id,
-        ]);
-        Storage::disk('local')->put('cartas/doc1.pdf', 'Conteudo PDF 1');
-        CartaMensagem::create([
-            'carta_id' => $carta1->id,
-            'rodada' => 1,
-            'remetente_participante_id' => $participante1->id,
+        Storage::disk('local')->put('cartas/educando.pdf', 'Nova mensagem do educando');
+        CartaMensagem::factory()->create([
+            'carta_id' => $carta->id,
+            'rodada' => 5,
+            'remetente_participante_id' => $this->educando->id,
             'destinatario_user_id' => $this->voluntario->id,
-            'tipo_remetente' => CartaMensagem::TIPO_REMETENTE_EDUCANDO,
-            'canal_entrada' => CartaMensagem::CANAL_ANEXO_MANUSCRITO,
-            'status' => CartaMensagem::STATUS_APROVADA,
-            'anexo_original_path' => 'cartas/doc1.pdf',
-            'anexo_original_nome' => 'doc1.pdf',
-            'anexo_original_mime' => 'application/pdf',
-            'enviada_em' => now(),
-            'criada_por' => $this->gestor->id,
-            'atualizada_por' => $this->gestor->id,
+            'anexo_original_path' => 'cartas/educando.pdf',
         ]);
+        $this->criarRespostaComArquivo($carta, 6, [
+            'status' => CartaMensagem::STATUS_RASCUNHO,
+            'enviada_em' => null,
+        ]);
+        $this->criarRespostaComArquivo($carta, 7)->delete();
 
-        // Carta 2 com arquivo
-        $carta2 = Carta::create([
-            'educando_participante_id' => $participante2->id,
-            'voluntario_user_id' => $this->voluntario->id,
-            'evento_id' => $this->eventoCartas->id,
-            'codigo' => 'CARTA_SEL_2',
-            'status' => Carta::STATUS_AGUARDANDO_VERIFICACAO,
-            'rodada_atual' => 1,
-            'criada_por' => $this->gestor->id,
-            'atualizada_por' => $this->gestor->id,
-        ]);
-        Storage::disk('local')->put('cartas/doc2.pdf', 'Conteudo PDF 2');
-        CartaMensagem::create([
-            'carta_id' => $carta2->id,
-            'rodada' => 1,
-            'remetente_participante_id' => $participante2->id,
-            'destinatario_user_id' => $this->voluntario->id,
-            'tipo_remetente' => CartaMensagem::TIPO_REMETENTE_EDUCANDO,
-            'canal_entrada' => CartaMensagem::CANAL_ANEXO_MANUSCRITO,
-            'status' => CartaMensagem::STATUS_APROVADA,
-            'anexo_original_path' => 'cartas/doc2.pdf',
-            'anexo_original_nome' => 'doc2.pdf',
-            'anexo_original_mime' => 'application/pdf',
-            'enviada_em' => now(),
-            'criada_por' => $this->gestor->id,
-            'atualizada_por' => $this->gestor->id,
-        ]);
+        $response = $this->actingAs($this->gestor)
+            ->get(route('cartas.download-batch'));
 
-        // Baixa apenas a carta 1 por ID selecionado
+        $this->assertSame(['Ultima resposta timbrada'], $this->conteudosDoZip($response));
+    }
+
+    #[DataProvider('managementRoles')]
+    public function test_download_batch_includes_all_filtered_pages_and_ignores_selected_ids(string $role): void
+    {
+        $this->gestor->syncRoles([$role]);
+        $this->remetente->update(['name' => 'Ana Remetente']);
+        $this->voluntario->update(['name' => 'Carlos Voluntario']);
+
+        $cartas = [];
+        $conteudosEsperados = [];
+        for ($i = 0; $i < 17; $i++) {
+            $carta = $this->criarCartaParaVoluntario();
+            $mensagem = $this->criarRespostaComArquivo($carta);
+            $cartas[] = $carta;
+            $conteudosEsperados[] = Storage::disk('local')->get($mensagem->anexo_original_path);
+        }
+
+        $outroRemetente = User::factory()->create(['name' => 'Bruno Remetente', 'sistema_origem' => User::SISTEMA_ENGAJA]);
+        $outroRemetente->participante->update(['municipio_id' => $this->educando->municipio_id]);
+        $foraDoNome = $this->criarCartaParaVoluntario();
+        $foraDoNome->update(['educando_participante_id' => $outroRemetente->participante->id]);
+        $this->criarRespostaComArquivo($foraDoNome);
+
+        $outroMunicipio = Municipio::factory()->create();
+        $remetenteOutraCidade = User::factory()->create(['name' => 'Ana Outra Cidade', 'sistema_origem' => User::SISTEMA_ENGAJA]);
+        $remetenteOutraCidade->participante->update(['municipio_id' => $outroMunicipio->id]);
+        $foraDoMunicipio = $this->criarCartaParaVoluntario();
+        $foraDoMunicipio->update(['educando_participante_id' => $remetenteOutraCidade->participante->id]);
+        $this->criarRespostaComArquivo($foraDoMunicipio);
+
+        $foraDoStatus = $this->criarCartaParaVoluntario();
+        $this->criarRespostaComArquivo($foraDoStatus, 2, ['status' => CartaMensagem::STATUS_APROVADA]);
+
         $response = $this->actingAs($this->gestor)
             ->get(route('cartas.download-batch', [
-                'carta_ids' => [$carta1->id],
+                'q' => 'Ana',
+                'municipio_id' => $this->educando->municipio_id,
+                'status' => 'pendente',
+                'page' => 2,
+                'carta_ids' => [$cartas[0]->id, $foraDoNome->id],
             ]));
 
+        $this->assertEqualsCanonicalizing($conteudosEsperados, $this->conteudosDoZip($response));
+    }
+
+    public static function managementRoles(): array
+    {
+        return [['cartas_gestao'], ['cartas_admin']];
+    }
+
+    public function test_download_batch_without_filters_includes_all_volunteer_responses(): void
+    {
+        $conteudosEsperados = [];
+        foreach ([CartaMensagem::STATUS_APROVADA, CartaMensagem::STATUS_AJUSTE_SOLICITADO] as $status) {
+            $carta = $this->criarCartaParaVoluntario();
+            $mensagem = $this->criarRespostaComArquivo($carta, 2, ['status' => $status]);
+            $conteudosEsperados[] = Storage::disk('local')->get($mensagem->anexo_original_path);
+        }
+
+        $semResposta = $this->criarCartaParaVoluntario();
+        $semResposta->mensagens()->first()->update(['anexo_original_path' => 'cartas/educando.pdf']);
+        Storage::disk('local')->put('cartas/educando.pdf', 'Carta sem resposta do voluntario');
+
+        $response = $this->actingAs($this->gestor)
+            ->get(route('cartas.download-batch'));
+
+        $this->assertEqualsCanonicalizing($conteudosEsperados, $this->conteudosDoZip($response));
+    }
+
+    public function test_download_batch_does_not_replace_latest_response_without_file_with_older_response(): void
+    {
+        $carta = $this->criarCartaParaVoluntario();
+        $this->criarRespostaComArquivo($carta);
+        $ultima = $this->criarRespostaComArquivo($carta, 4);
+        Storage::disk('local')->delete($ultima->anexo_original_path);
+
+        $response = $this->actingAs($this->gestor)
+            ->from(route('cartas.dashboard'))
+            ->get(route('cartas.download-batch'));
+
+        $response->assertRedirect(route('cartas.dashboard'));
+        $response->assertSessionHas('status', 'Nenhuma carta com anexo/PDF foi encontrada para gerar o lote.');
+    }
+
+    private function criarRespostaComArquivo(Carta $carta, int $rodada = 2, array $attributes = []): CartaMensagem
+    {
+        $path = "cartas/{$carta->id}/resposta-{$rodada}.pdf";
+        Storage::disk('local')->put($path, "Resposta {$carta->id} rodada {$rodada}");
+
+        return CartaMensagem::factory()->doVoluntario()->aguardandoVerificacao()->create(array_merge([
+            'carta_id' => $carta->id,
+            'rodada' => $rodada,
+            'remetente_user_id' => $this->voluntario->id,
+            'destinatario_participante_id' => $carta->educando_participante_id,
+            'anexo_original_path' => $path,
+            'anexo_original_nome' => "resposta-{$rodada}.pdf",
+            'anexo_original_mime' => 'application/pdf',
+        ], $attributes));
+    }
+
+    private function conteudosDoZip(TestResponse $response): array
+    {
         $response->assertOk();
-        $this->assertEquals('application/zip', $response->headers->get('content-type'));
+        $response->assertDownload('Cartas-Lote.zip');
+        $this->assertSame('application/zip', $response->headers->get('content-type'));
 
-        // Salvar temp para verificar conteudo do ZIP
-        $zipPath = tempnam(sys_get_temp_dir(), 'test_zip');
-        file_put_contents($zipPath, $response->streamedContent());
-
+        $zipPath = $response->baseResponse->getFile()->getPathname();
         $zip = new ZipArchive;
         $this->assertTrue($zip->open($zipPath));
-        $this->assertSame(1, $zip->numFiles);
 
-        $filenameInZip = $zip->getNameIndex(0);
-        $this->assertStringContainsString('Ana_Remetente', $filenameInZip);
-        $this->assertStringNotContainsString('Bruno_Remetente', $filenameInZip);
+        try {
+            $conteudos = [];
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $conteudos[] = $zip->getFromIndex($i);
+            }
 
-        $zip->close();
-        @unlink($zipPath);
+            return $conteudos;
+        } finally {
+            $zip->close();
+            unlink($zipPath);
+        }
     }
 }

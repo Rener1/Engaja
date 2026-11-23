@@ -6,6 +6,7 @@ use App\Models\Cartas\Carta;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Municipio extends Model
 {
@@ -50,11 +51,16 @@ class Municipio extends Model
 
     public function isPrioritario(): bool
     {
-        if ($this->relationLoaded('estado') && $this->estado && $this->estado->relationLoaded('regiao') && $this->estado->regiao) {
-            return $this->estado->regiao->isPrioritaria();
+        $uf = strtoupper(trim($this->estado?->sigla ?? ''));
+        $nome = Str::of($this->nome ?? '')->ascii()->lower()->squish()->value();
+
+        foreach (config('municipios_prioritarios.'.$uf, []) as $municipio) {
+            if (Str::of($municipio)->ascii()->lower()->squish()->value() === $nome) {
+                return true;
+            }
         }
 
-        return (bool) $this->estado?->regiao?->isPrioritaria();
+        return false;
     }
 
     public function getIsPrioritarioAttribute(): bool

@@ -35,7 +35,7 @@ class RolesPermissionsSeeder extends Seeder
             'agendamento.criar', 'agendamento.editar', 'agentamento.ver', 'agendamento.excluir', 'agendamento.notificar',
             'cartas.ver', 'cartas.criar', 'cartas.editar', 'cartas.excluir',
             'cartas.distribuir', 'cartas.responder', 'cartas.verificar',
-            'cartas.editar-enviada', 'cartas.relatorio', 'cartas.exportar',
+            'cartas.editar-enviada', 'cartas.exportar',
         ];
 
         foreach ($permissoes as $p) {
@@ -128,6 +128,8 @@ class RolesPermissionsSeeder extends Seeder
             'certificado.baixar',
         ]);
 
+        $this->call(AutorizacaoImagemPermissionsSeeder::class);
+
         // PARTICIPANTE
         $participante->givePermissionTo([
             'inscricao.ver', 'inscricao.criar',
@@ -141,16 +143,18 @@ class RolesPermissionsSeeder extends Seeder
         $cartasAdmin->givePermissionTo([
             'cartas.ver', 'cartas.criar', 'cartas.editar', 'cartas.excluir',
             'cartas.distribuir', 'cartas.responder', 'cartas.verificar',
-            'cartas.editar-enviada', 'cartas.relatorio', 'cartas.exportar',
+            'cartas.editar-enviada', 'cartas.exportar',
         ]);
 
         $cartasGestao->givePermissionTo([
             'cartas.ver', 'cartas.criar', 'cartas.editar',
-            'cartas.verificar', 'cartas.relatorio', 'cartas.exportar',
+            'cartas.verificar', 'cartas.exportar',
         ]);
 
         $cartasVoluntario->givePermissionTo([
             'cartas.ver', 'cartas.responder',
         ]);
+
+        $this->call(CartasRelatoriosPermissionsSeeder::class);
     }
 }

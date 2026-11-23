@@ -290,7 +290,7 @@
                                         </svg>
 
                                         <label class="form-check-label mb-0" for="autorizacao_imagem" style="cursor: pointer; font-size: .9rem; font-weight: 500;">
-                                            Autorização de imagem, voz e nome
+                                            Autorização global anterior (legado)
                                         </label>
 
                                         <button type="button" class="btn btn-link p-0 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#modalTermosImagem" aria-label="Ler termos de uso de imagem" title="Ler termos de uso de imagem">

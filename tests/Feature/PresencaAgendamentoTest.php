@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\AgendamentoPresenca;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -58,6 +59,98 @@ class PresencaAgendamentoTest extends TestCase
             'presenca_abre_em' => null,
             'presenca_fecha_em' => null,
         ], $atributos));
+    }
+
+    private function verificarCamposAgendamento(TestResponse $response, string $prefixo = '', bool $ativo = false, string $abre = '', string $fecha = ''): void
+    {
+        $response->assertOk();
+        $documento = new \DOMDocument;
+        @$documento->loadHTML($response->getContent());
+
+        $this->assertSame($abre, $documento->getElementById($prefixo.'presenca_abre_em')->getAttribute('value'));
+        $this->assertSame($fecha, $documento->getElementById($prefixo.'presenca_fecha_em')->getAttribute('value'));
+        $this->assertSame($ativo, $documento->getElementById($prefixo.'agendamento_presenca_ativo')->hasAttribute('checked'));
+        $fieldset = (new \DOMXPath($documento))->query('//*[@data-agendamento-campos]')->item(0);
+        $this->assertSame(! $ativo, $fieldset->hasAttribute('disabled'));
+    }
+
+    public function test_campos_de_agendamento_ficam_vazios_por_padrao_nas_telas_do_momento(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-05 12:00:00', 'UTC'));
+        $gerente = $this->criarUsuarioComPermissaoAbrir();
+        foreach (['atividade.criar', 'atividade.editar'] as $permissao) {
+            Permission::findOrCreate($permissao);
+            $gerente->givePermissionTo($permissao);
+        }
+        $atividade = $this->criarAtividade();
+
+        $this->actingAs($gerente);
+        $this->verificarCamposAgendamento($this->get(route('eventos.atividades.create', $atividade->evento)));
+        $this->verificarCamposAgendamento($this->get(route('atividades.edit', $atividade)));
+        $this->verificarCamposAgendamento($this->get(route('atividades.show', $atividade)), 'modal_');
+    }
+
+    public function test_agendamento_existente_exibe_somente_as_datas_salvas(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-05 12:00:00', 'UTC'));
+        $gerente = $this->criarUsuarioComPermissaoAbrir();
+        Permission::findOrCreate('atividade.editar');
+        $gerente->givePermissionTo('atividade.editar');
+        $atividade = $this->criarAtividade(['presenca_fecha_em' => Carbon::parse('2026-10-06 15:00:00', 'UTC')]);
+
+        $this->actingAs($gerente);
+        $this->verificarCamposAgendamento($this->get(route('atividades.edit', $atividade)), ativo: true, fecha: '2026-10-06T12:00');
+        $this->verificarCamposAgendamento($this->get(route('atividades.show', $atividade)), 'modal_', ativo: true, fecha: '2026-10-06T12:00');
+    }
+
+    public function test_desmarcar_agendamento_no_formulario_remove_as_datas_e_nao_as_recria_ao_voltar(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-05 12:00:00', 'UTC'));
+        $gerente = $this->criarUsuarioComPermissaoAbrir();
+        Permission::findOrCreate('atividade.editar');
+        $gerente->givePermissionTo('atividade.editar');
+        $atividade = $this->criarAtividade([
+            'presenca_ativa' => true,
+            'presenca_abre_em' => now()->addDay(),
+            'presenca_fecha_em' => now()->addDays(2),
+        ]);
+
+        $this->actingAs($gerente)->put(route('atividades.update', $atividade), [
+            'descricao' => $atividade->descricao,
+            'dia' => '2026-10-06',
+            'hora_inicio' => '08:00',
+            'hora_fim' => '12:00',
+            'agendamento_presenca_ativo' => '0',
+            // Campos desativados devem ser ignorados, inclusive se enviados indevidamente.
+            'presenca_abre_em' => 'data-invalida',
+            'presenca_fecha_em' => 'data-invalida',
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $atividade->refresh();
+        $this->assertNull($atividade->presenca_abre_em);
+        $this->assertNull($atividade->presenca_fecha_em);
+        $this->assertTrue($atividade->presencaEstaAberta());
+        $this->verificarCamposAgendamento($this->get(route('atividades.edit', $atividade)));
+        $this->verificarCamposAgendamento($this->get(route('atividades.show', $atividade)), 'modal_');
+    }
+
+    public function test_desmarcar_agendamento_no_modal_remove_as_datas(): void
+    {
+        $gerente = $this->criarUsuarioComPermissaoAbrir();
+        $atividade = $this->criarAtividade([
+            'presenca_abre_em' => now()->addDay(),
+            'presenca_fecha_em' => now()->addDays(2),
+        ]);
+
+        $this->actingAs($gerente)->patch(route('atividades.presenca.agendamento', $atividade), [
+            'agendamento_presenca_ativo' => '0',
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $atividade->refresh();
+        $this->assertNull($atividade->presenca_abre_em);
+        $this->assertNull($atividade->presenca_fecha_em);
+        $this->assertFalse($atividade->presencaEstaAberta());
+        $this->verificarCamposAgendamento($this->get(route('atividades.show', $atividade)), 'modal_');
     }
 
     public function test_participante_e_bloqueado_quando_presenca_estiver_fechada_no_qr_store(): void
@@ -246,6 +339,7 @@ class PresencaAgendamentoTest extends TestCase
 
         // Horário de Brasília digitado no input: 06/10 às 08:00 e 12:00
         $response = $this->actingAs($gerente)->patch(route('atividades.presenca.agendamento', $atividade), [
+            'agendamento_presenca_ativo' => '1',
             'presenca_abre_em' => '2026-10-06T08:00',
             'presenca_fecha_em' => '2026-10-06T12:00',
         ]);
@@ -362,6 +456,7 @@ class PresencaAgendamentoTest extends TestCase
 
         $response = $this->actingAs($gerente)->put(route('atividades.update', $atividade), [
             'descricao' => 'Momento com agendamento',
+            'agendamento_presenca_ativo' => '1',
             'dia' => '2026-10-06',
             'hora_inicio' => '08:00',
             'hora_fim' => '12:00',
@@ -389,6 +484,7 @@ class PresencaAgendamentoTest extends TestCase
 
         $response = $this->actingAs($usuario)->put(route('atividades.update', $atividade), [
             'descricao' => 'Momento alterado',
+            'agendamento_presenca_ativo' => '0',
             'dia' => '2026-10-06',
             'hora_inicio' => '08:00',
             'hora_fim' => '12:00',
@@ -417,6 +513,7 @@ class PresencaAgendamentoTest extends TestCase
 
         $response = $this->actingAs($gerente)->post(route('eventos.atividades.store', $evento), [
             'descricao' => 'Novo Momento Agendado',
+            'agendamento_presenca_ativo' => '1',
             'dia' => '2026-10-06',
             'hora_inicio' => '08:00',
             'hora_fim' => '12:00',
@@ -430,6 +527,59 @@ class PresencaAgendamentoTest extends TestCase
         $this->assertEquals('2026-10-06 11:00:00', $atividade->presenca_abre_em->format('Y-m-d H:i:s'));
         $this->assertEquals('2026-10-06 15:00:00', $atividade->presenca_fecha_em->format('Y-m-d H:i:s'));
         $this->assertFalse($atividade->presenca_ativa);
+    }
+
+    public function test_bloqueia_salvar_criacao_e_edicao_quando_agendamento_ativo_sem_horarios(): void
+    {
+        foreach (['atividade.criar', 'atividade.editar', 'presenca.abrir'] as $permissao) {
+            Permission::findOrCreate($permissao);
+        }
+
+        $gerente = User::factory()->create();
+        $gerente->givePermissionTo(['atividade.criar', 'atividade.editar', 'presenca.abrir']);
+
+        $abreOriginal = Carbon::parse('2026-10-06 11:00:00', 'UTC');
+        $atividade = $this->criarAtividade(['presenca_abre_em' => $abreOriginal]);
+
+        // 1. Criar momento com "Ativar agendamento de presença" marcado e ambos os horários vazios
+        $resCriar = $this->actingAs($gerente)
+            ->from(route('eventos.atividades.create', $atividade->evento))
+            ->post(route('eventos.atividades.store', $atividade->evento), [
+                'descricao' => 'Momento Bloqueado',
+                'agendamento_presenca_ativo' => '1',
+                'dia' => '2026-10-06',
+                'hora_inicio' => '08:00',
+                'hora_fim' => '12:00',
+                'presenca_abre_em' => '',
+                'presenca_fecha_em' => '',
+            ]);
+
+        $resCriar->assertRedirect(route('eventos.atividades.create', $atividade->evento));
+        $resCriar->assertSessionHasErrors([
+            'presenca_abre_em' => AgendamentoPresenca::MENSAGEM_SEM_HORARIO,
+        ]);
+        $this->assertDatabaseMissing('atividades', ['descricao' => 'Momento Bloqueado']);
+
+        // 2. Editar momento com "Ativar agendamento de presença" marcado e ambos os horários vazios
+        $resEditar = $this->actingAs($gerente)
+            ->from(route('atividades.edit', $atividade))
+            ->put(route('atividades.update', $atividade), [
+                'descricao' => 'Momento Editado Sem Horarios',
+                'agendamento_presenca_ativo' => '1',
+                'dia' => '2026-10-06',
+                'hora_inicio' => '08:00',
+                'hora_fim' => '12:00',
+                'presenca_abre_em' => '',
+                'presenca_fecha_em' => '',
+            ]);
+
+        $resEditar->assertRedirect(route('atividades.edit', $atividade));
+        $resEditar->assertSessionHasErrors([
+            'presenca_abre_em' => AgendamentoPresenca::MENSAGEM_SEM_HORARIO,
+        ]);
+
+        $atividade->refresh();
+        $this->assertEquals($abreOriginal->format('Y-m-d H:i:s'), $atividade->presenca_abre_em->format('Y-m-d H:i:s'));
     }
 
     public function test_criacao_de_atividade_sem_agendamento_de_abertura_cria_com_presenca_aberta(): void
@@ -575,5 +725,74 @@ class PresencaAgendamentoTest extends TestCase
         $resBusca->assertOk();
         $resBusca->assertSee('Oficina Leitura Aberta');
         $resBusca->assertDontSee('Palestra Fechada');
+    }
+
+    public function test_cards_do_gerenciamento_contabilizam_todos_os_momentos_independente_da_pagina_e_dos_filtros(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-06 12:00:00', 'UTC'));
+        $gerente = $this->criarUsuarioComPermissaoAbrir();
+        $eixo = Eixo::create(['nome' => 'Eixo Teste']);
+        $evento = Evento::factory()->create(['eixo_id' => $eixo->id]);
+
+        Atividade::factory()->count(30)->presencaFechada()->create(['evento_id' => $evento->id]);
+
+        // Inclui transições vencidas, o instante exato da transição e estado manual
+        // com abertura futura, conforme presencaEstaAberta().
+        $estados = [
+            [false, null, null],
+            [true, null, null],
+            [false, now()->subHour(), null],
+            [true, now()->addHour(), null],
+            [false, now()->addHour(), null],
+            [true, now()->subHour(), now()],
+            [false, now(), now()->addHour()],
+            [true, null, now()->subHour()],
+            [true, null, now()->addHour()],
+        ];
+
+        foreach ($estados as [$ativa, $abre, $fecha]) {
+            Atividade::factory()->create([
+                'evento_id' => $evento->id,
+                'presenca_ativa' => $ativa,
+                'presenca_abre_em' => $abre,
+                'presenca_fecha_em' => $fecha,
+            ]);
+        }
+
+        // Momentos excluídos ou de ações excluídas não entram nos totais.
+        $atributosExcluidos = [
+            'presenca_ativa' => true,
+            'presenca_fecha_em' => now()->addHour(),
+        ];
+        Atividade::factory()->create($atributosExcluidos + ['evento_id' => $evento->id])->delete();
+        $eventoExcluido = Evento::factory()->create(['eixo_id' => $eixo->id]);
+        Atividade::factory()->create($atributosExcluidos + ['evento_id' => $eventoExcluido->id]);
+        $eventoExcluido->delete();
+
+        foreach ([[], ['page' => 2], ['status' => 'aberta', 'q' => 'Busca sem resultados']] as $filtros) {
+            $response = $this->actingAs($gerente)->get(route('presencas.gerenciamento', $filtros));
+
+            $response->assertOk()
+                ->assertViewHas('totalAtividades', 39)
+                ->assertViewHas('totalAbertas', 5)
+                ->assertViewHas('totalFechadas', 34)
+                ->assertViewHas('comAgendamentoFuturo', 4)
+                ->assertDontSee('Nesta Listagem');
+
+            $quantidadeNaPagina = isset($filtros['q']) ? 0 : (isset($filtros['page']) ? 14 : 25);
+            $this->assertCount($quantidadeNaPagina, $response->viewData('atividades'));
+        }
+    }
+
+    public function test_cards_do_gerenciamento_retornam_zero_quando_nao_ha_momentos(): void
+    {
+        $gerente = $this->criarUsuarioComPermissaoAbrir();
+
+        $this->actingAs($gerente)->get(route('presencas.gerenciamento'))
+            ->assertOk()
+            ->assertViewHas('totalAtividades', 0)
+            ->assertViewHas('totalAbertas', 0)
+            ->assertViewHas('totalFechadas', 0)
+            ->assertViewHas('comAgendamentoFuturo', 0);
     }
 }

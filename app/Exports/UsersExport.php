@@ -53,7 +53,7 @@ class UsersExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
             'Tipo de organização',
             'Organização',
             'Vínculo',
-            'Autorização de Imagem'
+            'Autorização de Imagem (legado global)'
         ];
     }
 

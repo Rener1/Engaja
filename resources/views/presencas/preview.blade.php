@@ -17,7 +17,7 @@
   </div>
   @endif
 
-  <p class="text-muted"><strong>Nome, data de nascimento e status são obrigatórios. Informe e-mail ou CPF em cada registro. Salve as alterações da página antes de confirmar.</strong></p>
+  <p class="text-muted"><strong>Nome e status são obrigatórios. Informe e-mail ou CPF em cada registro. Salve as alterações da página antes de confirmar.</strong></p>
 
   <form method="POST" action="{{ route('atividades.presencas.savepage', $atividade) }}" class="mb-3">
     @csrf
@@ -37,7 +37,7 @@
                 <th>Tipo de Organização</th>
                 <th>Organização</th>
                 <th>Tag</th>
-                <th style="min-width:180px;">Data de nascimento *</th>
+                <th style="min-width:180px;">Data de nascimento</th>
                 <th style="min-width:180px;">Sexo</th>
                 <th style="min-width:150px;">Status</th>
                 <!-- <th>Justificativa</th> -->
@@ -105,7 +105,7 @@
                     class="form-control form-control-sm @error("rows.$gi.data_nascimento") is-invalid @enderror"
                     name="rows[{{ $gi }}][data_nascimento]"
                     value="{{ old("rows.$gi.data_nascimento", $r['data_nascimento'] ?? '') }}"
-                    max="{{ now()->toDateString() }}" required>
+                    max="{{ now()->toDateString() }}">
                   @error("rows.$gi.data_nascimento") <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </td>
                 <td>

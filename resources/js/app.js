@@ -5,6 +5,8 @@ import "./graficos-distribuicao-dimensoes";
 import "./lib/ag-grid-table";
 import "./lib/segmented-control";
 import "./lib/pagination";
+import "../css/momento-select.css";
+import { initMomentoSelects } from "./components/momento-select";
 import "tom-select/dist/css/tom-select.bootstrap5.min.css";
 import TomSelect from "tom-select";
 
@@ -111,6 +113,9 @@ const loadCartasPdfIfNeeded = () => {
 };
 
 if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => initMomentoSelects(), {
+        once: true,
+    });
     document.addEventListener("DOMContentLoaded", loadMultiSelectsIfNeeded, {
         once: true,
     });
@@ -124,6 +129,7 @@ if (document.readyState === "loading") {
         once: true,
     });
 } else {
+    initMomentoSelects();
     loadMultiSelectsIfNeeded();
     loadReportMomentSelectIfNeeded();
     loadFabricIfNeeded();

@@ -76,7 +76,7 @@
                 $fim = $ev->data_fim ? \Carbon\Carbon::parse($ev->data_fim)->format('d/m/Y') : null;
                 $mostrarFim = $fim && (!$inicio || $fim !== $inicio);
                 if ($inicio || $fim) {
-                    $periodoHtml = e($inicio ?? '-') . ($mostrarFim ? '<br><small class="text-muted">até ' . e($fim) . '</small>' : '');
+                    $periodoHtml = e($inicio ?? '-') . ($mostrarFim ? '<br><span style="color: inherit; padding-left: 0.25rem;">até ' . e($fim) . '</span>' : '');
                 } else {
                     $periodoHtml = '-';
                 }

@@ -15,9 +15,9 @@
   <div>
     <x-ui.filter-card>
         <form method="GET" action="{{ route('eventos.atividades.index', $evento) }}" class="row g-3 align-items-end">
-          <div class="col-auto">
+          <div class="col-12 col-md-6 col-lg-3">
             <label for="municipio_id" class="eg-filter-label">Município</label>
-            <x-ui.select name="municipio_id" id="municipio_id" onchange="this.form.submit()">
+            <x-ui.select name="municipio_id" id="municipio_id">
               <option value="">Todos</option>
               @if($temAbrangenciaNacional ?? false)
                 <option value="brasil" @selected(request('municipio_id') === 'brasil')>Brasil</option>
@@ -29,17 +29,34 @@
               @endforeach
             </x-ui.select>
           </div>
-          @if(request('municipio_id'))
-            <div class="col-auto">
-              <a href="{{ route('eventos.atividades.index', $evento) }}" class="btn btn-outline-secondary">Limpar filtro</a>
-            </div>
-          @endif
+          <div class="col-6 col-md-3 col-lg-2">
+            <label for="de" class="eg-filter-label">Data inicial</label>
+            <x-ui.input type="date" name="de" id="de" value="{{ request('de') }}" />
+          </div>
+          <div class="col-6 col-md-3 col-lg-2">
+            <label for="ate" class="eg-filter-label">Data final</label>
+            <x-ui.input type="date" name="ate" id="ate" value="{{ request('ate') }}" />
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label for="descricao" class="eg-filter-label">Descrição</label>
+            <x-ui.input type="search" name="descricao" id="descricao" maxlength="255" value="{{ request('descricao') }}" placeholder="Buscar descrição" />
+          </div>
+          <div class="col eg-filter-actions justify-content-end">
+            @if(request()->hasAny(['municipio_id', 'de', 'ate', 'descricao']))
+              <a href="{{ route('eventos.atividades.index', $evento) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i> Limpar filtros
+              </a>
+            @endif
+            <button type="submit" class="btn btn-engaja px-3">
+              <i class="bi bi-funnel-fill me-1"></i> Filtrar
+            </button>
+          </div>
         </form>
     </x-ui.filter-card>
 
     @php
         $columns = [
-            ['field' => 'dia', 'headerName' => 'Dia', 'flex' => 1],
+            ['field' => 'dia', 'headerName' => 'Data', 'flex' => 1],
             ['field' => 'municipios', 'headerName' => 'Municípios', 'flex' => 2],
             ['field' => 'descricao', 'headerName' => 'Descrição', 'flex' => 2],
             ['field' => 'carga_horaria', 'headerName' => 'Carga horária', 'flex' => 1],

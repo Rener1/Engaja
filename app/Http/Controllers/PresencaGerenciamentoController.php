@@ -24,7 +24,12 @@ class PresencaGerenciamentoController extends Controller
         $ate = $request->date('ate');
         $q = trim((string) $request->get('q', ''));
 
-        $query = Atividade::query()
+        $queryBase = Atividade::query()
+            ->whereNull('atividades.deleted_at')
+            ->whereNotNull('atividades.evento_id')
+            ->whereHas('evento', fn ($ev) => $ev->whereNull('deleted_at'));
+
+        $query = (clone $queryBase)
             ->with([
                 'evento:id,nome',
                 'municipio.estado:id,nome,sigla',
@@ -33,10 +38,7 @@ class PresencaGerenciamentoController extends Controller
             ->withCount([
                 'presencas as presentes_count' => fn ($rel) => $rel->where('status', 'presente'),
                 'inscricoes as inscritos_count' => fn ($rel) => $rel->whereNull('deleted_at'),
-            ])
-            ->whereNull('atividades.deleted_at')
-            ->whereNotNull('atividades.evento_id')
-            ->whereHas('evento', fn ($ev) => $ev->whereNull('deleted_at'));
+            ]);
 
         // Filtro por Ação pedagógica
         $query->when($eventoId, fn ($builder) => $builder->where('evento_id', $eventoId));
@@ -111,14 +113,25 @@ class PresencaGerenciamentoController extends Controller
 
         $atividades = $query->paginate(25)->appends($request->query());
 
-        $totalAtividades = Atividade::query()->whereNotNull('evento_id')->count();
-        $comAgendamentoFuturo = Atividade::query()
-            ->whereNotNull('evento_id')
-            ->where(function ($b) use ($agora) {
-                $b->where(fn ($sub) => $sub->whereNotNull('presenca_abre_em')->where('presenca_abre_em', '>', $agora))
-                    ->orWhere(fn ($sub) => $sub->whereNotNull('presenca_fecha_em')->where('presenca_fecha_em', '>', $agora));
-            })
-            ->count();
+        // Totais gerais, independentes dos filtros e da paginação da tabela.
+        // A prioridade dos horários segue Atividade::presencaEstaAberta().
+        $resumo = (clone $queryBase)->selectRaw('
+            COUNT(*) AS total,
+            COALESCE(SUM(CASE
+                WHEN presenca_fecha_em <= ? THEN 0
+                WHEN presenca_abre_em <= ? OR presenca_ativa = ? THEN 1
+                ELSE 0
+            END), 0) AS abertas,
+            COALESCE(SUM(CASE
+                WHEN presenca_abre_em > ? OR presenca_fecha_em > ? THEN 1
+                ELSE 0
+            END), 0) AS agendadas
+        ', [$agora, $agora, true, $agora, $agora])->first();
+
+        $totalAtividades = (int) $resumo->total;
+        $totalAbertas = (int) $resumo->abertas;
+        $totalFechadas = $totalAtividades - $totalAbertas;
+        $comAgendamentoFuturo = (int) $resumo->agendadas;
 
         // Lista de eventos e municípios para os filtros
         $eventos = Evento::query()->orderBy('nome')->pluck('nome', 'id');
@@ -129,6 +142,8 @@ class PresencaGerenciamentoController extends Controller
             'eventos',
             'municipios',
             'totalAtividades',
+            'totalAbertas',
+            'totalFechadas',
             'comAgendamentoFuturo'
         ));
     }

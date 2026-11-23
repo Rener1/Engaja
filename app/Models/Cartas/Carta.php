@@ -121,6 +121,20 @@ class Carta extends Model
         return $this->hasMany(CartaEvento::class)->latest('created_at');
     }
 
+    public function podeAprovarResposta(): bool
+    {
+        $mensagem = $this->ultimaMensagem;
+
+        return ! in_array($this->status, [
+            self::STATUS_RESPONDIDA,
+            self::STATUS_AGUARDANDO_AJUSTE,
+            self::STATUS_ENCERRADA,
+        ], true)
+            && $mensagem?->status === CartaMensagem::STATUS_AGUARDANDO_VERIFICACAO
+            && $mensagem->tipo_remetente === CartaMensagem::TIPO_REMETENTE_VOLUNTARIO
+            && $mensagem->enviada_em !== null;
+    }
+
     /**
      * Uma mensagem ainda aguardando verificação ou ajuste bloqueia novos envios na conversa.
      */

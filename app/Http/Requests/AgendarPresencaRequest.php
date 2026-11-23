@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Support\AgendamentoPresenca;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Validator;
 
 class AgendarPresencaRequest extends FormRequest
 {
@@ -20,7 +19,13 @@ class AgendarPresencaRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
-        return AgendamentoPresenca::regras(fechamentoNoFuturo: true);
+        $ativo = ! $this->exists('agendamento_presenca_ativo') || $this->boolean('agendamento_presenca_ativo');
+        $regras = ['agendamento_presenca_ativo' => ['sometimes', 'boolean']];
+        foreach (AgendamentoPresenca::regras(fechamentoNoFuturo: true, exigirAoMenosUm: $ativo) as $campo => $validacoes) {
+            $regras[$campo] = ['exclude_if:agendamento_presenca_ativo,0', ...$validacoes];
+        }
+
+        return $regras;
     }
 
     /** @return array<string, string> */
@@ -29,20 +34,13 @@ class AgendarPresencaRequest extends FormRequest
         return AgendamentoPresenca::mensagens();
     }
 
-    public function after(): array
-    {
-        return [
-            function (Validator $validator) {
-                if (! $this->filled('presenca_abre_em') && ! $this->filled('presenca_fecha_em')) {
-                    $validator->errors()->add('presenca_abre_em', 'Informe ao menos um horário de abertura ou de fechamento.');
-                }
-            },
-        ];
-    }
-
     /** @return array{presenca_abre_em: ?Carbon, presenca_fecha_em: ?Carbon} */
     public function horariosUtc(): array
     {
+        if ($this->exists('agendamento_presenca_ativo') && ! $this->boolean('agendamento_presenca_ativo')) {
+            return ['presenca_abre_em' => null, 'presenca_fecha_em' => null];
+        }
+
         return [
             'presenca_abre_em' => AgendamentoPresenca::paraUtc($this->validated('presenca_abre_em')),
             'presenca_fecha_em' => AgendamentoPresenca::paraUtc($this->validated('presenca_fecha_em')),

@@ -564,6 +564,7 @@
               <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                 <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Meu perfil</a></li>
                 <li><a class="dropdown-item" href="{{ route('profile.certificados') }}">Meus certificados</a></li>
+                <li><a class="dropdown-item" href="{{ route('profile.autorizacoes-imagem') }}">Minhas autorizações de imagem</a></li>
                 <li>
                   <hr class="dropdown-divider">
                 </li>
@@ -710,11 +711,11 @@
       </div>
     </div>
   </div>
-  
+
   @if (empty($exibirModalCompletarPerfil) && (!empty($showProfilePhotoPromptModal) || $errors->getBag('photoPrompt')->isNotEmpty()))
     @include('layouts.partials.profile-photo-prompt-modal')
   @endif
-  
+
   @livewireScripts
 </body>
 
@@ -958,7 +959,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      
+
       document.addEventListener('change', function (e) {
           const cb = e.target;
           if (!cb.classList.contains('js-checklist-item')) return;
@@ -986,23 +987,24 @@
 
           // ── Botão confirmar ─────────
           const btn = document.querySelector(`.js-checklist-confirm[data-modal="${modalId}"]`);
-          if (btn) btn.disabled = false; 
+          if (btn) btn.disabled = false;
       });
 
       // ── Reset ao fechar ─────────────────────────────────
       document.querySelectorAll('.modal').forEach(function (modalEl) {
           modalEl.addEventListener('hidden.bs.modal', function () {
               const id    = modalEl.id;
-              
+
               if (id === 'modalCompletarPerfil') return;
 
               const btn = modalEl.querySelector('.js-checklist-confirm');
-              if (btn) btn.disabled = false; 
+              if (btn) btn.disabled = false;
           });
       });
 
   });
   </script>
 
+@include('autorizacoes-imagem.partials.presenca-modal')
 </body>
 </html>
