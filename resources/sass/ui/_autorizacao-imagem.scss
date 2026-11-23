@@ -1,0 +1,77 @@
+/* ──────────────────────────────────────────────────────
+   Autorização de imagem: título de seção, caixa do termo
+   e histórico de respostas (modais e "Minhas autorizações").
+────────────────────────────────────────────────────── */
+.eg-autorizacao-secao {
+  display: block;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #6b7280;
+  margin-bottom: .6rem;
+}
+
+.eg-autorizacao-termo,
+.eg-autorizacao-termo-texto {
+  white-space: pre-line;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.eg-autorizacao-termo {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 1rem 1.1rem;
+  background: #faf8fb;
+  border: 1px solid #ece7ee;
+  border-radius: .85rem;
+  font-size: .9rem;
+
+  &:focus-visible {
+    outline: 2px solid rgba(66, 25, 68, .35);
+    outline-offset: 2px;
+  }
+}
+
+.eg-autorizacao-historico {
+  font-size: .875rem;
+
+  > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #421944;
+    width: fit-content;
+  }
+
+  &__lista {
+    list-style: none;
+    margin: .6rem 0 0;
+    padding: 0 0 0 .9rem;
+    border-left: 2px solid #ece7ee;
+
+    li {
+      padding: .3rem 0;
+    }
+  }
+}
+
+/* Selo da situação: mesma paleta dos cards de totais (cinza, verde, rosa). */
+.eg-situacao-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .25rem .65rem;
+  border: 1px solid var(--situacao-borda);
+  border-radius: 999px;
+  background: var(--situacao-fundo);
+  color: var(--situacao-texto);
+  font-size: .78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &--pendente   { --situacao-fundo: #f3f4f6; --situacao-texto: #4b5563; --situacao-borda: #e5e7eb; }
+  &--autorizada { --situacao-fundo: #e6f6f3; --situacao-texto: #0f766e; --situacao-borda: #b5e4dc; }
+  &--negada     { --situacao-fundo: #fdf2f8; --situacao-texto: #be185d; --situacao-borda: #fbcfe8; }
+}

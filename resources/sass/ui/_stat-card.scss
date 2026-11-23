@@ -111,7 +111,8 @@
 }
 
 @media (max-width: 480px) {
-  .eg-stats-row { grid-template-columns: 1fr; }
+  .eg-stats-row,
+  .eg-stats-row:not(.eg-stats-row--auto) { grid-template-columns: 1fr; }
 
   .eg-stat-card {
     padding: 1rem 1.25rem;

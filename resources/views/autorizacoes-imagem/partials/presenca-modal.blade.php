@@ -2,29 +2,33 @@
   <div class="modal fade" id="autorizacaoImagemPresencaModal" tabindex="-1" aria-labelledby="autorizacaoImagemPresencaTitulo" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title fs-5" id="autorizacaoImagemPresencaTitulo">Uso de imagem, voz e nome</h2>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Responder depois"></button>
-        </div>
+        <x-ui.modal-header icon="camera" title="Uso de imagem, voz e nome" title-id="autorizacaoImagemPresencaTitulo" dismiss-label="Responder depois">
+          <x-slot:subtitle>{{ $contextoImagem['acao_nome'] }}</x-slot:subtitle>
+        </x-ui.modal-header>
         <div class="modal-body">
           <p>Sua presença está confirmada, <strong>{{ $contextoImagem['participante_nome'] }}</strong>.</p>
           <p>Esta decisão vale para a ação pedagógica <strong>{{ $contextoImagem['acao_nome'] }}</strong> e seus momentos.</p>
-          <div class="border rounded p-3 mb-3" style="white-space: pre-line">{{ $contextoImagem['termo_texto'] }}</div>
-          <p class="small text-muted">Recusar ou responder depois não altera sua presença.</p>
+          <h6 class="eg-autorizacao-secao">Termo de autorização</h6>
+          <div class="eg-autorizacao-termo mb-2" tabindex="0">{{ $contextoImagem['termo_texto'] }}</div>
+          <p class="small text-muted mb-3">Recusar ou responder depois não altera sua presença.</p>
           <form method="POST" action="{{ route('presenca.autorizacao-imagem', $contextoImagem['atividade_id']) }}" id="autorizacaoImagemPresencaForm">
             @csrf
             <input type="hidden" name="contexto" value="{{ $contextoImagem['token'] }}">
             <fieldset>
-              <legend class="fs-6">Você autoriza o uso de imagem, voz e nome nesta ação?</legend>
-              <div class="form-check mb-2"><input class="form-check-input" type="radio" name="autorizado" value="1" id="imagemSim" required><label class="form-check-label" for="imagemSim">Sim, autorizo.</label></div>
-              <div class="form-check mb-3"><input class="form-check-input" type="radio" name="autorizado" value="0" id="imagemNao" required><label class="form-check-label" for="imagemNao">Não autorizo.</label></div>
+              <legend class="eg-autorizacao-secao">Você autoriza o uso de imagem, voz e nome nesta ação?</legend>
+              <div class="d-flex flex-wrap gap-2">
+                <input class="btn-check" type="radio" name="autorizado" value="1" id="imagemSim" required>
+                <label class="btn btn-outline-success" for="imagemSim"><i class="bi bi-check-circle me-1"></i> Sim, autorizo</label>
+                <input class="btn-check" type="radio" name="autorizado" value="0" id="imagemNao" required>
+                <label class="btn btn-outline-danger" for="imagemNao"><i class="bi bi-x-circle me-1"></i> Não autorizo</label>
+              </div>
             </fieldset>
-            <p class="alert alert-danger d-none" id="autorizacaoImagemErro" role="alert"></p>
-            <div class="d-flex gap-2 flex-wrap">
-              <button type="submit" class="btn btn-engaja" id="autorizacaoImagemConfirmar">Confirmar resposta</button>
-              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Responder depois</button>
-            </div>
+            <p class="alert alert-danger d-none mt-3 mb-0" id="autorizacaoImagemErro" role="alert"></p>
           </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Responder depois</button>
+          <button type="submit" class="btn btn-engaja" id="autorizacaoImagemConfirmar" form="autorizacaoImagemPresencaForm">Confirmar resposta</button>
         </div>
       </div>
     </div>

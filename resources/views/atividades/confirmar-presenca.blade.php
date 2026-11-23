@@ -398,11 +398,8 @@
     <div class="modal fade" id="termoAutorizacaoImagemModal" tabindex="-1" aria-labelledby="termoAutorizacaoImagemTitulo" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-          <div class="modal-header">
-            <h2 class="modal-title fs-5" id="termoAutorizacaoImagemTitulo"><strong>Termo de autorização de uso de imagem, voz e nome</strong></h2>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-          </div>
-          <div class="modal-body" style="white-space: pre-line">{{ config('autorizacao_imagem.texto') }}</div>
+          <x-ui.modal-header icon="file-earmark-text" title="Termo de autorização de uso de imagem, voz e nome" title-id="termoAutorizacaoImagemTitulo" />
+          <div class="modal-body eg-autorizacao-termo-texto">{{ config('autorizacao_imagem.texto') }}</div>
           <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button></div>
         </div>
       </div>

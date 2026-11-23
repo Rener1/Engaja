@@ -15,7 +15,7 @@
   <div>
     <x-ui.filter-card>
         <form method="GET" action="{{ route('eventos.atividades.index', $evento) }}" class="row g-3 align-items-end">
-          <div class="col-12 col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-4">
             <label for="municipio_id" class="eg-filter-label">Município</label>
             <x-ui.select name="municipio_id" id="municipio_id">
               <option value="">Todos</option>
@@ -37,11 +37,11 @@
             <label for="ate" class="eg-filter-label">Data final</label>
             <x-ui.input type="date" name="ate" id="ate" value="{{ request('ate') }}" />
           </div>
-          <div class="col-12 col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-4">
             <label for="descricao" class="eg-filter-label">Descrição</label>
             <x-ui.input type="search" name="descricao" id="descricao" maxlength="255" value="{{ request('descricao') }}" placeholder="Buscar descrição" />
           </div>
-          <div class="col eg-filter-actions justify-content-end">
+          <div class="col-12 eg-filter-actions justify-content-end">
             @if(request()->hasAny(['municipio_id', 'de', 'ate', 'descricao']))
               <a href="{{ route('eventos.atividades.index', $evento) }}" class="btn btn-outline-secondary">
                 <i class="bi bi-x-circle me-1"></i> Limpar filtros

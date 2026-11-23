@@ -93,6 +93,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: .5rem;
+
+  .btn {
+    white-space: nowrap;
+  }
 }
 
 .eg-filter-card .btn:not(.btn-sm):not(.dropdown-toggle-split) {

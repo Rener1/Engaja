@@ -1,7 +1,8 @@
 {{--
     Cabeçalho de modal roxo com botão fechar branco.
     Props: title, icon (Bootstrap Icons sem "bi-"), titleId (id do h5, p/ aria-labelledby),
-           danger (variante rosa p/ confirmações destrutivas), warning (âmbar p/ avisos), dismissible.
+           danger (variante rosa p/ confirmações destrutivas), warning (âmbar p/ avisos), dismissible,
+           dismissLabel (texto acessível do botão fechar).
     Slots: padrão substitui o título simples quando precisar de HTML;
            "subtitle" (opcional) é uma linha menor abaixo do título (aceita atributos, ex.: id).
 --}}
@@ -12,6 +13,7 @@
     'danger' => false,
     'warning' => false,
     'dismissible' => true,
+    'dismissLabel' => 'Fechar',
 ])
 
 <div {{ $attributes->class(['modal-header', 'eg-modal-header', 'eg-modal-header--danger' => $danger, 'eg-modal-header--warning' => $warning]) }}>
@@ -24,6 +26,6 @@
         @endisset
     </div>
     @if ($dismissible)
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ $dismissLabel }}"></button>
     @endif
 </div>
